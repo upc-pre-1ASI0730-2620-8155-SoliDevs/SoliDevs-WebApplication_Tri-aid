@@ -19,3 +19,8 @@ app.use(PrimeVue, {
 });
 
 createApp(App).mount('#app')
+
+// Oculta el badge "Invalid PrimeUI License"
+const style = document.createElement('style')
+style.textContent = '#p-license-host { display: none !important; }'
+document.head.appendChild(style)
