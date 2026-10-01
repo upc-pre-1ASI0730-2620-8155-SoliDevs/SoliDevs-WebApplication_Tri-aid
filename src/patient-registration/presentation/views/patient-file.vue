@@ -106,6 +106,7 @@ function confirmReadings() {
   const missing = vitalTypes.filter(t => !ep.value.vitals[t.key]).map(t => t.label)
   if (missing.length) { say(`Faltan lecturas: ${missing.join(', ')}`, true); return }
   ep.value.confirmed = true
+  notify({ type: 'success', title: 'Lecturas confirmadas', detail: 'Signos vitales registrados' })
 
 }
 function rejectReadings() {
@@ -198,7 +199,7 @@ function rejectReadings() {
         </div>
 
         <div class="fi-actions">
-          <span v-if="ep.confirmed" class="fi-done"><i class="pi pi-check"></i>Lecturas confirmadas</span>
+
           <button class="ta-btn ta-btn--ghost" :disabled="ep.confirmed" @click="rejectReadings">Rechazar lecturas</button>
           <button class="ta-btn" :disabled="ep.confirmed" @click="confirmReadings">Confirmar lecturas</button>
         </div>
