@@ -5,6 +5,7 @@ import './shared/presentation/styles/tokens.css'
 import './shared/presentation/styles/ui.css'
 import TheSidebar from './shared/presentation/components/sidebar.vue'
 import NotificationBell from './alerting/presentation/components/notification-bell.vue'
+import ToastHost from './shared/presentation/components/toast-host.vue'
 import { session } from './shared/application/demo-session.js'
 
 const route = useRoute()
@@ -24,6 +25,7 @@ watch(() => route.fullPath, () => {
 </script>
 
 <template>
+  <ToastHost />
   <router-view v-if="isAuth" v-slot="{ Component, route: r }">
     <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
   </router-view>

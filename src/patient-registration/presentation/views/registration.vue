@@ -3,6 +3,7 @@ import { reactive, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { registerEpisode, findPatient } from '../../application/patient-store.js'
 import { docTypes, docTypeOf } from '../../application/document-types.js'
+import { notify } from '../../../shared/application/toast-store.js'
 
 const router = useRouter()
 const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '' })
@@ -25,6 +26,7 @@ function lookup() {
   FILL.forEach(k => (f[k] = p[k] || ''))
   Object.keys(err).forEach(k => delete err[k])
   found.value = p
+  notify({ type: 'success', title: 'Paciente encontrado', detail: 'Datos cargados' })
 }
 
 function pick(key) {
@@ -96,7 +98,7 @@ function reset() {
           <label class="ta-label" for="doc">Número de {{ doc.label }}</label>
           <input id="doc" class="ta-input" :class="{ bad: err.dni }" :value="f.dni" :disabled="f.sinDni" :inputmode="doc.numeric ? 'numeric' : 'text'" :maxlength="doc.max" :placeholder="f.sinDni ? 'Sin documento' : doc.ph" autocomplete="off" @input="onDoc" @keyup.enter="submit" />
           <small v-if="err.dni" class="ta-err">{{ err.dni }}</small>
-          <small v-else-if="found" class="rg-found"><i class="pi pi-check-circle"></i>Paciente encontrado: datos cargados. Se abrirá un nuevo ingreso.</small>
+
           <small v-else-if="!f.sinDni" class="rg-hint">{{ doc.hint }}</small>
         </div>
         <div class="rg-f">
@@ -159,7 +161,7 @@ function reset() {
 .rg-seg button:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
 .rg-sep{width:1px;height:16px;background:var(--ta-line)}
 .rg-hint{font-size:11px;color:var(--ta-muted)}
-.rg-found{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ta-brand)}
+
 .rg-check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ta-muted);margin-top:18px;cursor:pointer}
 .rg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
 .rg-f{display:grid;gap:6px;align-content:start}
