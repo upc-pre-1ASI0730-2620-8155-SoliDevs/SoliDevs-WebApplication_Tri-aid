@@ -105,7 +105,7 @@ function confirmReadings() {
   const missing = vitalTypes.filter(t => !ep.value.vitals[t.key]).map(t => t.label)
   if (missing.length) { say(`Faltan lecturas: ${missing.join(', ')}`, true); return }
   ep.value.confirmed = true
-  say('Lecturas confirmadas')
+
 }
 function rejectReadings() {
   ep.value.vitals = {}

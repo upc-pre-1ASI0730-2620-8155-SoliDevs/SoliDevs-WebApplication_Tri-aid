@@ -1,7 +1,7 @@
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { registerEpisode } from '../../application/patient-store.js'
+import { registerEpisode, findPatient } from '../../application/patient-store.js'
 import { docTypes, docTypeOf } from '../../application/document-types.js'
 
 const router = useRouter()
@@ -11,17 +11,35 @@ const err = reactive({})
 const today = new Date().toISOString().slice(0, 10)
 const doc = computed(() => docTypeOf(f.docType))
 
+const found = ref(null)
+const FILL = ['names', 'surnames', 'birth', 'sex', 'phone', 'address']
+function clearFilled() {
+  if (!found.value) return
+  FILL.forEach(k => (f[k] = ''))
+  found.value = null
+}
+function lookup() {
+  if (!doc.value.pattern.test(f.dni)) { clearFilled(); return }
+  const p = findPatient(f.docType, f.dni)
+  if (!p) { clearFilled(); return }
+  FILL.forEach(k => (f[k] = p[k] || ''))
+  Object.keys(err).forEach(k => delete err[k])
+  found.value = p
+}
+
 function pick(key) {
   if (f.sinDni) return
   f.docType = key
+  clearFilled()
   f.dni = ''
   delete err.dni
 }
 function onDoc(e) {
   const v = e.target.value
   f.dni = doc.value.numeric ? v.replace(/\D/g, '') : v.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  lookup()
 }
-function toggleSin() { f.dni = ''; delete err.dni }
+function toggleSin() { f.dni = ''; delete err.dni; clearFilled() }
 
 function validate() {
   Object.keys(err).forEach(k => delete err[k])
@@ -52,6 +70,7 @@ function submit() {
 
 function reset() {
   Object.assign(f, blank())
+  found.value = null
   Object.keys(err).forEach(k => delete err[k])
 }
 </script>
@@ -77,6 +96,7 @@ function reset() {
           <label class="ta-label" for="doc">Número de {{ doc.label }}</label>
           <input id="doc" class="ta-input" :class="{ bad: err.dni }" :value="f.dni" :disabled="f.sinDni" :inputmode="doc.numeric ? 'numeric' : 'text'" :maxlength="doc.max" :placeholder="f.sinDni ? 'Sin documento' : doc.ph" autocomplete="off" @input="onDoc" @keyup.enter="submit" />
           <small v-if="err.dni" class="ta-err">{{ err.dni }}</small>
+          <small v-else-if="found" class="rg-found"><i class="pi pi-check-circle"></i>Paciente encontrado: datos cargados. Se abrirá un nuevo ingreso.</small>
           <small v-else-if="!f.sinDni" class="rg-hint">{{ doc.hint }}</small>
         </div>
         <div class="rg-f">
@@ -139,6 +159,7 @@ function reset() {
 .rg-seg button:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
 .rg-sep{width:1px;height:16px;background:var(--ta-line)}
 .rg-hint{font-size:11px;color:var(--ta-muted)}
+.rg-found{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ta-brand)}
 .rg-check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ta-muted);margin-top:18px;cursor:pointer}
 .rg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
 .rg-f{display:grid;gap:6px;align-content:start}
