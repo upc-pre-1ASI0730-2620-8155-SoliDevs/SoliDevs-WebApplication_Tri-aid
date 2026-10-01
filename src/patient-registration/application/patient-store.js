@@ -41,6 +41,9 @@ export function registerEpisode(data) {
 
 export const findEpisode = id => store.episodes.find(e => e.id === id)
 
+// TODO: reemplazar por consulta al backend cuando exista la BD
+export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
+
 export function addDevice(type, model) {
   store.devices.push({ id: ++store.devSeq, type, model, online: true, lastUse: '' })
 }
