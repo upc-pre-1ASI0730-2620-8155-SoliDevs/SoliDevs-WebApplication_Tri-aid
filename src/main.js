@@ -1,14 +1,16 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './app.vue'
+import router from './router/index.js'
 
-import PrimeVue from 'primevue/config';
-import Material from '@primeuix/themes/material';
-import 'primeflex/primeflex.css';
-import 'primeicons/primeicons.css';
-const app = createApp(App);
+import PrimeVue from 'primevue/config'
+import Material from '@primeuix/themes/material'
+import 'primeflex/primeflex.css'
+import 'primeicons/primeicons.css'
 
+const app = createApp(App)
 
+app.use(router)
 app.use(PrimeVue, {
     theme: {
         preset: Material,
@@ -16,9 +18,9 @@ app.use(PrimeVue, {
             darkModeSelector: '.my-app-dark'
         }
     }
-});
+})
 
-createApp(App).mount('#app')
+router.isReady().then(() => app.mount('#app'))
 
 // Oculta el badge "Invalid PrimeUI License"
 const style = document.createElement('style')
