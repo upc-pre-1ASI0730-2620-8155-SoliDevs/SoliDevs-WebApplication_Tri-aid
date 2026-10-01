@@ -2,6 +2,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { docLabel } from '../../application/document-types.js'
+import { notify } from '../../../shared/application/toast-store.js'
 import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital } from '../../application/patient-store.js'
 
 const route = useRoute()
@@ -100,7 +101,7 @@ function saveManual(t) {
 const toast = ref('')
 const toastBad = ref(false)
 let tt
-function say(m, bad = false) { toast.value = m; toastBad.value = bad; clearTimeout(tt); tt = setTimeout(() => (toast.value = ''), 3200) }
+function say(m, bad = false) { notify({ type: bad ? 'error' : 'info', title: m }) }
 function confirmReadings() {
   const missing = vitalTypes.filter(t => !ep.value.vitals[t.key]).map(t => t.label)
   if (missing.length) { say(`Faltan lecturas: ${missing.join(', ')}`, true); return }
@@ -220,7 +221,7 @@ function rejectReadings() {
       </section>
     </Transition>
 
-    <Transition name="toast"><div v-if="toast" class="fi-toast" :class="{ bad: toastBad }">{{ toast }}</div></Transition>
+
   </div>
 </template>
 
