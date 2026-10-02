@@ -54,7 +54,7 @@ export function readFromDevice(ep, d) {
   if (ep.confirmed || !d.online) return
   const t = vitalTypes.find(x => x.key === d.type)
   const time = nowTime()
-  ep.vitals[d.type] = { value: t.sample(), source: 'auto', device: `${t.device} ${d.model}`, time }
+  ep.vitals[d.type] = { value: t.sample(), source: 'auto', model: d.model, time }
   d.lastUse = time
 }
 export function setManual(ep, key, value) { ep.vitals[key] = { value, source: 'manual', time: nowTime() } }

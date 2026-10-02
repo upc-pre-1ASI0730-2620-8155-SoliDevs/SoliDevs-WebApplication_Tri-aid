@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { store, ageOf, fmtDateTime } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
+import { t, sexLabel } from '../../../shared/application/i18n.js'
 
 const q = ref('')
 
@@ -15,17 +16,18 @@ const rows = computed(() => {
 })
 
 const filtered = computed(() => {
-  const t = q.value.trim().toLowerCase()
-  if (!t) return rows.value
+  const s = q.value.trim().toLowerCase()
+  if (!s) return rows.value
   return rows.value.filter(r => {
     const p = r.last.patient
-    return [p.names, p.surnames, p.dni, r.last.id].join(' ').toLowerCase().includes(t)
+    return [p.names, p.surnames, p.dni, r.last.id].join(' ').toLowerCase().includes(s)
   })
 })
 
+const count = computed(() => rows.value.length === 0 ? t('pl.count.none') : rows.value.length === 1 ? t('pl.count.one') : t('pl.count.many', { n: rows.value.length }))
+const visitsText = n => (n === 1 ? t('pl.visit.one') : t('pl.visit.many', { n }))
 const initials = p => ((p.names[0] || '') + (p.surnames[0] || '')).toUpperCase()
 const fullName = p => `${p.surnames}, ${p.names}`
-const idLine = p => docLabel(p)
 </script>
 
 <template>
@@ -33,15 +35,15 @@ const idLine = p => docLabel(p)
     <section class="ta-card">
       <div class="pl-top">
         <div>
-          <h3 class="ta-h">Pacientes</h3>
-          <p class="ta-sub">{{ rows.length ? `${rows.length} ${rows.length === 1 ? 'paciente registrado' : 'pacientes registrados'}` : 'Aún no hay pacientes registrados' }}</p>
+          <h3 class="ta-h">{{ t('nav.patients') }}</h3>
+          <p class="ta-sub">{{ count }}</p>
         </div>
-        <router-link to="/patient-registration/new" class="ta-btn"><i class="pi pi-plus"></i>Nuevo paciente</router-link>
+        <router-link to="/patient-registration/new" class="ta-btn"><i class="pi pi-plus"></i>{{ t('pl.new') }}</router-link>
       </div>
 
       <div v-if="rows.length" class="pl-search">
         <i class="pi pi-search"></i>
-        <input class="ta-input" v-model="q" placeholder="Buscar por nombre, DNI o código de episodio" aria-label="Buscar paciente" />
+        <input class="ta-input" v-model="q" :placeholder="t('pl.search')" :aria-label="t('pl.search')" />
       </div>
 
       <TransitionGroup v-if="filtered.length" name="list" tag="div" class="pl-list">
@@ -49,23 +51,22 @@ const idLine = p => docLabel(p)
           <span class="pl-av">{{ initials(r.last.patient) }}</span>
           <div class="pl-who">
             <b>{{ fullName(r.last.patient) }}</b>
-            <small>{{ idLine(r.last.patient) }} · {{ ageOf(r.last.patient.birth) }} años · {{ r.last.patient.sex }}</small>
+            <small>{{ docLabel(r.last.patient) }} · {{ ageOf(r.last.patient.birth) }} {{ t('yrs') }} · {{ sexLabel(r.last.patient.sex) }}</small>
           </div>
           <div class="pl-ep">
             <span>{{ r.last.id }}</span>
             <small>{{ fmtDateTime(r.last.arrival) }}</small>
           </div>
-          <span class="pl-visits">{{ r.visits }} {{ r.visits === 1 ? 'visita' : 'visitas' }}</span>
-          <span class="pl-st" :class="{ ok: r.last.confirmed }">{{ r.last.confirmed ? 'Confirmadas' : 'Pendientes' }}</span>
+          <span class="pl-visits">{{ visitsText(r.visits) }}</span>
+          <span class="pl-st" :class="{ ok: r.last.confirmed }">{{ r.last.confirmed ? t('pl.confirmed') : t('pl.pending') }}</span>
           <i class="pi pi-angle-right pl-go"></i>
         </router-link>
       </TransitionGroup>
 
       <div v-else class="pl-empty">
         <i class="pi pi-users"></i>
-        <b>{{ rows.length ? 'Sin resultados' : 'Aún no hay pacientes' }}</b>
-        <p>{{ rows.length ? 'Prueba con otro nombre, DNI o código.' : 'Usa «Nuevo paciente» para abrir un episodio de triaje.' }}</p>
-
+        <b>{{ rows.length ? t('pl.noResults') : t('pl.empty') }}</b>
+        <p>{{ rows.length ? t('pl.noResults.hint') : t('pl.empty.hint') }}</p>
       </div>
     </section>
   </div>

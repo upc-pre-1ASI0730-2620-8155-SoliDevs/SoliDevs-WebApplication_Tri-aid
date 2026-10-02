@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { gsap } from 'gsap'
 import { alertStore, unreadCount } from '../../application/alert-store.js'
+import { t } from '../../../shared/application/i18n.js'
 
 const open = ref(false)
 const root = ref(null)
@@ -63,17 +64,17 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="root" class="nb">
-    <button class="nb__btn" :class="{ on: open }" aria-label="Alertas" aria-haspopup="dialog" :aria-expanded="open" @click="toggle">
+    <button class="nb__btn" :class="{ on: open }" :aria-label="t('bell.title')" aria-haspopup="dialog" :aria-expanded="open" @click="toggle">
       <i ref="bell" class="pi pi-bell"></i>
       <span v-if="unreadCount" class="nb__count">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
     </button>
 
     <Transition :css="false" @enter="onEnter" @leave="onLeave">
-      <div v-if="open" class="nb__panel" role="dialog" aria-label="Alertas">
+      <div v-if="open" class="nb__panel" role="dialog" :aria-label="t('bell.title')">
         <header class="nb__head" data-in>
           <div>
-            <strong>Alertas</strong>
-            <small>{{ unreadCount ? `${unreadCount} sin leer` : 'Todo al día' }}</small>
+            <strong>{{ t('bell.title') }}</strong>
+            <small>{{ unreadCount ? t('bell.unread', { n: unreadCount }) : t('bell.allClear') }}</small>
           </div>
           <span class="nb__chip" :class="{ live: unreadCount }">{{ unreadCount }}</span>
         </header>
@@ -93,12 +94,12 @@ onBeforeUnmount(() => {
             <span class="nb__ring nb-ring"></span>
             <span class="nb__core"><i class="pi pi-bell"></i></span>
           </div>
-          <b data-in>Sin alertas por ahora</b>
-          <p data-in>Cuando haya novedades, las verás aquí.</p>
+          <b data-in>{{ t('bell.empty') }}</b>
+          <p data-in>{{ t('bell.emptyHint') }}</p>
         </div>
 
         <footer class="nb__foot" data-in>
-          <router-link to="/alerting" @click="open = false">Ir a Alertas <i class="pi pi-arrow-right"></i></router-link>
+          <router-link to="/alerting" @click="open = false">{{ t('bell.goto') }} <i class="pi pi-arrow-right"></i></router-link>
         </footer>
       </div>
     </Transition>

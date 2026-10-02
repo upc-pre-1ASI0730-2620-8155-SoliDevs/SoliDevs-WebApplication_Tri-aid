@@ -1,17 +1,18 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AuthShell from '../../../shared/presentation/components/auth-shell.vue'
+import { t } from '../../../shared/application/i18n.js'
 
 const router = useRouter()
 const user = ref('')
 const pass = ref('')
 const loading = ref(false)
-const features = [
-  { title: 'Cola en tiempo real', text: 'Espera, prioridad y alertas de cada paciente, siempre visibles.' },
-  { title: 'Clasificación NT-158', text: 'Niveles I-V con guía en pantalla y captura de signos vitales.' },
-  { title: 'Trazabilidad completa', text: 'Derivación, comprobantes y reportes del turno, sin hojas sueltas.' }
-]
+const features = computed(() => [
+  { title: t('login.f1.t'), text: t('login.f1.d') },
+  { title: t('login.f2.t'), text: t('login.f2.d') },
+  { title: t('login.f3.t'), text: t('login.f3.d') }
+])
 
 async function submit() {
   loading.value = true
@@ -22,14 +23,14 @@ async function submit() {
 </script>
 
 <template>
-  <AuthShell title="El instrumento de triaje del servicio de emergencias." lead="Registra ingresos, clasifica con la escala NT-158 y mantén la cola monitoreada durante todo el turno." :features="features">
-    <h2>Iniciar sesión</h2>
-    <p class="sub">Panel de triaje · Personal de emergencias</p>
+  <AuthShell :title="t('login.title')" :lead="t('login.lead')" :features="features">
+    <h2>{{ t('login.h') }}</h2>
+    <p class="sub">{{ t('login.sub') }}</p>
     <form @submit.prevent="submit" novalidate>
-      <div class="field"><label for="u">Usuario</label><input id="u" v-model="user" autocomplete="username" /></div>
-      <div class="field"><label for="p">Contraseña</label><input id="p" type="password" v-model="pass" autocomplete="current-password" /></div>
-      <button class="btn" :disabled="loading">{{ loading ? 'Ingresando…' : 'Iniciar sesión' }}</button>
+      <div class="field"><label for="u">{{ t('login.user') }}</label><input id="u" v-model="user" autocomplete="username" /></div>
+      <div class="field"><label for="p">{{ t('login.pass') }}</label><input id="p" type="password" v-model="pass" autocomplete="current-password" /></div>
+      <button class="btn" :disabled="loading">{{ loading ? t('login.loading') : t('login.h') }}</button>
     </form>
-    <router-link class="link" to="/recuperar">Olvidé mi contraseña</router-link>
+    <router-link class="link" to="/recuperar">{{ t('login.forgot') }}</router-link>
   </AuthShell>
 </template>
