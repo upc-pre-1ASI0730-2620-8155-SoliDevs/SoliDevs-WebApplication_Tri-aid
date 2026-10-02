@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n'
-import en from './locales/en.json'
-import es from './locales/es.json'
+import en from '../../locales/en.json'
+import es from '../../locales/es.json'
 
 // Idioma por defecto: inglés. La elección del usuario se recuerda en localStorage.
 const KEY = 'triaid.locale'
