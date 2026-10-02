@@ -2,14 +2,15 @@
 import logo from '../../../assets/tri-aid-logo.png'
 import { session } from '../../application/demo-session.js'
 import { unreadCount } from '../../../alerting/application/alert-store.js'
+import { t } from '../../application/i18n.js'
 
 const items = [
-  { label: 'Panel', icon: 'pi pi-home', to: '/panel' },
-  { label: 'Pacientes', icon: 'pi pi-users', to: '/patient-registration' },
-  { label: 'Alertas', icon: 'pi pi-bell', to: '/alerting', alerts: true },
-  { label: 'Reportes', icon: 'pi pi-file', to: '/reports' },
-  { label: 'Dispositivos', icon: 'pi pi-desktop', to: '/devices' },
-  { label: 'Suscripción', icon: 'pi pi-shield', to: '/subscriptions' }
+  { key: 'nav.panel', icon: 'pi pi-home', to: '/panel' },
+  { key: 'nav.patients', icon: 'pi pi-users', to: '/patient-registration' },
+  { key: 'nav.alerts', icon: 'pi pi-bell', to: '/alerting', alerts: true },
+  { key: 'nav.reports', icon: 'pi pi-file', to: '/reports' },
+  { key: 'nav.devices', icon: 'pi pi-desktop', to: '/devices' },
+  { key: 'nav.subscription', icon: 'pi pi-shield', to: '/subscriptions' }
 ]
 </script>
 
@@ -17,12 +18,12 @@ const items = [
   <aside class="sb">
     <header class="sb__brand">
       <img :src="logo" alt="Tri-Aid" />
-      <div><strong>Tri-Aid</strong><small>EMERGENCIAS<span v-if="session.shift"> · {{ session.shift }}</span></small></div>
+      <div><strong>Tri-Aid</strong><small>{{ t('brand.sub') }}<span v-if="session.shift"> · {{ session.shift }}</span></small></div>
     </header>
 
     <nav class="sb__nav">
-      <router-link v-for="it in items" :key="it.label" :to="it.to" class="sb__link">
-        <i :class="it.icon"></i><span>{{ it.label }}</span>
+      <router-link v-for="it in items" :key="it.key" :to="it.to" class="sb__link">
+        <i :class="it.icon"></i><span>{{ t(it.key) }}</span>
         <span v-if="it.alerts && unreadCount" class="sb__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
       </router-link>
     </nav>
@@ -32,7 +33,7 @@ const items = [
         <span class="sb__av">{{ session.initials }}</span>
         <div><b>{{ session.name }}</b><small>{{ session.unit }}</small></div>
       </div>
-      <router-link to="/login" class="sb__out"><i class="pi pi-sign-out"></i><span>Salir</span></router-link>
+      <router-link to="/login" class="sb__out"><i class="pi pi-sign-out"></i><span>{{ t('nav.signOut') }}</span></router-link>
     </footer>
   </aside>
 </template>

@@ -1,5 +1,6 @@
 <script setup>
 import logo from '../../../assets/tri-aid-logo.png'
+import { t } from '../../application/i18n.js'
 defineProps({ title: String, lead: String, features: { type: Array, default: () => [] } })
 
 // 10 latidos de 120 unidades cada uno (1200 de ancho); el CSS desplaza un latido en bucle
@@ -11,7 +12,7 @@ const ecgPath = 'M0 24' + ' h20 q5 -8 10 0 h6 l3 4 l5 -24 l5 28 l3 -8 h10 q10 -1
     <aside class="auth__brand">
       <header class="auth__logo">
         <img :src="logo" alt="Tri-Aid" />
-        <div><strong>Tri-Aid</strong><small>PANEL DE TRIAJE · EMERGENCIAS</small></div>
+        <div><strong>Tri-Aid</strong><small>{{ t('auth.brand') }}</small></div>
       </header>
       <section class="auth__pitch">
         <h1>{{ title }}</h1>

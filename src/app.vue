@@ -6,6 +6,8 @@ import './shared/presentation/styles/ui.css'
 import TheSidebar from './shared/presentation/components/sidebar.vue'
 import NotificationBell from './alerting/presentation/components/notification-bell.vue'
 import ToastHost from './shared/presentation/components/toast-host.vue'
+import LangSwitch from './shared/presentation/components/lang-switch.vue'
+import { t } from './shared/application/i18n.js'
 import { session } from './shared/application/demo-session.js'
 
 const route = useRoute()
@@ -26,6 +28,7 @@ watch(() => route.fullPath, () => {
 
 <template>
   <ToastHost />
+  <LangSwitch v-if="isAuth" class="ls--float" />
   <router-view v-if="isAuth" v-slot="{ Component, route: r }">
     <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
   </router-view>
@@ -33,9 +36,10 @@ watch(() => route.fullPath, () => {
   <div v-else class="shell">
     <TheSidebar />
     <div class="shell__main">
-      <header v-if="route.meta.title" class="tb">
-        <span class="tb__title">{{ route.meta.title }}</span>
+      <header v-if="route.meta.titleKey" class="tb">
+        <span class="tb__title">{{ t(route.meta.titleKey) }}</span>
         <div class="tb__right">
+          <LangSwitch />
           <NotificationBell />
           <div v-if="session.name" class="tb__user"><span class="tb__av">{{ session.initials }}</span><span>{{ session.name }}</span></div>
         </div>

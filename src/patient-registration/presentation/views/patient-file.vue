@@ -1,9 +1,10 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
-import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital } from '../../application/patient-store.js'
+import { t, sexLabel } from '../../../shared/application/i18n.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,27 +17,27 @@ const initials = computed(() => ((p.value.names[0] || '') + (p.value.surnames[0]
 const fullName = computed(() => `${p.value.surnames}, ${p.value.names}`)
 const meta = computed(() => [
   docLabel(p.value),
-  `${ageOf(p.value.birth)} años`,
-  `Llegada ${fmtTime(ep.value.arrival)}`,
+  `${ageOf(p.value.birth)} ${t('yrs')}`,
+  t('pf.arrival', { time: fmtTime(ep.value.arrival) }),
   ep.value.id
 ].join(' · '))
 const dmy = s => s.split('-').reverse().join('/')
 const rows = computed(() => [
-  ['Documento', docLabel(p.value)],
-  ['Fecha de nacimiento', dmy(p.value.birth)],
-  ['Nombres', p.value.names],
-  ['Apellidos', p.value.surnames],
-  ['Sexo', p.value.sex],
-  ['Teléfono', p.value.phone],
-  ['Dirección', p.value.address]
+  [t('pf.r.document'), docLabel(p.value)],
+  [t('rg.birth'), dmy(p.value.birth)],
+  [t('rg.names'), p.value.names],
+  [t('rg.surnames'), p.value.surnames],
+  [t('rg.sex'), sexLabel(p.value.sex)],
+  [t('pf.r.phone'), p.value.phone],
+  [t('pf.r.address'), p.value.address]
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 
-const tabs = [
-  { id: 'vitals', label: 'Signos vitales' },
-  { id: 'data', label: 'Datos personales' },
-  { id: 'history', label: 'Historial de visitas' }
-]
+const tabs = computed(() => [
+  { id: 'vitals', label: t('pf.tab.vitals') },
+  { id: 'data', label: t('pf.tab.data') },
+  { id: 'history', label: t('pf.tab.history') }
+])
 const tab = ref('vitals')
 
 const icons = {
@@ -45,18 +46,19 @@ const icons = {
   fc: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
   temp: '<path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"/>'
 }
-const typeOf = k => vitalTypes.find(t => t.key === k)
+const devName = k => t('vital.' + k + '.device')
+const vLabel = k => t('vital.' + k + '.label')
 
 /* ---------- Dispositivos ---------- */
 const showForm = ref(false)
 const dForm = reactive({ type: 'pa', model: '' })
-const dErr = ref('')
+const dErr = ref(false)
 function link() {
-  if (!dForm.model.trim()) { dErr.value = 'Indica la marca y el modelo.'; return }
+  if (!dForm.model.trim()) { dErr.value = true; return }
   addDevice(dForm.type, dForm.model.trim())
-  dForm.model = ''; dErr.value = ''; showForm.value = false
+  dForm.model = ''; dErr.value = false; showForm.value = false
 }
-function closeForm() { showForm.value = false; dErr.value = ''; dForm.model = '' }
+function closeForm() { showForm.value = false; dErr.value = false; dForm.model = '' }
 
 /* ---------- Signos vitales ---------- */
 const dev = k => store.devices.find(d => d.type === k && d.online) || store.devices.find(d => d.type === k)
@@ -69,27 +71,27 @@ function state(k) {
 }
 const isBad = k => ['none', 'lost'].includes(state(k))
 const shown = k => ep.value.vitals[k]?.value ?? '—'
-const warn = k => state(k) === 'none' ? 'Sin dispositivo vinculado' : `Conexión con el ${typeOf(k).device.toLowerCase()} perdida temporalmente`
+const warn = k => state(k) === 'none' ? t('pf.warn.none') : t('pf.warn.lost', { device: devName(k).toLowerCase() })
 function metaLine(k) {
   const v = ep.value.vitals[k]
-  if (v) return v.source === 'manual' ? `Ingreso manual · ${v.time}` : `${v.device} · ${v.time}`
+  if (v) return v.source === 'manual' ? t('pf.meta.manual', { time: v.time }) : `${devName(k)}${v.model ? ' ' + v.model : ''} · ${v.time}`
   const d = dev(k)
-  return d ? `Esperando lectura de ${typeOf(k).device.toLowerCase()} ${d.model}` : ''
+  return d ? t('pf.waiting', { device: devName(k).toLowerCase(), model: d.model }) : ''
 }
 const canManual = k => !ep.value.confirmed && !editing[k] && ['none', 'lost', 'waiting'].includes(state(k))
 
 const editing = reactive({ pa: false, spo2: false, fc: false, temp: false })
 const draft = reactive({ pa: { a: '', b: '' }, spo2: { a: '' }, fc: { a: '' }, temp: { a: '' } })
 const mErr = reactive({ pa: '', spo2: '', fc: '', temp: '' })
-function saveManual(t) {
-  const k = t.key
-  const [lo, hi] = t.lim
+function saveManual(vt) {
+  const k = vt.key
+  const [lo, hi] = vt.lim
   const a = parseFloat(String(draft[k].a).replace(',', '.'))
-  if (isNaN(a) || a < lo || a > hi) { mErr[k] = `Valor entre ${lo} y ${hi}`; return }
+  if (isNaN(a) || a < lo || a > hi) { mErr[k] = t('pf.err.range', { lo, hi }); return }
   let value = String(a)
   if (k === 'pa') {
     const b = parseFloat(draft.pa.b)
-    if (isNaN(b) || b < 30 || b >= a) { mErr.pa = 'Diastólica inválida'; return }
+    if (isNaN(b) || b < 30 || b >= a) { mErr.pa = t('pf.err.dia'); return }
     value = `${a}/${b}`
   }
   setManual(ep.value, k, value)
@@ -98,22 +100,18 @@ function saveManual(t) {
 }
 
 /* ---------- Confirmar / rechazar ---------- */
-const toast = ref('')
-const toastBad = ref(false)
-let tt
 function say(m, bad = false) { notify({ type: bad ? 'error' : 'info', title: m }) }
 function confirmReadings() {
-  const missing = vitalTypes.filter(t => !ep.value.vitals[t.key]).map(t => t.label)
-  if (missing.length) { say(`Faltan lecturas: ${missing.join(', ')}`, true); return }
+  const missing = vitalTypes.filter(x => !ep.value.vitals[x.key]).map(x => vLabel(x.key))
+  if (missing.length) { say(t('pf.missing', { list: missing.join(', ') }), true); return }
   ep.value.confirmed = true
-  notify({ type: 'success', title: 'Lecturas confirmadas', detail: 'Signos vitales registrados' })
-
+  notify({ type: 'success', title: t('pf.confirmed'), detail: t('pf.confirmedDetail') })
 }
 function rejectReadings() {
   ep.value.vitals = {}
   ep.value.confirmed = false
   Object.keys(editing).forEach(k => (editing[k] = false))
-  say('Lecturas rechazadas')
+  say(t('pf.rejected'))
 }
 </script>
 
@@ -125,11 +123,11 @@ function rejectReadings() {
         <div class="fi-name">{{ fullName }}</div>
         <div class="fi-meta">{{ meta }}</div>
       </div>
-      <span class="fi-pill">Sin clasificar</span>
+      <span class="fi-pill">{{ t('pf.unclassified') }}</span>
     </section>
 
     <nav class="fi-tabs fi-in" style="--d:1">
-      <button v-for="t in tabs" :key="t.id" :class="{ on: tab === t.id }" @click="tab = t.id">{{ t.label }}</button>
+      <button v-for="tb in tabs" :key="tb.id" :class="{ on: tab === tb.id }" @click="tab = tb.id">{{ tb.label }}</button>
     </nav>
 
     <Transition name="fade" mode="out-in">
@@ -137,22 +135,22 @@ function rejectReadings() {
         <section class="ta-card fi-in" style="--d:2">
           <div class="fd-top">
             <div>
-              <h3 class="ta-h">Dispositivos</h3>
-              <p class="ta-sub">Estado de vinculación de los instrumentos de medición</p>
+              <h3 class="ta-h">{{ t('pf.devices') }}</h3>
+              <p class="ta-sub">{{ t('pf.devices.sub') }}</p>
             </div>
-            <button class="ta-btn ta-btn--ghost" @click="showForm ? closeForm() : (showForm = true)"><i class="pi pi-sync"></i>Vincular dispositivo</button>
+            <button class="ta-btn ta-btn--ghost" @click="showForm ? closeForm() : (showForm = true)"><i class="pi pi-sync"></i>{{ t('pf.link') }}</button>
           </div>
 
           <div class="fd-form" :class="{ open: showForm }">
             <div>
               <div class="fd-form__in">
-                <select class="ta-select" v-model="dForm.type" aria-label="Tipo de dispositivo">
-                  <option v-for="t in vitalTypes" :key="t.key" :value="t.key">{{ t.device }}</option>
+                <select class="ta-select" v-model="dForm.type" :aria-label="t('pf.devTypeAria')">
+                  <option v-for="vt in vitalTypes" :key="vt.key" :value="vt.key">{{ devName(vt.key) }}</option>
                 </select>
-                <input class="ta-input" v-model="dForm.model" placeholder="Marca y modelo (ej. Bosch GL100)" aria-label="Marca y modelo" @keyup.enter="link" />
-                <button class="ta-btn" @click="link">Vincular</button>
-                <button class="ta-btn ta-btn--ghost" @click="closeForm">Cancelar</button>
-                <small v-if="dErr" class="ta-err fd-err">{{ dErr }}</small>
+                <input class="ta-input" v-model="dForm.model" :placeholder="t('pf.brandModelPh')" :aria-label="t('pf.brandModel')" @keyup.enter="link" />
+                <button class="ta-btn" @click="link">{{ t('pf.linkBtn') }}</button>
+                <button class="ta-btn ta-btn--ghost" @click="closeForm">{{ t('pf.cancel') }}</button>
+                <small v-if="dErr" class="ta-err fd-err">{{ t('pf.errModel') }}</small>
               </div>
             </div>
           </div>
@@ -160,69 +158,66 @@ function rejectReadings() {
           <TransitionGroup name="list" tag="ul" class="fd-list">
             <li v-for="d in store.devices" :key="d.id">
               <span class="fd-ico"><svg viewBox="0 0 24 24" v-html="icons[d.type]"></svg></span>
-              <div class="fd-info"><b>{{ typeOf(d.type).device }} · {{ d.model }}</b><small>{{ d.lastUse ? 'último uso ' + d.lastUse : 'sin lecturas aún' }}</small></div>
-              <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="!d.online || ep.confirmed" @click="readFromDevice(ep, d)">Simular lectura</button>
-              <button class="fd-badge" :class="d.online ? 'on' : 'off'" title="Clic para cambiar el estado" @click="d.online = !d.online"><i></i>{{ d.online ? 'Conectado' : 'Desconectado' }}</button>
-              <button class="fd-x" aria-label="Desvincular" @click="removeDevice(d.id)">×</button>
+              <div class="fd-info"><b>{{ devName(d.type) }} · {{ d.model }}</b><small>{{ d.lastUse ? t('pf.lastUse', { time: d.lastUse }) : t('pf.noReads') }}</small></div>
+              <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="!d.online || ep.confirmed" @click="readFromDevice(ep, d)">{{ t('pf.simulate') }}</button>
+              <button class="fd-badge" :class="d.online ? 'on' : 'off'" :title="t('pf.toggleTitle')" @click="d.online = !d.online"><i></i>{{ d.online ? t('pf.connected') : t('pf.disconnected') }}</button>
+              <button class="fd-x" :aria-label="t('pf.unlink')" @click="removeDevice(d.id)">×</button>
             </li>
           </TransitionGroup>
-          <p v-if="!store.devices.length" class="fd-empty">Aún no hay dispositivos vinculados.</p>
+          <p v-if="!store.devices.length" class="fd-empty">{{ t('pf.noDevices') }}</p>
         </section>
 
         <div class="fv-grid">
-          <article v-for="(t, i) in vitalTypes" :key="t.key" class="fv-card" :class="{ bad: isBad(t.key) }" :style="{ '--i': i }">
+          <article v-for="(vt, i) in vitalTypes" :key="vt.key" class="fv-card" :class="{ bad: isBad(vt.key) }" :style="{ '--i': i }">
             <header>
-              <span class="fv-t"><svg viewBox="0 0 24 24" v-html="icons[t.key]"></svg>{{ t.label }}</span>
-              <span v-if="state(t.key) === 'auto' || state(t.key) === 'manual'" class="fv-badge" :class="state(t.key)"><i></i>{{ state(t.key) === 'manual' ? 'manual' : 'automático' }}</span>
+              <span class="fv-t"><svg viewBox="0 0 24 24" v-html="icons[vt.key]"></svg>{{ vLabel(vt.key) }}</span>
+              <span v-if="state(vt.key) === 'auto' || state(vt.key) === 'manual'" class="fv-badge" :class="state(vt.key)"><i></i>{{ state(vt.key) === 'manual' ? t('pf.manual') : t('pf.auto') }}</span>
             </header>
             <Transition name="flip" mode="out-in">
-              <div class="fv-val" :key="shown(t.key)"><b>{{ shown(t.key) }}</b><span>{{ t.unit }}</span></div>
+              <div class="fv-val" :key="shown(vt.key)"><b>{{ shown(vt.key) }}</b><span>{{ vt.unit }}</span></div>
             </Transition>
-            <p v-if="metaLine(t.key)" class="fv-meta">{{ metaLine(t.key) }}</p>
-            <p v-if="isBad(t.key)" class="fv-warn"><i class="pi pi-exclamation-triangle"></i>{{ warn(t.key) }}</p>
+            <p v-if="metaLine(vt.key)" class="fv-meta">{{ metaLine(vt.key) }}</p>
+            <p v-if="isBad(vt.key)" class="fv-warn"><i class="pi pi-exclamation-triangle"></i>{{ warn(vt.key) }}</p>
 
             <Transition name="fade">
-              <div v-if="editing[t.key]" class="fv-manual">
-                <input class="ta-input" v-model="draft[t.key].a" inputmode="decimal" :placeholder="t.ph" :aria-label="t.label" @keyup.enter="saveManual(t)" />
-                <input v-if="t.key === 'pa'" class="ta-input" v-model="draft.pa.b" inputmode="numeric" placeholder="Diastólica" aria-label="Diastólica" @keyup.enter="saveManual(t)" />
+              <div v-if="editing[vt.key]" class="fv-manual">
+                <input class="ta-input" v-model="draft[vt.key].a" inputmode="decimal" :placeholder="vt.key === 'pa' ? t('pf.systolic') : vt.ph" :aria-label="vLabel(vt.key)" @keyup.enter="saveManual(vt)" />
+                <input v-if="vt.key === 'pa'" class="ta-input" v-model="draft.pa.b" inputmode="numeric" :placeholder="t('pf.diastolic')" :aria-label="t('pf.diastolic')" @keyup.enter="saveManual(vt)" />
                 <div class="fv-row">
-                  <button class="ta-btn ta-btn--sm" @click="saveManual(t)">Guardar</button>
-                  <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="editing[t.key] = false">Cancelar</button>
+                  <button class="ta-btn ta-btn--sm" @click="saveManual(vt)">{{ t('pf.save') }}</button>
+                  <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="editing[vt.key] = false">{{ t('pf.cancel') }}</button>
                 </div>
-                <small v-if="mErr[t.key]" class="ta-err">{{ mErr[t.key] }}</small>
+                <small v-if="mErr[vt.key]" class="ta-err">{{ mErr[vt.key] }}</small>
               </div>
             </Transition>
 
-            <button v-if="canManual(t.key)" class="ta-btn ta-btn--ghost ta-btn--sm" @click="editing[t.key] = true">Ingresar manualmente</button>
-            <button v-if="state(t.key) === 'manual' && !ep.confirmed" class="ta-btn ta-btn--ghost ta-btn--sm" @click="clearVital(ep, t.key)">Quitar valor manual</button>
+            <button v-if="canManual(vt.key)" class="ta-btn ta-btn--ghost ta-btn--sm" @click="editing[vt.key] = true">{{ t('pf.enterManual') }}</button>
+            <button v-if="state(vt.key) === 'manual' && !ep.confirmed" class="ta-btn ta-btn--ghost ta-btn--sm" @click="clearVital(ep, vt.key)">{{ t('pf.removeManual') }}</button>
           </article>
         </div>
 
         <div class="fi-actions">
-
-          <button class="ta-btn ta-btn--ghost" :disabled="ep.confirmed" @click="rejectReadings">Rechazar lecturas</button>
-          <button class="ta-btn" :disabled="ep.confirmed" @click="confirmReadings">Confirmar lecturas</button>
+          <button class="ta-btn ta-btn--ghost" :disabled="ep.confirmed" @click="rejectReadings">{{ t('pf.reject') }}</button>
+          <button class="ta-btn" :disabled="ep.confirmed" @click="confirmReadings">{{ t('pf.confirm') }}</button>
         </div>
       </div>
 
       <section v-else-if="tab === 'data'" key="d" class="ta-card">
-        <h3 class="ta-h">Datos personales</h3>
-        <p class="ta-sub">Registrados al ingreso del paciente</p>
+        <h3 class="ta-h">{{ t('pf.tab.data') }}</h3>
+        <p class="ta-sub">{{ t('pf.data.sub') }}</p>
         <dl class="fi-dl">
           <div v-for="r in rows" :key="r[0]"><dt>{{ r[0] }}</dt><dd>{{ r[1] }}</dd></div>
         </dl>
       </section>
 
       <section v-else key="h" class="ta-card">
-        <h3 class="ta-h">Historial de visitas</h3>
-        <p class="ta-sub">Ingresos registrados de este paciente</p>
+        <h3 class="ta-h">{{ t('pf.tab.history') }}</h3>
+        <p class="ta-sub">{{ t('pf.hist.sub') }}</p>
         <ul class="fi-visits">
-          <li v-for="v in visits" :key="v.id"><b>{{ v.id }}</b><span>Llegada {{ fmtDateTime(v.arrival) }}</span></li>
+          <li v-for="v in visits" :key="v.id"><b>{{ v.id }}</b><span>{{ t('pf.hist.arrival', { dt: fmtDateTime(v.arrival) }) }}</span></li>
         </ul>
       </section>
     </Transition>
-
-
   </div>
 </template>
 

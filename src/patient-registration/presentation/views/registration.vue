@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { registerEpisode, findPatient } from '../../application/patient-store.js'
 import { docTypes, docTypeOf } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
+import { t } from '../../../shared/application/i18n.js'
 
 const router = useRouter()
 const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '' })
@@ -11,6 +12,7 @@ const f = reactive(blank())
 const err = reactive({})
 const today = new Date().toISOString().slice(0, 10)
 const doc = computed(() => docTypeOf(f.docType))
+const docName = computed(() => t('doc.' + f.docType + '.label'))
 
 const found = ref(null)
 const FILL = ['names', 'surnames', 'birth', 'sex', 'phone', 'address']
@@ -26,7 +28,7 @@ function lookup() {
   FILL.forEach(k => (f[k] = p[k] || ''))
   Object.keys(err).forEach(k => delete err[k])
   found.value = p
-  notify({ type: 'success', title: 'Paciente encontrado', detail: 'Datos cargados' })
+  notify({ type: 'success', title: t('toast.found'), detail: t('toast.loaded') })
 }
 
 function pick(key) {
@@ -45,12 +47,12 @@ function toggleSin() { f.dni = ''; delete err.dni; clearFilled() }
 
 function validate() {
   Object.keys(err).forEach(k => delete err[k])
-  if (!f.sinDni && !doc.value.pattern.test(f.dni)) err.dni = doc.value.msg
-  if (!f.names.trim()) err.names = 'Ingresa los nombres'
-  if (!f.surnames.trim()) err.surnames = 'Ingresa los apellidos'
-  if (!f.birth || f.birth > today) err.birth = 'Fecha de nacimiento inválida'
-  if (!f.sex) err.sex = 'Selecciona el sexo'
-  if (f.phone && !/^\d{9}$/.test(f.phone)) err.phone = 'El teléfono debe tener 9 dígitos'
+  if (!f.sinDni && !doc.value.pattern.test(f.dni)) err.dni = t('doc.' + f.docType + '.msg')
+  if (!f.names.trim()) err.names = t('rg.e.names')
+  if (!f.surnames.trim()) err.surnames = t('rg.e.surnames')
+  if (!f.birth || f.birth > today) err.birth = t('rg.e.birth')
+  if (!f.sex) err.sex = t('rg.e.sex')
+  if (f.phone && !/^\d{9}$/.test(f.phone)) err.phone = t('rg.e.phone')
   return !Object.keys(err).length
 }
 
@@ -80,71 +82,70 @@ function reset() {
 <template>
   <div class="ta-page">
     <section class="ta-card">
-      <h3 class="ta-h">Registro de paciente</h3>
-      <p class="ta-sub">Completa los datos del paciente para abrir un nuevo episodio de triaje</p>
+      <h3 class="ta-h">{{ t('rg.title') }}</h3>
+      <p class="ta-sub">{{ t('rg.sub') }}</p>
 
       <div class="rg-field">
-        <span class="ta-label">Tipo de documento</span>
-        <div class="rg-seg" role="tablist" aria-label="Tipo de documento" :class="{ off: f.sinDni }">
-          <template v-for="(t, i) in docTypes" :key="t.key">
+        <span class="ta-label">{{ t('rg.docType') }}</span>
+        <div class="rg-seg" role="tablist" :aria-label="t('rg.docType')" :class="{ off: f.sinDni }">
+          <template v-for="(dt, i) in docTypes" :key="dt.key">
             <span v-if="i" class="rg-sep"></span>
-            <button type="button" role="tab" :aria-selected="f.docType === t.key" :class="{ on: f.docType === t.key }" :disabled="f.sinDni" :title="t.full || t.label" @click="pick(t.key)">{{ t.label }}</button>
+            <button type="button" role="tab" :aria-selected="f.docType === dt.key" :class="{ on: f.docType === dt.key }" :disabled="f.sinDni" :title="t('doc.' + dt.key + '.full')" @click="pick(dt.key)">{{ t('doc.' + dt.key + '.label') }}</button>
           </template>
         </div>
       </div>
 
       <div class="rg-grid">
         <div class="rg-f">
-          <label class="ta-label" for="doc">Número de {{ doc.label }}</label>
-          <input id="doc" class="ta-input" :class="{ bad: err.dni }" :value="f.dni" :disabled="f.sinDni" :inputmode="doc.numeric ? 'numeric' : 'text'" :maxlength="doc.max" :placeholder="f.sinDni ? 'Sin documento' : doc.ph" autocomplete="off" @input="onDoc" @keyup.enter="submit" />
+          <label class="ta-label" for="doc">{{ t('rg.docNumber', { doc: docName }) }}</label>
+          <input id="doc" class="ta-input" :class="{ bad: err.dni }" :value="f.dni" :disabled="f.sinDni" :inputmode="doc.numeric ? 'numeric' : 'text'" :maxlength="doc.max" :placeholder="f.sinDni ? t('rg.noDocPh') : doc.ph" autocomplete="off" @input="onDoc" @keyup.enter="submit" />
           <small v-if="err.dni" class="ta-err">{{ err.dni }}</small>
-
-          <small v-else-if="!f.sinDni" class="rg-hint">{{ doc.hint }}</small>
+          <small v-else-if="!f.sinDni" class="rg-hint">{{ t('doc.' + f.docType + '.hint') }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="birth">Fecha de nacimiento</label>
+          <label class="ta-label" for="birth">{{ t('rg.birth') }}</label>
           <input id="birth" type="date" class="ta-input" :class="{ bad: err.birth }" v-model="f.birth" :max="today" />
           <small v-if="err.birth" class="ta-err">{{ err.birth }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="names">Nombres</label>
+          <label class="ta-label" for="names">{{ t('rg.names') }}</label>
           <input id="names" class="ta-input" :class="{ bad: err.names }" v-model="f.names" @keyup.enter="submit" />
           <small v-if="err.names" class="ta-err">{{ err.names }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="surnames">Apellidos</label>
+          <label class="ta-label" for="surnames">{{ t('rg.surnames') }}</label>
           <input id="surnames" class="ta-input" :class="{ bad: err.surnames }" v-model="f.surnames" @keyup.enter="submit" />
           <small v-if="err.surnames" class="ta-err">{{ err.surnames }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="sex">Sexo</label>
+          <label class="ta-label" for="sex">{{ t('rg.sex') }}</label>
           <select id="sex" class="ta-select" :class="{ bad: err.sex }" v-model="f.sex">
-            <option value="" disabled>Seleccionar</option>
-            <option>Femenino</option>
-            <option>Masculino</option>
+            <option value="" disabled>{{ t('rg.select') }}</option>
+            <option value="F">{{ t('sex.F') }}</option>
+            <option value="M">{{ t('sex.M') }}</option>
           </select>
           <small v-if="err.sex" class="ta-err">{{ err.sex }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="phone">Teléfono (opcional)</label>
+          <label class="ta-label" for="phone">{{ t('rg.phone') }}</label>
           <input id="phone" class="ta-input" :class="{ bad: err.phone }" v-model="f.phone" inputmode="numeric" maxlength="9" placeholder="987654321" @keyup.enter="submit" />
           <small v-if="err.phone" class="ta-err">{{ err.phone }}</small>
         </div>
         <div class="rg-f rg-wide">
-          <label class="ta-label" for="address">Dirección (opcional)</label>
+          <label class="ta-label" for="address">{{ t('rg.address') }}</label>
           <input id="address" class="ta-input" v-model="f.address" @keyup.enter="submit" />
         </div>
       </div>
 
       <label class="rg-check">
         <input type="checkbox" v-model="f.sinDni" @change="toggleSin" />
-        <span>Sin documento por ahora (se creará un perfil temporal)</span>
+        <span>{{ t('rg.noDoc') }}</span>
       </label>
 
       <div class="rg-actions">
-        <router-link to="/patient-registration" class="ta-btn ta-btn--ghost">Volver al listado</router-link>
-        <button class="ta-btn ta-btn--ghost" @click="reset">Limpiar</button>
-        <button class="ta-btn" @click="submit">Registrar ingreso</button>
+        <router-link to="/patient-registration" class="ta-btn ta-btn--ghost">{{ t('rg.back') }}</router-link>
+        <button class="ta-btn ta-btn--ghost" @click="reset">{{ t('rg.clear') }}</button>
+        <button class="ta-btn" @click="submit">{{ t('rg.submit') }}</button>
       </div>
     </section>
   </div>
