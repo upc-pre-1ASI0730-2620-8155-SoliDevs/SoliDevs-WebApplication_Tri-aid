@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{
+  --ta-ink:#0a2118; --ta-brand:#0a6b38; --ta-brand-dk:#08592e; --ta-accent:#34d27b;
+  --ta-bg:#eef5f1; --ta-surface:#fbfdfc; --ta-line:#dbe6df; --ta-text:#10231a; --ta-muted:#5f7368;
+  --ta-danger:#c8372d; --ta-danger-bg:#fdf0ef; --ta-danger-line:#f0b9b4;
+  --ta-font:'Space Grotesk',system-ui,sans-serif; --ta-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+.auth h1,.auth h2,.pt h2,.pt h3{letter-spacing:normal;color:var(--ta-text)}
+.auth__brand h1{color:#e8f3ec}
+
+.pt{letter-spacing:0}
+
+.auth,.pt{line-height:1.4}
+.auth .field>label{margin:0}
+
+.auth,.pt{line-height:1.4}
+.auth .field>label{margin:0}
