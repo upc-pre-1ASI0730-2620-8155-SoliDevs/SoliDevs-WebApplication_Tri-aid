@@ -8,7 +8,7 @@ export default [
   { path: '/patient-registration', component: () => import('../patient-registration/presentation/views/patient-list.vue'), meta: { titleKey: 'nav.patients' } },
   { path: '/patient-registration/new', component: () => import('../patient-registration/presentation/views/registration.vue'), meta: { titleKey: 'rg.title' } },
   { path: '/patient-registration/:episode', component: () => import('../patient-registration/presentation/views/patient-file.vue'), meta: { titleKey: 'pf.title' } },
-  { path: '/alerting', component: soon, meta: { titleKey: 'nav.alerts' } },
+  { path: '/alerting', component: () => import('../alerting/presentation/views/alerting-center-view.vue'), meta: { titleKey: 'nav.alerts' } },
   { path: '/reports', component: soon, meta: { titleKey: 'nav.reports' } },
   { path: '/devices', component: soon, meta: { titleKey: 'nav.devices' } },
   { path: '/subscriptions', component: soon, meta: { titleKey: 'nav.subscription' } }
