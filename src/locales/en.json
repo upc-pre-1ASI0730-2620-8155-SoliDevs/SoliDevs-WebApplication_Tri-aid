@@ -259,5 +259,7 @@
   "referral.spec.Cardiologia": "Cardiology",
   "referral.spec.Pediatria": "Pediatrics",
   "referral.spec.Neurologia": "Neurology",
-  "referral.suggestBtn": "Get suggestion"
+  "referral.suggestBtn": "Get suggestion",
+  "pf.editClass": "Edit classification",
+  "pf.sealed": "Vital signs sealed by the classification."
 }
