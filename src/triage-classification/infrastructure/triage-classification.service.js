@@ -39,7 +39,7 @@ export class TriageClassificationService {
         return ClassificationAssembler.toEntity(response.data)
     }
 
-    /** Suggests a priority level from the vital signs (US19). */
+    /** Suggests a priority level from the vital signs. */
     async suggestPriority(episode, vitals) {
         await delay()
         const result = this.engine.calculatePriority(vitals)
@@ -58,7 +58,7 @@ export class TriageClassificationService {
         return { ok: true, data: classification, reasons: result.reasons }
     }
 
-    /** Approves the system suggestion (US20). */
+    /** Approves the system suggestion. */
     async approveSuggestion(episodeId, userId = null) {
         await delay(120)
         const c = await this.findByEpisode(episodeId)
@@ -68,7 +68,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Modifies the clinical level with mandatory justification (US21, US22). */
+    /** Modifies the clinical level with mandatory justification. */
     async modifyLevel(episodeId, { level, justification }, userId = null) {
         await delay(120)
         const c = await this.findByEpisode(episodeId)
@@ -78,7 +78,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Restores the original suggestion (US21, scenario 2). */
+    /** Restores the original suggestion. */
     async resetToSuggestion(episodeId, userId = null) {
         await delay(120)
         const c = await this.findByEpisode(episodeId)
@@ -88,7 +88,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Confirms the classification and records the triage end time (US24). */
+    /** Confirms the classification and records the triage end time. */
     async confirmClassification(episodeId, userId = null) {
         await delay(180)
         const c = await this.findByEpisode(episodeId)
@@ -98,7 +98,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Standard parameters for the triage guide (US23). */
+    /** Standard parameters for the triage guide. */
     async getGuide() {
         await delay(100)
         return { ok: true, data: this.engine.guide() }

@@ -93,7 +93,7 @@ async function resetSuggestion() {
   if (r.ok) { classification.value = r.data; syncEpisodeLevel(); notify({ type: 'info', title: t('triage.toast.reset') }) }
 }
 
-/* ---------- Modificar nivel (US21 + US22) ---------- */
+/* ---------- Change level ---------- */
 const showModify = ref(false)
 const modLevel = ref('')
 const modReason = ref('')
@@ -117,10 +117,10 @@ async function saveModify() {
   notify({ type: 'info', title: t('triage.toast.overridden', { level: level.code }) })
 }
 
-/* ---------- Guia NT-158 (US23) ---------- */
+/* ---------- Guia NT-158 ---------- */
 const showGuide = ref(false)
 
-/* ---------- Confirmar (US20 + US24) ---------- */
+/* ---------- Confirm classification ---------- */
 const cycleMinutes = episode => {
   const c = classification.value
   if (!c?.confirmedAt || !episode?.arrival) return null

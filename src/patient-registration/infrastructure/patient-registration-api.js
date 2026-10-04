@@ -6,8 +6,8 @@ const episodesPath = import.meta.env.VITE_EPISODES_ENDPOINT_PATH
 const devicesPath = import.meta.env.VITE_DEVICES_ENDPOINT_PATH
 
 /**
- * Infrastructure gateway del bounded context Patient Registration.
- * Persiste pacientes, episodios y dispositivos contra el backend falso.
+ * Infrastructure gateway for the Patient Registration bounded context.
+ * Persists patients, episodes and devices against the fake backend.
  */
 export class PatientRegistrationApi extends BaseApi {
     #patientsEndpoint

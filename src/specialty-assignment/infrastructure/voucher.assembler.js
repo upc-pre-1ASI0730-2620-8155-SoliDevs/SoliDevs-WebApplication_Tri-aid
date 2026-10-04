@@ -1,5 +1,5 @@
 /**
- * Traduce entre el resource plano del backend falso y la entidad de dominio Voucher.
+ * Translates between the flat fake-backend resource and the Voucher domain entity.
  */
 import { Voucher } from '../domain/model/voucher.entity.js'
 import { VoucherResource } from './voucher.resource.js'

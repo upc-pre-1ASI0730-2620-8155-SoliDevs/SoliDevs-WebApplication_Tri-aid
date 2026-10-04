@@ -1,5 +1,5 @@
 <script setup>
-/** Digital referral voucher (US33): QR, destination details and SMS delivery. */
+/** Digital referral voucher: QR, destination details and SMS delivery. */
 import { computed } from 'vue'
 import { t } from '../../../shared/application/i18n.js'
 

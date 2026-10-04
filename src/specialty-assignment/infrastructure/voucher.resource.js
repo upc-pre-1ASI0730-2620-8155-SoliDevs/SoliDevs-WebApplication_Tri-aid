@@ -1,5 +1,5 @@
 /**
- * Resource que viaja hacia/desde el endpoint /vouchers.
+ * Resource traveling to/from the /vouchers endpoint.
  */
 export class VoucherResource {
     constructor({ id, referralId, qrCode, channel, sentAt }) {

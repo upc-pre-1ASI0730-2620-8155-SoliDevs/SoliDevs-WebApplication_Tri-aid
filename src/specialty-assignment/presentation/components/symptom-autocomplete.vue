@@ -1,6 +1,6 @@
 <script setup>
 /**
- * Autocomplete for the coded symptom catalog (US30).
+ * Autocomplete for the coded symptom catalog.
  * The user searches by name (ES/EN) and the CODE travels, not the free text.
  */
 import { ref, computed, onMounted } from 'vue'

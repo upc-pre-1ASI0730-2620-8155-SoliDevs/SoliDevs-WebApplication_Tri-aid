@@ -1,5 +1,5 @@
 /**
- * Traduce entre el resource plano del backend falso y la entidad de dominio Referral.
+ * Translates between the flat fake-backend resource and the Referral domain entity.
  */
 import { Referral } from '../domain/model/referral.entity.js'
 import { ReferralResource } from './referral.resource.js'
