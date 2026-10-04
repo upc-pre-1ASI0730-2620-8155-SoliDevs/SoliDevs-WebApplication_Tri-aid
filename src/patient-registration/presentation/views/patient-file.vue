@@ -137,9 +137,6 @@ function rejectReadings() {
         </template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>
-      <router-link v-if="classified" class="fi-edit" :to="`/triage-classification/${ep.id}`">
-        <i class="pi pi-pencil"></i>{{ t('pf.editClass') }}
-      </router-link>
     </section>
 
     <nav class="fi-tabs fi-in" style="--d:1">
@@ -305,8 +302,6 @@ function rejectReadings() {
 .fi-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
 .fi-sealed{justify-content:flex-start;font-size:12px;color:var(--ta-muted)}
 .fi-sealed i{color:var(--ta-brand)}
-.fi-edit{margin-left:8px;font-size:11px;color:var(--ta-brand);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
-.fi-edit:hover{text-decoration:underline}
 .fi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
 .fi-done{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ta-brand);margin-right:auto}
 .fi-dl{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
