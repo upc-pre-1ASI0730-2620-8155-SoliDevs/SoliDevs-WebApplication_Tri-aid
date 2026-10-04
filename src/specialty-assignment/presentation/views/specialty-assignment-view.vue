@@ -161,7 +161,7 @@ function closeVoucher() {
     </section>
 
     <!-- Sintoma principal y especialidad -->
-    <section class="ta-card rc-in" style="--d:1">
+    <section class="ta-card rc-card rc-in" style="--d:1">
       <h3 class="ta-h">{{ t('referral.symptomTitle') }}</h3>
       <p class="ta-sub">{{ t('referral.symptomSub') }}</p>
 
@@ -255,6 +255,10 @@ function closeVoucher() {
 .rc-symrow{display:flex;gap:10px;align-items:flex-start}
 .rc-symrow .ta-input{flex:1}
 .rc-symrow .ta-btn{white-space:nowrap}
+.rc-sugg{margin-top:18px;margin-bottom:22px}
+.rc-card label.ta-label{display:block;margin-top:18px;margin-bottom:6px}
+.rc-card .rc-select{margin-top:0}
+.rc-actions{margin-top:26px}
 .rc-sugg{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff}
 .rc-arrow{width:30px;height:30px;border-radius:8px;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;flex:none}
 .rc-sugg small{display:block;font-size:10.5px;color:var(--ta-muted)}
