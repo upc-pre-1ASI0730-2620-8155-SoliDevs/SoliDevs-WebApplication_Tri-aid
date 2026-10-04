@@ -249,7 +249,10 @@ function rejectReadings() {
             </span>
           </div>
           <div class="fi-next">
-            <router-link v-if="classifiedConfirmed" class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
+            <router-link v-if="referred" class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
+              <i class="pi pi-qrcode"></i>{{ t('pf.viewReferral') }}
+            </router-link>
+            <router-link v-else-if="classifiedConfirmed" class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
               <i class="pi pi-arrow-right"></i>{{ t('pf.ctaReferral') }}
             </router-link>
             <router-link v-else-if="classified" class="ta-btn fi-cta" :to="`/triage-classification/${ep.id}`">
@@ -257,9 +260,6 @@ function rejectReadings() {
             </router-link>
             <router-link v-else class="ta-btn fi-cta" :to="`/triage-classification/${ep.id}`">
               <i class="pi pi-sort-amount-up"></i>{{ t('panel.btnClassify') }}
-            </router-link>
-            <router-link v-if="referred" class="ta-btn ta-btn--ghost fi-ghost" :to="`/specialty-assignment/${ep.id}`">
-              <i class="pi pi-qrcode"></i>{{ t('pf.viewReferral') }}
             </router-link>
           </div>
         </div>
