@@ -8,7 +8,6 @@ import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { session } from '../../../shared/application/demo-session.js'
 import { TRIAGE_LEVELS, levelByKey, levelByCode } from '../../domain/model/triage-level.js'
 import { ClassificationState } from '../../domain/model/classification.entity.js'
-import { findClassification, cycleMinutes } from '../../application/triage-store.js'
 import { TriageClassificationService } from '../../infrastructure/triage-classification.service.js'
 import { nt158Engine } from '../../domain/services/nt158-engine.js'
 
@@ -45,7 +44,7 @@ const missing = computed(() => nt158Engine.missingMetrics(ep.value.vitals))
 const hasAllVitals = computed(() => !missing.value.length)
 
 /* ---------- Clasificación ---------- */
-const classification = ref(findClassification(id))
+const classification = ref(null)
 const reasons = ref([])
 const loading = ref(false)
 
@@ -60,6 +59,7 @@ const stateLabel = computed(() => t({
 }[state.value]))
 
 onMounted(async () => {
+  classification.value = await service.findByEpisode(id)
   if (!hasAllVitals.value) {
     notify({ type: 'error', title: t('triage.err.missingVitals', { list: missing.value.join(', ') }) })
     return
@@ -139,7 +139,7 @@ const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
         <div class="fi-meta">{{ meta }}</div>
       </div>
       <span class="fi-pill" :class="{ done: ep.confirmed }">
-        {{ ep.confirmed ? t('triage.vitalsConfirmed', { time: fmtTime(ep.vitals.pa?.time || new Date().toISOString()) }) : t('pf.unclassified') }}
+        {{ ep.confirmed ? t('triage.vitalsConfirmed', { time: fmtTime(ep.vitalsConfirmedAt || ep.arrival) }) : t('pf.unclassified') }}
       </span>
     </section>
 
@@ -147,7 +147,7 @@ const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
       <!-- Signos vitales confirmados -->
       <section class="ta-card tc-in" style="--d:1">
         <h3 class="ta-h">{{ t('triage.vitals.title') }}</h3>
-        <p class="ta-sub">{{ t('triage.vitals.by', { who: session.name || t('triage.nurse'), time: fmtTime(ep.vitals.pa?.time || new Date().toISOString()) }) }}</p>
+        <p class="ta-sub">{{ t('triage.vitals.by', { who: session.name || t('triage.nurse'), time: fmtTime(ep.vitalsConfirmedAt || ep.arrival) }) }}</p>
 
         <dl class="tc-vitals">
           <div v-for="row in vitalsRows" :key="row.key">
@@ -159,7 +159,7 @@ const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
         <p v-if="outOfRange.length" class="tc-warn">
           <i class="pi pi-exclamation-triangle"></i>
           <span>{{ t('triage.warning', { n: outOfRange.length }) }}
-            {{ outOfRange.map(o => `${o.label} ${o.value}${o.metric === 'spo2' ? ' %' : ''}`).join(' · ') }}</span>
+            {{ outOfRange.map(o => `${vLabel(o.metric === 'pas' ? 'pa' : o.metric)} ${o.value}${o.metric === 'spo2' ? ' %' : ''}`).join(' · ') }}</span>
         </p>
         <p v-else class="tc-ok"><i class="pi pi-check-circle"></i> {{ t('triage.allNormal') }}</p>
       </section>
