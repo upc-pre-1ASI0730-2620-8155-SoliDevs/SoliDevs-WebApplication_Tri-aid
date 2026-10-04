@@ -264,5 +264,16 @@
   "pf.sealed": "Vital signs sealed by the classification.",
   "pf.viewReferral": "View referral",
   "referral.showVoucher": "View voucher",
-  "referral.update": "Update referral"
+  "referral.update": "Update referral",
+  "panel.stat.admissions": "Registered admissions",
+  "panel.stat.pending": "Pending classification",
+  "panel.stat.classified": "Classified",
+  "panel.stat.critical": "Priority I-II",
+  "panel.recent": "Recent episodes",
+  "panel.recentSub": "Care flow status per episode",
+  "panel.referred": "Referred",
+  "panel.toRefer": "Pending referral",
+  "panel.toClassify": "Pending classification",
+  "panel.btnRefer": "Refer",
+  "panel.btnClassify": "Classify"
 }

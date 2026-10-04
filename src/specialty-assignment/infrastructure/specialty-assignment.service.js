@@ -70,21 +70,25 @@ export class SpecialtyAssignmentService {
             const updated = await this.api.updateReferral(referral.id, ReferralAssembler.toResource(referral))
             return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
         }
+        // Posicion en cola = cola base del turno + derivaciones vivas previas + 1 (US34)
+        const [specResponse, refResponse] = await Promise.all([this.api.getSpecialties(), this.api.getReferrals()])
+        const baseWaiting = (specResponse.data || []).find(sp => sp.key === specialty)?.waiting || 0
+        const liveReferrals = (refResponse.data || []).filter(r => r.specialty === specialty && r.state !== 'Attended' && String(r.episodeId) !== String(episodeId))
+        const position = baseWaiting + liveReferrals.length + 1
+
         const resource = ReferralAssembler.toResource(new Referral({
             id: null,
             episodeId,
             specialty,
             room: ROOMS[specialty] || '',
-            queuePosition: 0,
+            queuePosition: position,
             state: ReferralState.Referred,
             referredAt: new Date().toISOString(),
             symptom
         }))
         const response = await this.api.createReferral(resource)
         referral = ReferralAssembler.toEntity(response.data)
-        referral.updateQueuePosition(response.data.queuePosition || 1)
-        const updated = await this.api.updateReferral(referral.id, ReferralAssembler.toResource(referral))
-        return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
+        return { ok: true, data: referral }
     }
 
     /** Reasignacion manual de especialidad con motivo (US32). */
@@ -101,10 +105,19 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
     }
 
-    /** Genera el comprobante digital de la derivacion (US33). */
+    /** Genera (o reutiliza y actualiza) el comprobante digital de la derivacion (US33). */
     async generateVoucher(referral) {
         await delay(150)
         const qrCode = `TRI-AID|${referral.episodeId}|${referral.specialty}|${referral.room}|#${referral.queuePosition}`
+
+        // Si ya existe un comprobante para la derivacion, se actualiza (US33, escenario 2)
+        const existing = ((await this.api.getVouchers()).data || []).find(v => String(v.referralId) === String(referral.id))
+        if (existing) {
+            existing.qrCode = qrCode
+            const response = await this.api.updateVoucher(existing.id, VoucherAssembler.toResource(new Voucher({ ...existing })))
+            return { ok: true, data: VoucherAssembler.toEntity(response.data) }
+        }
+
         const voucher = new Voucher({ id: null, referralId: referral.id, qrCode, channel: DeliveryChannel.QrPortal })
         const response = await this.api.createVoucher(VoucherAssembler.toResource(voucher))
         return { ok: true, data: VoucherAssembler.toEntity(response.data) }
