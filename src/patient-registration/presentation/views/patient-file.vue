@@ -2,6 +2,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital } from '../../application/patient-store.js'
+import { findClassification } from '../../../triage-classification/application/triage-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
@@ -32,6 +33,7 @@ const rows = computed(() => [
   [t('pf.r.address'), p.value.address]
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
+const classified = computed(() => findClassification(ep.value.id)?.level || null)
 
 const tabs = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
@@ -105,7 +107,10 @@ function confirmReadings() {
   const missing = vitalTypes.filter(x => !ep.value.vitals[x.key]).map(x => vLabel(x.key))
   if (missing.length) { say(t('pf.missing', { list: missing.join(', ') }), true); return }
   ep.value.confirmed = true
+  ep.value.vitalsConfirmedAt = new Date().toISOString()
   notify({ type: 'success', title: t('pf.confirmed'), detail: t('pf.confirmedDetail') })
+  // Al confirmar los signos vitales el episodio pasa a clasificación de prioridad.
+  router.push(`/triage-classification/${ep.value.id}`)
 }
 function rejectReadings() {
   ep.value.vitals = {}
@@ -123,7 +128,9 @@ function rejectReadings() {
         <div class="fi-name">{{ fullName }}</div>
         <div class="fi-meta">{{ meta }}</div>
       </div>
-      <span class="fi-pill">{{ t('pf.unclassified') }}</span>
+      <span class="fi-pill" :class="{ done: classified }">
+        {{ classified ? t('pf.classified', { level: classified }) : t('pf.unclassified') }}
+      </span>
     </section>
 
     <nav class="fi-tabs fi-in" style="--d:1">
