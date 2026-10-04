@@ -142,7 +142,7 @@ function closeVoucher() {
         <div class="fi-meta">{{ meta }}</div>
       </div>
       <span v-if="level" class="rc-badge" :style="{ borderColor: level.color, color: level.color }">
-        {{ level.code }} · {{ t('triage.state.confirmed') }} {{ confirmedAt }}
+        {{ level.code }} · {{ t('triage.level.' + level.code + '.name') }}
       </span>
     </section>
 
