@@ -1,11 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { store, findEpisode, ageOf, fmtTime, vitalTypes } from '../../../patient-registration/application/patient-store.js'
+import { findEpisode, ageOf, fmtTime, vitalTypes } from '../../../patient-registration/application/patient-store.js'
 import { docLabel } from '../../../patient-registration/application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { session } from '../../../shared/application/demo-session.js'
+import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
+import PriorityBadge from '../components/priority-badge.vue'
+import TriageGuideModal from '../components/triage-guide-modal.vue'
 import { TRIAGE_LEVELS, levelByKey, levelByCode } from '../../domain/model/triage-level.js'
 import { ClassificationState } from '../../domain/model/classification.entity.js'
 import { TriageClassificationService } from '../../infrastructure/triage-classification.service.js'
@@ -35,21 +38,26 @@ const vitalsRows = computed(() => vitalTypes.map(vt => ({
   key: vt.key,
   label: vLabel(vt.key),
   unit: vt.unit,
-  value: ep.value.vitals[vt.key]?.value ?? '—',
-  time: ep.value.vitals[vt.key]?.time ?? ''
+  value: ep.value.vitals[vt.key]?.value ?? '—'
 })))
 
 const outOfRange = computed(() => nt158Engine.outOfRange(ep.value.vitals))
 const missing = computed(() => nt158Engine.missingMetrics(ep.value.vitals))
 const hasAllVitals = computed(() => !missing.value.length)
 
-/* ---------- Clasificación ---------- */
+/* ---------- Clasificacion ---------- */
 const classification = ref(null)
 const reasons = ref([])
 const loading = ref(false)
 
 const suggested = computed(() => levelByKey(classification.value?.suggestedLevel))
 const current = computed(() => levelByKey(classification.value?.level))
+const badgeLevel = computed(() => current.value ? {
+  code: current.value.code,
+  name: t('triage.level.' + current.value.code + '.name'),
+  desc: t('triage.level.' + current.value.code + '.desc'),
+  color: current.value.color
+} : null)
 const state = computed(() => classification.value?.state ?? ClassificationState.PendingConfirmation)
 const stateLabel = computed(() => t({
   PendingConfirmation: 'triage.state.pending',
@@ -109,10 +117,16 @@ async function saveModify() {
   notify({ type: 'info', title: t('triage.toast.overridden', { level: level.code }) })
 }
 
-/* ---------- Guía NT-158 (US23) ---------- */
+/* ---------- Guia NT-158 (US23) ---------- */
 const showGuide = ref(false)
 
 /* ---------- Confirmar (US20 + US24) ---------- */
+const cycleMinutes = episode => {
+  const c = classification.value
+  if (!c?.confirmedAt || !episode?.arrival) return null
+  return Math.max(0, Math.round((new Date(c.confirmedAt) - new Date(episode.arrival)) / 60000))
+}
+
 async function confirmClassification() {
   const r = await service.confirmClassification(id, session.name || null)
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
@@ -127,9 +141,7 @@ async function confirmClassification() {
   router.push(`/specialty-assignment/${ep.value.id}`)
 }
 
-const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
-// Sincroniza el nivel con el episodio para que la ficha del paciente
-// deje de mostrar "Sin clasificar" en cuanto hay una decision.
+/* ---------- Sincroniza el nivel con el episodio (ficha del paciente) ---------- */
 const syncEpisodeLevel = () => {
   if (ep.value && classification.value) {
     const l = levelByKey(classification.value.level)
@@ -138,30 +150,21 @@ const syncEpisodeLevel = () => {
     ep.value.classifiedLevelColor = l?.color || null
   }
 }
-// Tiempo de ciclo del triaje en minutos: llegada del episodio -> confirmacion (US24)
-const cycleMinutes = episode => {
-  const c = classification.value
-  if (!c?.confirmedAt || !episode?.arrival) return null
-  return Math.max(0, Math.round((new Date(c.confirmedAt) - new Date(episode.arrival)) / 60000))
-}
+
+const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
+const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lvl.code + '.name'), desc: t('triage.level.' + lvl.code + '.desc'), color: lvl.color } : null
 </script>
 
 <template>
   <div class="ta-page" v-if="ep">
-    <!-- Banner del paciente -->
-    <section class="ta-card tc-head tc-in" style="--d:0">
-      <span class="tc-av">{{ initials }}</span>
-      <div class="tc-id">
-        <div class="fi-name">{{ fullName }}</div>
-        <div class="fi-meta">{{ meta }}</div>
-      </div>
-      <span class="fi-pill" :class="{ done: ep.confirmed }">
-        {{ ep.confirmed ? t('triage.vitalsConfirmed', { time: fmtTime(ep.vitalsConfirmedAt || ep.arrival) }) : t('pf.unclassified') }}
-      </span>
-    </section>
+    <PatientBanner
+        :initials="initials"
+        :name="fullName"
+        :meta="meta"
+        :badge="ep.confirmed ? t('triage.vitalsConfirmed', { time: fmtTime(ep.vitalsConfirmedAt || ep.arrival) }) : t('pf.unclassified')"
+    />
 
     <div class="tc-grid">
-      <!-- Signos vitales confirmados -->
       <section class="ta-card tc-in" style="--d:1">
         <h3 class="ta-h">{{ t('triage.vitals.title') }}</h3>
         <p class="ta-sub">{{ t('triage.vitals.by', { who: session.name || t('triage.nurse'), time: fmtTime(ep.vitalsConfirmedAt || ep.arrival) }) }}</p>
@@ -181,14 +184,11 @@ const cycleMinutes = episode => {
         <p v-else class="tc-ok"><i class="pi pi-check-circle"></i> {{ t('triage.allNormal') }}</p>
       </section>
 
-      <!-- Sugerencia del sistema -->
       <section class="ta-card tc-in tc-suggest" style="--d:2">
         <span class="tc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
 
         <template v-if="current">
-          <div :class="tone(current)" class="tc-circle">{{ current.code }}</div>
-          <div class="tc-lvname">{{ t('triage.level.' + current.code + '.name') }}</div>
-          <p class="tc-lvdesc">{{ t('triage.level.' + current.code + '.desc') }}</p>
+          <PriorityBadge :level="levelDisplay(current)" />
 
           <p v-if="reasons.length" class="tc-reasons">
             <b>{{ t('triage.reasons') }}</b>
@@ -229,7 +229,6 @@ const cycleMinutes = episode => {
       <router-link class="ta-btn ta-btn--ghost" :to="`/patient-registration/${ep.id}`"><i class="pi pi-arrow-left"></i>{{ t('triage.backFile') }}</router-link>
     </div>
 
-    <!-- Modal: modificar nivel -->
     <div v-if="showModify" class="tc-overlay" @click.self="showModify = false">
       <div class="ta-card tc-modal">
         <h3 class="ta-h">{{ t('triage.modifyTitle') }}</h3>
@@ -253,36 +252,17 @@ const cycleMinutes = episode => {
       </div>
     </div>
 
-    <!-- Modal: guía NT-158 (US23) -->
-    <div v-if="showGuide" class="tc-overlay" @click.self="showGuide = false">
-      <div class="ta-card tc-modal tc-guide">
-        <h3 class="ta-h">{{ t('triage.guideTitle') }}</h3>
-        <p class="ta-sub">{{ t('triage.guideSub') }}</p>
-        <ul>
-          <li v-for="l in TRIAGE_LEVELS" :key="l.code">
-            <span :class="tone(l)" class="tc-gcode">{{ l.code }}</span>
-            <div>
-              <b>{{ t('triage.level.' + l.code + '.name') }}</b>
-              <small>{{ t('triage.level.' + l.code + '.range') }}</small>
-            </div>
-          </li>
-        </ul>
-        <div class="tc-modal__actions">
-          <button class="ta-btn" @click="showGuide = false">{{ t('triage.close') }}</button>
-        </div>
-      </div>
-    </div>
+    <TriageGuideModal
+        v-if="showGuide"
+        :title="t('triage.guideTitle')"
+        :sub="t('triage.guideSub')"
+        :close-label="t('triage.close')"
+        @close="showGuide = false"
+    />
   </div>
 </template>
 
 <style scoped>
-.tc-head{display:flex;align-items:center;gap:14px;padding:16px 20px}
-.tc-av{width:42px;height:42px;border-radius:50%;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;font-weight:600;flex:none}
-.tc-id{display:grid;gap:2px;flex:1;min-width:0}
-.fi-name{font-size:14.5px;font-weight:600}
-.fi-meta{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted)}
-.fi-pill{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted);white-space:nowrap}
-.fi-pill.done{background:#e3f3ea;color:var(--ta-brand)}
 .tc-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:16px}
 .tc-vitals{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;margin:16px 0 0}
 .tc-vitals dt{font-size:11px;color:var(--ta-muted)}
@@ -292,9 +272,6 @@ const cycleMinutes = episode => {
 .tc-ok{margin:16px 0 0;display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ta-brand)}
 .tc-suggest{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:20px}
 .tc-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ta-brand);background:#e3f3ea;border-radius:999px;padding:4px 10px}
-.tc-circle{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:700;color:#fff;background:var(--ta-muted)}
-.tc-lvname{font-size:17px;font-weight:600}
-.tc-lvdesc{margin:0;font-size:12.5px;color:var(--ta-muted);line-height:1.5;max-width:34ch}
 .tc-reasons{display:grid;gap:3px;margin:6px 0 0;font-size:11.5px;color:var(--ta-muted)}
 .tc-state{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
 .st--PendingConfirmation{background:#fff4e5;color:#b45309}
@@ -313,14 +290,5 @@ const cycleMinutes = episode => {
 .tc-levels button{width:44px;height:44px;border-radius:50%;border:1px solid var(--ta-line);background:#fff;font:inherit;font-weight:600;cursor:pointer;transition:transform .15s,border-color .15s}
 .tc-levels button.on{transform:translateY(-2px);border-color:var(--ta-brand)}
 .tc-area{min-height:88px;resize:vertical;padding:10px}
-.tc-guide ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px}
-.tc-guide li{display:flex;gap:12px;align-items:flex-start}
-.tc-gcode{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:none}
-.tc-guide li small{display:block;color:var(--ta-muted);font-size:11.5px}
-.lv--critical{background:#b42318}
-.lv--emergency{background:#d97706}
-.lv--urgent{background:#ca8a04}
-.lv--less{background:#0f766e}
-.lv--non{background:#2563eb}
 @media(max-width:900px){.tc-grid{grid-template-columns:1fr}}
 </style>

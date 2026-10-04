@@ -1,13 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { store, findEpisode, ageOf, fmtTime, saveEpisode } from '../../../patient-registration/application/patient-store.js'
+import { findEpisode, ageOf, fmtTime, saveEpisode } from '../../../patient-registration/application/patient-store.js'
 import { docLabel } from '../../../patient-registration/application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
+import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
+import SymptomAutocomplete from '../components/symptom-autocomplete.vue'
+import QueueChips from '../components/queue-chips.vue'
+import VoucherDialog from '../components/voucher-dialog.vue'
 import { SpecialtyAssignmentService } from '../../infrastructure/specialty-assignment.service.js'
 
 const route = useRoute()
@@ -34,79 +38,28 @@ const meta = computed(() => [
 const level = ref(null)
 const confirmedAt = ref(null)
 
-const alreadyReferred = ref(false)
-
-onMounted(async () => {
-  const response = await triageApi.getClassificationByEpisode(id)
-  const c = ClassificationAssembler.toEntity((response.data || [])[0] || null)
-  if (c?.level) {
-    level.value = levelByCode(c.level.split('_')[0])
-    confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
-  }
-  // si el episodio ya fue derivado, restaurar el contexto (US31/US33)
-  const existing = await service.findByEpisode(id)
-  if (existing) {
-    referral.value = existing
-    symptom.value = existing.symptom || ''
-    suggestion.value = existing.specialty
-    selected.value = existing.specialty
-    consulted.value = true
-    alreadyReferred.value = true
-  }
-  try {
-    const rs = await service.getSymptoms()
-    symptoms.value = rs.data
-  } catch (e) { console.error(e) }
-  await loadQueues()
-})
-
-/* ---------- Sintoma y sugerencia (US30) ---------- */
-const symptom = ref('')
+/* ---------- Sintoma codificado y sugerencia (US30) ---------- */
+const selectedSymptom = ref(null)
+const symptomErr = ref(false)
 const suggestion = ref(null)
 const specialties = ref([])
-
-const suggestedSpecialty = computed(() => specialties.value.find(s => s.key === suggestion.value) || null)
-const selectedSpecialty = computed(() => specialties.value.find(s => s.key === selected.value) || null)
-const changed = computed(() => selected.value && selected.value !== suggestion.value)
-
 const selected = ref('')
-const symErr = ref(false)
 const sugErr = ref('')
 const chgReason = ref('')
 const chgErr = ref(false)
 const consulted = ref(false)
 
-// Catalogo codificado de sintomas (json-server): el usuario escribe y elige;
-// viaja el CODIGO, no el texto libre.
-const symptoms = ref([])
-const symptomQuery = ref('')
-const symptomOpen = ref(false)
-const selectedSymptom = ref(null)
-
-const locale = () => (t('lang.label') === 'Idioma' ? 'es' : 'en')
-const symptomLabel = s => s[locale()] || s.es
-const filteredSymptoms = computed(() => {
-  const q = symptomQuery.value.trim().toLowerCase()
-  if (!q) return []
-  // busca en ambas lenguas del catalogo
-  return symptoms.value
-    .filter(s => s.es.toLowerCase().includes(q) || s.en.toLowerCase().includes(q))
-    .slice(0, 8)
-})
-
-function pickSymptom(s) {
-  selectedSymptom.value = s
-  symptomQuery.value = symptomLabel(s)
-  symptomOpen.value = false
-  symErr.value = false
-}
+const suggestedSpecialty = computed(() => specialties.value.find(s => s.key === suggestion.value) || null)
+const selectedSpecialty = computed(() => specialties.value.find(s => s.key === selected.value) || null)
+const changed = computed(() => selected.value && selected.value !== suggestion.value)
+const specName = key => t('referral.spec.' + key)
 
 async function consult() {
-  symErr.value = false; sugErr.value = ''
-  if (!selectedSymptom.value) { symErr.value = true; return }
+  symptomErr.value = false; sugErr.value = ''
+  if (!selectedSymptom.value) { symptomErr.value = true; return }
   const r = await service.suggestSpecialty({
     symptomId: selectedSymptom.value.id,
-    symptom: symptomLabel(selectedSymptom.value),
+    symptom: selectedSymptom.value.es,
     level: level.value?.key, age: age.value
   })
   if (!r.ok) { sugErr.value = t(r.error); return }
@@ -124,13 +77,16 @@ async function loadQueues() {
 
 /* ---------- Derivar (US31, US32) ---------- */
 const referring = ref(false)
+const alreadyReferred = ref(false)
+const referral = ref(null)
+
 async function refer() {
-  if (!consulted.value) { symErr.value = true; return }
+  if (!consulted.value) { symptomErr.value = true; return }
   if (changed.value && !chgReason.value.trim()) { chgErr.value = true; return }
   referring.value = true
   const r = await service.refer(id, {
     specialtyRef: selectedSpecialty.value || suggestedSpecialty.value,
-    symptom: selectedSymptom.value ? `${selectedSymptom.value.id} — ${symptomLabel(selectedSymptom.value)}` : ''
+    symptom: `${selectedSymptom.value.id} — ${selectedSymptom.value.es}`
   }, age.value)
   referring.value = false
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
@@ -142,25 +98,14 @@ async function refer() {
 }
 
 /* ---------- Comprobante (US33) ---------- */
-const referral = ref(null)
 const voucher = ref(null)
 const showVoucher = ref(false)
-const qrBlocks = ref([])
 
 async function makeVoucher() {
   if (!referral.value) return
   const r = await service.generateVoucher(referral.value)
   if (!r.ok) return
   voucher.value = r.data
-  // pseudo-QR determinista a partir del codigo del comprobante
-  let seed = 0
-  for (const ch of voucher.value.qrCode) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0
-  const blocks = []
-  for (let i = 0; i < 121; i++) {
-    seed = (seed * 1103515245 + 12345) >>> 0
-    blocks.push(((seed >> 8) & 1) === 1)
-  }
-  qrBlocks.value = blocks
   showVoucher.value = true
 }
 
@@ -177,45 +122,53 @@ function closeVoucher() {
   showVoucher.value = false
   router.push('/patient-registration')
 }
+
+onMounted(async () => {
+  const response = await triageApi.getClassificationByEpisode(id)
+  const c = ClassificationAssembler.toEntity((response.data || [])[0] || null)
+  if (c?.level) {
+    level.value = levelByCode(c.level.split('_')[0])
+    confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
+  }
+  // si el episodio ya fue derivado, restaurar el contexto (US31/US33)
+  const existing = await service.findByEpisode(id)
+  if (existing) {
+    referral.value = existing
+    selectedSymptom.value = { id: (existing.symptom || '').split(' — ')[0], es: (existing.symptom || '').split(' — ')[1] || '', en: '' }
+    suggestion.value = existing.specialty
+    selected.value = existing.specialty
+    consulted.value = true
+    alreadyReferred.value = true
+  }
+  await loadQueues()
+})
 </script>
 
 <template>
   <div class="ta-page" v-if="ep">
-    <!-- Banner del paciente con su prioridad confirmada -->
-    <section class="ta-card rc-head rc-in" style="--d:0">
-      <span class="tc-av">{{ initials }}</span>
-      <div class="tc-id">
-        <div class="fi-name">{{ fullName }}</div>
-        <div class="fi-meta">{{ meta }}</div>
-      </div>
-      <span v-if="level" class="rc-badge" :style="{ borderColor: level.color, color: level.color }">
-        {{ level.code }} · {{ t('triage.level.' + level.code + '.name') }}
-      </span>
-    </section>
+    <PatientBanner
+        :initials="initials"
+        :name="fullName"
+        :meta="meta"
+        :badge="level ? `${level.code} · ${t('triage.level.' + level.code + '.name')}` : ''"
+        :badge-color="level?.color"
+    />
 
-    <!-- Sintoma principal y especialidad -->
     <section class="ta-card rc-card rc-in" style="--d:1">
       <h3 class="ta-h">{{ t('referral.symptomTitle') }}</h3>
       <p class="ta-sub">{{ t('referral.symptomSub') }}</p>
 
-      <label class="ta-label" for="symptom">{{ t('referral.symptom') }}</label>
-      <div class="rc-symrow rc-autocomplete">
-        <input id="symptom" class="ta-input rc-sym" v-model="symptomQuery" :class="{ bad: symErr }" :placeholder="t('referral.symptomPh')" autocomplete="off" @focus="symptomOpen = true" @input="symptomOpen = true" @keyup.enter="filteredSymptoms.length && pickSymptom(filteredSymptoms[0])" />
+      <div class="rc-symrow">
+        <SymptomAutocomplete v-model="selectedSymptom" :error="symptomErr" />
         <button class="ta-btn" @click="consult"><i class="pi pi-sparkles"></i>{{ t('referral.suggestBtn') }}</button>
-        <ul v-if="symptomOpen && filteredSymptoms.length" class="rc-dropdown">
-          <li v-for="s in filteredSymptoms" :key="s.id" @mousedown.prevent="pickSymptom(s)">
-            <code>{{ s.id }}</code> {{ symptomLabel(s) }}
-          </li>
-        </ul>
       </div>
-      <p v-if="selectedSymptom" class="rc-selected"><i class="pi pi-check-circle"></i>{{ selectedSymptom.id }} — {{ symptomLabel(selectedSymptom) }}</p>
-      <p v-if="symErr" class="ta-err">{{ t('referral.err.catalog') }}</p>
+      <p v-if="symptomErr" class="ta-err">{{ t('referral.err.catalog') }}</p>
 
-      <div v-if="suggestion" class="rc-sugg">
+      <div v-if="consulted" class="rc-sugg">
         <span class="rc-arrow"><i class="pi pi-arrow-right"></i></span>
         <div>
           <small>{{ t('referral.suggested') }}</small>
-          <b>{{ t('referral.spec.' + suggestion) }}</b>
+          <b>{{ specName(suggestion) }}</b>
         </div>
         <span class="rc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
       </div>
@@ -245,85 +198,35 @@ function closeVoucher() {
       </template>
     </section>
 
-    <!-- Pacientes en espera por especialidad (US34) -->
     <section class="ta-card rc-in" style="--d:2">
       <h3 class="ta-h">{{ t('referral.queuesTitle') }}</h3>
       <p class="ta-sub">{{ t('referral.queuesSub') }}</p>
-      <div class="rc-chips">
-        <span v-for="s in queues" :key="s.key" class="rc-chip">{{ s.name }} <b>{{ s.waiting }}</b></span>
-      </div>
+      <QueueChips :queues="queues" :label="specName" />
     </section>
 
-    <!-- Comprobante digital (US33) -->
-    <div v-if="showVoucher" class="tc-overlay" @click.self="closeVoucher">
-      <div class="ta-card tc-modal rc-voucher">
-        <span class="rc-vkicker">{{ t('referral.voucherKicker') }}</span>
-        <h3 class="ta-h">{{ t('referral.voucherTitle') }}</h3>
-
-        <div class="rc-qr" aria-hidden="true">
-          <span v-for="(on, i) in qrBlocks" :key="i" :class="{ on }"></span>
-        </div>
-        <code class="rc-qrcode">{{ voucher?.qrCode }}</code>
-
-        <dl class="rc-vdl">
-          <div><dt>{{ t('referral.vPatient') }}</dt><dd>{{ fullName }}</dd></div>
-          <div><dt>{{ t('referral.vEpisode') }}</dt><dd>{{ ep.id }}</dd></div>
-          <div><dt>{{ t('referral.vSpecialty') }}</dt><dd>{{ t('referral.spec.' + referral?.specialty) }}</dd></div>
-          <div><dt>{{ t('referral.vRoom') }}</dt><dd>{{ referral?.room }}</dd></div>
-          <div v-if="level"><dt>{{ t('referral.vPriority') }}</dt><dd>{{ level.code }} · {{ t('triage.level.' + level.code + '.name') }}</dd></div>
-          <div><dt>{{ t('referral.vQueue') }}</dt><dd>#{{ referral?.queuePosition }}</dd></div>
-        </dl>
-
-        <div class="tc-modal__actions">
-          <button class="ta-btn ta-btn--ghost" @click="sendVoucher('Sms')"><i class="pi pi-mobile"></i>{{ t('referral.sendSms') }}</button>
-          <button class="ta-btn" @click="closeVoucher"><i class="pi pi-check"></i>{{ t('referral.done') }}</button>
-        </div>
-      </div>
-    </div>
+    <VoucherDialog
+        v-if="showVoucher"
+        :voucher="voucher"
+        :referral="referral"
+        :patient-name="fullName"
+        :episode-id="ep.id"
+        :level="level"
+        @close="closeVoucher"
+        @send="sendVoucher"
+    />
   </div>
 </template>
 
 <style scoped>
-.rc-head{display:flex;align-items:center;gap:14px;padding:16px 20px}
-.tc-av{width:42px;height:42px;border-radius:50%;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;font-weight:600;flex:none}
-.tc-id{display:grid;gap:2px;flex:1;min-width:0}
-.fi-name{font-size:14.5px;font-weight:600}
-.fi-meta{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted)}
-.rc-badge{font-size:11px;padding:4px 10px;border-radius:999px;border:1.5px solid;background:#fff;white-space:nowrap;font-weight:600}
-.rc-sym{max-width:420px}
-.rc-symrow{display:flex;gap:10px;align-items:flex-start}
-.rc-symrow .ta-input{flex:1}
-.rc-symrow .ta-btn{white-space:nowrap}
-.rc-autocomplete{position:relative}
-.rc-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--ta-line);border-radius:10px;list-style:none;margin:0;padding:4px;z-index:20;max-height:240px;overflow:auto;box-shadow:0 10px 26px rgba(10,40,25,.14)}
-.rc-dropdown li{padding:9px 12px;font-size:12.5px;cursor:pointer;border-radius:8px;display:flex;gap:8px;align-items:center}
-.rc-dropdown li:hover{background:#eef7f2}
-.rc-dropdown code{font-family:var(--ta-mono);font-size:10px;color:var(--ta-brand);background:#e3f3ea;border-radius:4px;padding:1px 5px}
-.rc-selected{margin:8px 0 0;font-size:12px;color:var(--ta-brand);display:flex;align-items:center;gap:6px}
-.rc-sugg{margin-top:18px;margin-bottom:22px}
 .rc-card label.ta-label{display:block;margin-top:18px;margin-bottom:6px}
-.rc-card .rc-select{margin-top:0}
-.rc-actions{margin-top:26px}
-.rc-sugg{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff}
+.rc-symrow{display:flex;gap:10px;align-items:flex-start}
+.rc-symrow .ta-btn{white-space:nowrap}
+.rc-symrow > :first-child{flex:1}
+.rc-sugg{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff}
 .rc-arrow{width:30px;height:30px;border-radius:8px;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;flex:none}
 .rc-sugg small{display:block;font-size:10.5px;color:var(--ta-muted)}
 .rc-sugg b{font-size:15px}
 .rc-tag{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ta-brand);background:#e3f3ea;border-radius:999px;padding:4px 10px;white-space:nowrap}
-.rc-select{max-width:420px}
-.rc-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-.rc-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-.rc-chip{border:1px solid var(--ta-line);border-radius:999px;padding:6px 14px;font-size:12.5px;background:#fff;display:inline-flex;gap:8px}
-.rc-chip b{color:var(--ta-brand)}
-.tc-overlay{position:fixed;inset:0;background:rgba(8,20,14,.45);display:grid;place-items:center;z-index:40;padding:20px}
-.tc-modal{width:min(480px,100%);display:grid;gap:10px}
-.tc-modal__actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
-.rc-vkicker{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ta-brand);font-weight:700}
-.rc-qr{display:grid;grid-template-columns:repeat(11,1fr);gap:2px;width:150px;padding:10px;background:#fff;border:1px solid var(--ta-line);border-radius:10px}
-.rc-qr span{aspect-ratio:1;background:transparent;border-radius:1px}
-.rc-qr span.on{background:var(--ta-ink)}
-.rc-qrcode{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted);word-break:break-all}
-.rc-vdl{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin:4px 0 0}
-.rc-vdl div{display:grid;gap:3px}
-.rc-vdl dt{font-size:11px;color:var(--ta-muted)}
-.rc-vdl dd{margin:0;font-size:13px;font-weight:500}
+.rc-select{max-width:420px;margin-top:0}
+.rc-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px}
 </style>
