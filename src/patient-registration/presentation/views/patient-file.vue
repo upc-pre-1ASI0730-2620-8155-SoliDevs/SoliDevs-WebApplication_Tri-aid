@@ -133,7 +133,7 @@ function rejectReadings() {
       <span class="fi-pill" :class="{ done: classified }">
         <template v-if="classified">
           <i class="fi-dot" :style="{ background: classifiedColor }"></i>
-          {{ t('pf.classified', { level: classifiedCode }) }}
+          {{ classifiedCode }} · {{ t('triage.level.' + classifiedCode + '.name') }}
         </template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>
