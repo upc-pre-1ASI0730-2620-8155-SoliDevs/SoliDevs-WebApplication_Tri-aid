@@ -77,12 +77,12 @@ onMounted(async () => {
 
 async function approve() {
   const r = await service.approveSuggestion(id, session.name || null)
-  if (r.ok) { classification.value = r.data; notify({ type: 'success', title: t('triage.toast.approved') }) }
+  if (r.ok) { classification.value = r.data; syncEpisodeLevel(); notify({ type: 'success', title: t('triage.toast.approved') }) }
 }
 
 async function resetSuggestion() {
   const r = await service.resetToSuggestion(id, session.name || null)
-  if (r.ok) { classification.value = r.data; notify({ type: 'info', title: t('triage.toast.reset') }) }
+  if (r.ok) { classification.value = r.data; syncEpisodeLevel(); notify({ type: 'info', title: t('triage.toast.reset') }) }
 }
 
 /* ---------- Modificar nivel (US21 + US22) ---------- */
@@ -104,6 +104,7 @@ async function saveModify() {
   const r = await service.modifyLevel(id, { level: level.key, justification: modReason.value }, session.name || null)
   if (!r.ok) { modErr.value = t(r.error); return }
   classification.value = r.data
+  syncEpisodeLevel()
   showModify.value = false
   notify({ type: 'info', title: t('triage.toast.overridden', { level: level.code }) })
 }
@@ -116,7 +117,7 @@ async function confirmClassification() {
   const r = await service.confirmClassification(id, session.name || null)
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
   classification.value = r.data
-  ep.value.classifiedLevel = r.data.level
+  syncEpisodeLevel()
   const min = cycleMinutes(ep.value)
   notify({
     type: 'success',
@@ -127,6 +128,9 @@ async function confirmClassification() {
 }
 
 const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
+// Sincroniza el nivel con el episodio para que la ficha del paciente
+// deje de mostrar "Sin clasificar" en cuanto hay una decision.
+const syncEpisodeLevel = () => { if (ep.value && classification.value) ep.value.classifiedLevel = classification.value.level }
 // Tiempo de ciclo del triaje en minutos: llegada del episodio -> confirmacion (US24)
 const cycleMinutes = episode => {
   const c = classification.value

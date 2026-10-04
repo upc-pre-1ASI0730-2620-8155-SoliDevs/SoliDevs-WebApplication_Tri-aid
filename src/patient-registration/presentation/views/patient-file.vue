@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital } from '../../application/patient-store.js'
+import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital, saveEpisode } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
@@ -107,6 +107,7 @@ function confirmReadings() {
   if (missing.length) { say(t('pf.missing', { list: missing.join(', ') }), true); return }
   ep.value.confirmed = true
   ep.value.vitalsConfirmedAt = new Date().toISOString()
+  saveEpisode(ep.value)
   notify({ type: 'success', title: t('pf.confirmed'), detail: t('pf.confirmedDetail') })
   // Al confirmar los signos vitales el episodio pasa a clasificación de prioridad.
   router.push(`/triage-classification/${ep.value.id}`)
