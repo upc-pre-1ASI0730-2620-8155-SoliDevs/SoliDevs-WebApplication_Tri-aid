@@ -130,7 +130,8 @@ onMounted(async () => {
   const response = await triageApi.getClassificationByEpisode(id)
   const c = ClassificationAssembler.toEntity((response.data || [])[0] || null)
   if (c?.level) {
-    level.value = levelByCode(c.level.split('_')[0])
+    const l = levelByCode(c.level.split('_')[0])
+    level.value = l ? { ...l, name: t('triage.level.' + l.code + '.name') } : null
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
   }
   // if the episode was already referred, restore its context
