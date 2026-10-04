@@ -172,6 +172,9 @@
   "alerting.confirmTitle": "Confirm action",
   "alerting.confirmMsg": "Are you sure you want to acknowledge and mute this alert?",
   "alerting.yes": "Yes, acknowledge",
-  "alerting.no": "Cancel"
+  "alerting.no": "Cancel",
+  "alerting.filterAll": "All",
+  "alerting.filterCritical": "Critical only",
+  "alerting.filterUnresolved": "Hide resolved"
 
 }
