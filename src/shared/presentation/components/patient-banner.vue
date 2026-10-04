@@ -1,5 +1,7 @@
 <script setup>
-// Banner de paciente reutilizable por los bounded contexts del flujo clinico.
+/**
+ * Reusable patient banner for the bounded contexts of the care flow.
+ */
 defineProps({
     initials: { type: String, required: true },
     name: { type: String, required: true },

@@ -1,8 +1,10 @@
-// Domain Service: reglas clinicas de recomendacion de especialidad (US30)
-// y restricciones demographicas (US32, escenario 2).
+/**
+ * Domain Service: clinical rules for specialty recommendation (US30)
+ * and demographic restrictions (US32, scenario 2).
+ */
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 
-// Palabras clave del sintoma principal -> especialidad.
+// Main symptom keywords -> specialty.
 const SYMPTOM_RULES = [
   { specialty: 'CirugiaGeneral',  words: ['abdomen', 'abdominal', 'apendice', 'apendicitis', 'hernia', 'dolor abdominal'] },
   { specialty: 'Traumatologia',   words: ['fractura', 'esguince', 'luxacion', 'trauma', 'caida', 'golpe', 'torcedura', 'fracturas'] },
@@ -15,9 +17,9 @@ const SYMPTOM_RULES = [
 
 export class SpecialtyRules {
   /**
-   * Sugiere una especialidad a partir del sintoma principal, la prioridad
-   * clasificada y la edad del paciente (US30). Devuelve
-   * { ok, specialtyKey, rule } o { ok:false, error }.
+   * Suggests a specialty from the main symptom, the classified priority
+   * and the patient age (US30). Returns
+   * { ok, specialtyKey, rule } or { ok:false, error }.
    */
   suggest({ symptom = '', level = null, age = null }) {
     const text = String(symptom || '').toLowerCase()
@@ -27,15 +29,15 @@ export class SpecialtyRules {
       if (rule.words.some(w => text.includes(w))) return { ok: true, specialtyKey: rule.specialty, rule: 'symptom' }
     }
 
-    // Sin coincidencia de sintoma: la prioridad orienta el destino.
+    // No symptom match: the priority drives the destination.
     const l = levelByCode(level)
     if (l && (l.code === 'I' || l.code === 'II')) return { ok: true, specialtyKey: 'CirugiaGeneral', rule: 'priority' }
     return { ok: true, specialtyKey: 'MedicinaInterna', rule: 'priority' }
   }
 
   /**
-   * Restriccion demografica (US32, escenario 2): p.ej. no derivar a
-   * Pediatria a un paciente adulto mayor.
+   * Demographic restriction (US32, scenario 2): e.g. do not refer an
+   * elderly patient to Pediatrics.
    */
   violatesDemographics(specialty, age = null) {
     if (!specialty) return false

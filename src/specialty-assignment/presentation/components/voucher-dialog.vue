@@ -1,5 +1,5 @@
 <script setup>
-// Comprobante digital de la derivacion (US33): QR, datos del destino y envio por SMS.
+/** Digital referral voucher (US33): QR, destination details and SMS delivery. */
 import { computed } from 'vue'
 import { t } from '../../../shared/application/i18n.js'
 
@@ -12,7 +12,7 @@ const props = defineProps({
 })
 defineEmits(['close', 'send'])
 
-// pseudo-QR determinista a partir del codigo del comprobante (demo)
+// deterministic pseudo-QR generated from the voucher code (demo)
 const blocks = computed(() => {
     let seed = 0
     for (const ch of props.voucher.qrCode) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0

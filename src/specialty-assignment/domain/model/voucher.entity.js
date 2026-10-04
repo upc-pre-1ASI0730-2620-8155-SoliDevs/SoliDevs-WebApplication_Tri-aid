@@ -1,4 +1,4 @@
-// Entidad Voucher del Bounded Context: Specialty Assignment (US33).
+/** Voucher entity of the Specialty Assignment bounded context (US33). */
 export const DeliveryChannel = {
   Sms: 'Sms',
   QrPortal: 'QrPortal'

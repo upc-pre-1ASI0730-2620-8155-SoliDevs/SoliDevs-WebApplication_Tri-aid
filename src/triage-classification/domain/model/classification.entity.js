@@ -1,5 +1,7 @@
-// Aggregate Root del Bounded Context: Triage Classification.
-// Espeja la clase Classification del diagrama de clases del informe.
+/**
+ * Aggregate Root of the Triage Classification bounded context.
+ * Mirrors the Classification class from the report class diagram.
+ */
 import { TriageLevel, levelByKey } from './triage-level.js'
 
 export const ClassificationState = {
@@ -40,7 +42,7 @@ export class Classification {
     return this.state === ClassificationState.Confirmed
   }
 
-  /** El sistema propone un nivel a partir del motor NT-158. */
+  /** The system proposes a level from the NT-158 engine. */
   suggest(levelKey) {
     this.suggestedLevel = levelKey
     this.level = levelKey
@@ -49,7 +51,7 @@ export class Classification {
     return this
   }
 
-  /** La enfermera aprueba la sugerencia del sistema (US20). */
+  /** The triage nurse approves the system suggestion (US20). */
   approve(userId = null) {
     if (!this.suggestedLevel) return { ok: false, error: 'classification.error.noSuggestion' }
     this.level = this.suggestedLevel
@@ -59,7 +61,7 @@ export class Classification {
     return { ok: true }
   }
 
-  /** La enfermera modifica el nivel clínico (US21) y debe justificarlo (US22). */
+  /** The triage nurse changes the clinical level (US21) and must justify it (US22). */
   override(newLevelKey, justification, userId = null) {
     if (!levelByKey(newLevelKey)) return { ok: false, error: 'classification.error.invalidLevel' }
     if (!String(justification || '').trim()) return { ok: false, error: 'classification.error.justificationRequired' }
@@ -70,7 +72,7 @@ export class Classification {
     return { ok: true }
   }
 
-  /** La enfermera se retracta y vuelve a la sugerencia original (US21, escenario 2). */
+  /** The triage nurse retracts and returns to the original suggestion (US21, scenario 2). */
   resetToSuggestion(userId = null) {
     if (!this.suggestedLevel) return { ok: false, error: 'classification.error.noSuggestion' }
     this.level = this.suggestedLevel
@@ -80,7 +82,7 @@ export class Classification {
     return { ok: true }
   }
 
-  /** Cierra la clasificación con estampa de tiempo inalterable (US24). */
+  /** Closes the classification with an immutable timestamp (US24). */
   confirm(userId = null) {
     if (!this.level) return { ok: false, error: 'classification.error.noLevel' }
     this.state = ClassificationState.Confirmed

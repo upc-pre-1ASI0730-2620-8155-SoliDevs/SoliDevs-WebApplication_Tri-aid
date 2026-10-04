@@ -36,7 +36,7 @@ const rows = computed(() => [
   [t('pf.r.address'), p.value.address]
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
-// Clasificacion y derivacion se consultan al backend falso (sobreviven al F5)
+// Classification and referral are fetched from the fake backend (they survive F5)
 const classified = ref(null)
 const referred = ref(false)
 
@@ -131,7 +131,7 @@ function confirmReadings() {
   ep.value.vitalsConfirmedAt = new Date().toISOString()
   saveEpisode(ep.value)
   notify({ type: 'success', title: t('pf.confirmed'), detail: t('pf.confirmedDetail') })
-  // Al confirmar los signos vitales el episodio pasa a clasificación de prioridad.
+  // Once vital signs are confirmed the episode moves to priority classification.
   router.push(`/triage-classification/${ep.value.id}`)
 }
 function rejectReadings() {

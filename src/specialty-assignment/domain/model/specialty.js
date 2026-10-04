@@ -1,5 +1,7 @@
-// Catalogo de especialidades (enum Specialty del modelo de dominio),
-// espejado contra la coleccion /specialties del backend falso.
+/**
+ * Specialty catalog (Specialty enum of the domain model),
+ * mirrored against the /specialties collection of the fake backend.
+ */
 export const Specialty = {
   MedicinaInterna: 'MedicinaInterna',
   CirugiaGeneral: 'CirugiaGeneral',

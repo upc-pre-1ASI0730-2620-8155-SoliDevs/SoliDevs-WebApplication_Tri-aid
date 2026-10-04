@@ -1,5 +1,5 @@
 <script setup>
-// Pacientes en espera por especialidad (US34).
+/** Patients waiting per specialty (US34). */
 defineProps({
     queues: { type: Array, default: () => [] },
     label: { type: Function, required: true } // traduce key -> nombre
