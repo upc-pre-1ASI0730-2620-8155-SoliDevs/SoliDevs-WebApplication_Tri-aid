@@ -1,5 +1,9 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
+import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
+import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
+import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { useRoute, useRouter } from 'vue-router'
 import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital, saveEpisode } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
@@ -32,9 +36,25 @@ const rows = computed(() => [
   [t('pf.r.address'), p.value.address]
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
-const classified = computed(() => ep.value.classifiedLevel || null)
-const classifiedCode = computed(() => ep.value.classifiedLevelCode || String(ep.value.classifiedLevel || '').split('_')[0])
-const classifiedColor = computed(() => ep.value.classifiedLevelColor || '#6b7280')
+// Clasificacion y derivacion se consultan al backend falso (sobreviven al F5)
+const classified = ref(null)
+const referred = ref(false)
+
+onMounted(async () => {
+  if (!ep.value) return
+  try {
+    const rc = await new TriageApi().getClassificationByEpisode(ep.value.id)
+    const c = ClassificationAssembler.toEntity((rc.data || [])[0] || null)
+    if (c?.level) {
+      const l = levelByCode(c.level.split('_')[0])
+      classified.value = l ? { code: l.code, name: t('triage.level.' + l.code + '.name'), color: l.color } : null
+    }
+  } catch (e) { console.error(e) }
+  try {
+    const rr = await new SpecialtyAssignmentApi().getReferralsByEpisode(ep.value.id)
+    referred.value = (rr.data || []).length > 0
+  } catch (e) { console.error(e) }
+})
 
 const tabs = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
@@ -132,8 +152,8 @@ function rejectReadings() {
       </div>
       <span class="fi-pill" :class="{ done: classified }">
         <template v-if="classified">
-          <i class="fi-dot" :style="{ background: classifiedColor }"></i>
-          {{ classifiedCode }} · {{ t('triage.level.' + classifiedCode + '.name') }}
+          <i class="fi-dot" :style="{ background: classified.color }"></i>
+          {{ classified.code }} · {{ classified.name }}
         </template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>
@@ -219,7 +239,7 @@ function rejectReadings() {
           <router-link class="ta-btn ta-btn--ghost" :to="`/triage-classification/${ep.id}`">
             <i class="pi pi-pencil"></i>{{ t('pf.editClass') }}
           </router-link>
-          <router-link v-if="ep.referred" class="ta-btn ta-btn--ghost" :to="`/specialty-assignment/${ep.id}`">
+          <router-link v-if="referred" class="ta-btn ta-btn--ghost" :to="`/specialty-assignment/${ep.id}`">
             <i class="pi pi-directions"></i>{{ t('pf.viewReferral') }}
           </router-link>
         </div>
