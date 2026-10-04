@@ -264,5 +264,16 @@
   "pf.sealed": "Signos vitales sellados al clasificar.",
   "pf.viewReferral": "Ver derivación",
   "referral.showVoucher": "Ver comprobante",
-  "referral.update": "Actualizar derivación"
+  "referral.update": "Actualizar derivación",
+  "panel.stat.admissions": "Ingresos registrados",
+  "panel.stat.pending": "Pendientes de clasificar",
+  "panel.stat.classified": "Clasificados",
+  "panel.stat.critical": "Prioridad I-II",
+  "panel.recent": "Episodios recientes",
+  "panel.recentSub": "Estado del flujo de atención por episodio",
+  "panel.referred": "Derivado",
+  "panel.toRefer": "Por derivar",
+  "panel.toClassify": "Por clasificar",
+  "panel.btnRefer": "Derivar",
+  "panel.btnClassify": "Clasificar"
 }
