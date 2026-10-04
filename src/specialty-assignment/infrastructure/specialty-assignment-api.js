@@ -7,8 +7,8 @@ const vouchersEndpointPath = import.meta.env.VITE_VOUCHERS_ENDPOINT_PATH
 const symptomsEndpointPath = import.meta.env.VITE_SYMPTOMS_ENDPOINT_PATH
 
 /**
- * Infrastructure gateway del bounded context Specialty Assignment.
- * Espeja IReferralRepository del informe, pero contra json-server.
+ * Infrastructure gateway for the Specialty Assignment bounded context.
+ * Mirrors IReferralRepository from the report, backed by json-server.
  */
 export class SpecialtyAssignmentApi extends BaseApi {
     #referralsEndpoint

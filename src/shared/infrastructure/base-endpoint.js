@@ -1,6 +1,6 @@
 /**
- * Cliente de endpoints reutilizable con operaciones CRUD sobre una coleccion.
- * Espeja la clase BaseEndpoint del repositorio de referencia (learning-center).
+ * Reusable endpoint client with CRUD operations over a resource collection.
+ * Mirrors the BaseEndpoint class of the reference repository (learning-center).
  */
 export class BaseEndpoint {
     constructor(baseApi, endpointPath) {

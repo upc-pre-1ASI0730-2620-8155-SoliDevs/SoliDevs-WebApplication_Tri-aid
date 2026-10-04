@@ -13,7 +13,7 @@ import { VoucherAssembler } from './voucher.assembler.js'
 
 const delay = (ms = 200) => new Promise(r => setTimeout(r, ms))
 
-// Shift room codes, used when assigning a consulting room (US31).
+// Shift room codes, used when assigning a consulting room.
 const ROOMS = { MedicinaInterna: 'MI-2', CirugiaGeneral: 'CG-1', Traumatologia: 'TT-3', Ginecologia: 'GI-1', Cardiologia: 'CA-2', Pediatria: 'PD-1', Neurologia: 'NE-1' }
 
 export class SpecialtyAssignmentService {
@@ -28,12 +28,12 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: response.data || [] }
     }
 
-    /** Main symptom is mandatory (US30, scenario 2). */
+    /** Main symptom is mandatory. */
     static validateSymptom(symptom) {
         return String(symptom || '').trim() ? { ok: true } : { ok: false, error: 'referral.error.symptomRequired' }
     }
 
-    /** Specialties with their shift queue (US34). */
+    /** Specialties with their shift queue. */
     async getSpecialties() {
         const response = await this.api.getSpecialties()
         const referrals = (await this.api.getReferrals()).data || []
@@ -66,7 +66,7 @@ export class SpecialtyAssignmentService {
         return { ok: true, specialtyKey: entry.specialty, rule: 'coded-catalog' }
     }
 
-    /** Busca la derivacion existente del episodio. */
+    /** Finds the existing referral of the episode. */
     async findByEpisode(episodeId) {
         const response = await this.api.getReferralsByEpisode(episodeId)
         const list = response.data || []
@@ -74,9 +74,9 @@ export class SpecialtyAssignmentService {
     }
 
     /**
-     * Registra la derivacion y asigna consultorio y posicion en cola (US31).
+     * Registra la derivacion y asigna consultorio y posicion en cola.
      * `specialtyRef` es el objeto completo del catalogo (incluye restricciones
-     * demograficas maxAge/minAge que aplican para la US32, escenario 2).
+     * demographic maxAge/minAge constraints).
      */
     async refer(episodeId, { specialtyRef, symptom }, age = null) {
         await delay(180)
@@ -91,7 +91,7 @@ export class SpecialtyAssignmentService {
             const updated = await this.api.updateReferral(referral.id, ReferralAssembler.toResource(referral))
             return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
         }
-        // Queue position = shift base queue + previous live referrals + 1 (US34)
+        // Queue position = shift base queue + previous live referrals + 1
         const [specResponse, refResponse] = await Promise.all([this.api.getSpecialties(), this.api.getReferrals()])
         const baseWaiting = (specResponse.data || []).find(sp => sp.key === specialty)?.waiting || 0
         const liveReferrals = (refResponse.data || []).filter(r => r.specialty === specialty && r.state !== 'Attended' && String(r.episodeId) !== String(episodeId))
@@ -112,7 +112,7 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: referral }
     }
 
-    /** Reasignacion manual de especialidad con motivo (US32). */
+    /** Reasignacion manual de especialidad con motivo. */
     async changeSpecialty(referralId, { specialty, reason }) {
         await delay(150)
         const referrals = (await this.api.getReferrals()).data || []
@@ -125,12 +125,12 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
     }
 
-    /** Genera (o reutiliza y actualiza) el comprobante digital de la derivacion (US33). */
+    /** Genera (o reutiliza y actualiza) el comprobante digital de la derivacion. */
     async generateVoucher(referral) {
         await delay(150)
         const qrCode = `TRI-AID|${referral.episodeId}|${referral.specialty}|${referral.room}|#${referral.queuePosition}`
 
-        // If a voucher already exists for the referral, it is updated (US33, scenario 2)
+        // If a voucher already exists for the referral, it is updated
         const existing = ((await this.api.getVouchers()).data || []).find(v => String(v.referralId) === String(referral.id))
         if (existing) {
             existing.qrCode = qrCode
@@ -143,13 +143,19 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: VoucherAssembler.toEntity(response.data) }
     }
 
-    /** Actualiza el comprobante tras una reevaluacion (US33, escenario 2). */
+    /** Updates the voucher after a clinical re-evaluation. */
     async updateVoucher(voucher) {
         const response = await this.api.updateVoucher(voucher.id, VoucherAssembler.toResource(voucher))
         return { ok: true, data: VoucherAssembler.toEntity(response.data) }
     }
 
-    /** Envia el comprobante por el canal elegido (US33). */
+    /** Envia el comprobante por el canal elegido. */
+    /**
+     * Delivers the voucher through the chosen channel and stamps the sent time.
+     * @param {Object} voucher - Voucher entity to send.
+     * @param {string} [channel] - Delivery channel ('Sms' | 'QrPortal').
+     * @returns {Promise<{ok: true, data: Object}>} The updated voucher.
+     */
     async sendVoucher(voucher, channel = DeliveryChannel.QrPortal) {
         await delay(300)
         voucher.channel = channel

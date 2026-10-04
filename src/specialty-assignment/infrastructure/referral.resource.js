@@ -1,5 +1,5 @@
 /**
- * Resource que viaja hacia/desde el endpoint /referrals.
+ * Resource traveling to/from the /referrals endpoint.
  */
 export class ReferralResource {
     constructor({ id, episodeId, specialty, room, queuePosition, state, changeReason, referredAt, symptom }) {

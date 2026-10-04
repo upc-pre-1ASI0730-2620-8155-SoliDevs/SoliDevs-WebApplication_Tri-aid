@@ -4,8 +4,8 @@ import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint.js'
 const classificationsEndpointPath = import.meta.env.VITE_CLASSIFICATIONS_ENDPOINT_PATH
 
 /**
- * Infrastructure gateway del bounded context Triage Classification.
- * Espeja IClassificationRepository del informe, pero contra json-server.
+ * Infrastructure gateway for the Triage Classification bounded context.
+ * Mirrors IClassificationRepository from the report, backed by json-server.
  */
 export class TriageApi extends BaseApi {
     #classificationsEndpoint

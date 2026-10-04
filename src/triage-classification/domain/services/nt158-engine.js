@@ -7,7 +7,7 @@
  */
 import { TRIAGE_LEVELS, levelByCode, mostUrgent } from '../model/triage-level.js'
 
-// Mandatory metrics to classify (US19 scenario 2 requires stopping the
+// Mandatory metrics to classify
 // suggestion and reporting which metric is missing).
 export const REQUIRED_METRICS = ['spo2', 'fc', 'pa']
 
@@ -62,7 +62,7 @@ export function vitalsSummary(vitals = {}) {
 }
 
 export class Nt158Engine {
-  /** Missing mandatory metrics (US19, scenario 2). */
+  /** Missing mandatory metrics. */
   missingMetrics(vitals = {}) {
     const s = vitalsSummary(vitals)
     const labels = { spo2: 'SpO₂', fc: 'Frecuencia cardíaca', pa: 'Presión arterial' }
@@ -71,7 +71,7 @@ export class Nt158Engine {
       .map(m => labels[m])
   }
 
-  /** Valores fuera del rango habitual, para el aviso de la vista. */
+  /** Values outside the habitual range, for the view warning. */
   outOfRange(vitals = {}) {
     const s = vitalsSummary(vitals)
     const out = []
@@ -122,7 +122,7 @@ export class Nt158Engine {
     return { ok: true, level: level.code, levelKey: level.key, reasons }
   }
 
-  /** Standard parameters for the triage guide (US23). */
+  /** Standard parameters for the triage guide. */
   guide() {
     return TRIAGE_LEVELS.map(l => ({
       code: l.code,

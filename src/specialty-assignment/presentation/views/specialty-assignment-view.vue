@@ -38,7 +38,7 @@ const meta = computed(() => [
 const level = ref(null)
 const confirmedAt = ref(null)
 
-/* ---------- Sintoma codificado y sugerencia (US30) ---------- */
+/* ---------- Sintoma codificado y sugerencia ---------- */
 const selectedSymptom = ref(null)
 const symptomErr = ref(false)
 const suggestion = ref(null)
@@ -68,14 +68,14 @@ async function consult() {
   consulted.value = true
 }
 
-/* ---------- Colas por especialidad (US34) ---------- */
+/* ---------- Colas por especialidad ---------- */
 const queues = ref([])
 async function loadQueues() {
   const r = await service.getSpecialties()
   if (r.ok) { queues.value = r.data; specialties.value = r.data }
 }
 
-/* ---------- Derivar (US31, US32) ---------- */
+/* ---------- Derivar ---------- */
 const referring = ref(false)
 const alreadyReferred = ref(false)
 const referral = ref(null)
@@ -97,7 +97,7 @@ async function refer() {
   await makeVoucher()
 }
 
-/* ---------- Comprobante (US33) ---------- */
+/* ---------- Comprobante ---------- */
 const voucher = ref(null)
 const showVoucher = ref(false)
 
@@ -130,7 +130,7 @@ onMounted(async () => {
     level.value = levelByCode(c.level.split('_')[0])
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
   }
-  // si el episodio ya fue derivado, restaurar el contexto (US31/US33)
+  // if the episode was already referred, restore its context
   const existing = await service.findByEpisode(id)
   if (existing) {
     referral.value = existing
