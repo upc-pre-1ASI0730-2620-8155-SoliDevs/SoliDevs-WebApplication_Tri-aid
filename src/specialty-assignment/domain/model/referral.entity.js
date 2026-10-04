@@ -34,7 +34,15 @@ export class Referral {
     this.symptom = symptom
   }
 
-  /** US32: manual reassignment with a justified reason. */
+  /**
+   * Reassigns the patient to a different specialty. A written reason is
+   * mandatory, otherwise the change is rejected. The state moves to
+   * Reassigned and the reason is kept for audit.
+   * @param {string} newSpecialty - Specialty key selected by the staff.
+   * @param {string} reason - Clinical reason for the reassignment.
+   * @returns {{ok: boolean, error?: string}} Result; fails when the
+   * specialty is invalid or the reason is empty.
+   */
   changeSpecialty(newSpecialty, reason) {
     if (!newSpecialty) return { ok: false, error: 'referral.error.invalidSpecialty' }
     if (!String(reason || '').trim()) return { ok: false, error: 'referral.error.reasonRequired' }
@@ -48,7 +56,11 @@ export class Referral {
     this.queuePosition = position
   }
 
-  /** Attention priority derived from the classification (I goes first). */
+  /**
+   * Attention priority derived from the triage classification
+   * (level I is attended first).
+   * @returns {number} Sort order of the classified level.
+   */
   get priorityOrder() {
     return levelByCode(this.level)?.order ?? 9
   }

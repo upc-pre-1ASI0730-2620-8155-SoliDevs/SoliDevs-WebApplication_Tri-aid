@@ -42,6 +42,15 @@ export function ageOf(birth) {
   return a
 }
 
+/**
+ * Registers (or updates) the patient and creates a new care episode.
+ * Both records are persisted to the fake backend through the write-through
+ * API client. The episode id follows the pattern EP-YYMMDD-#### where the
+ * sequence is per day, so ids do not collide after page reloads.
+ * @param {Object} data - Patient admission data ({ dni, names, surnames,
+ *   birth, sex, phone, address, sinDni?, docType? }).
+ * @returns {Object} The created episode.
+ */
 export function registerEpisode(data) {
   const now = new Date()
   const patient = { ...data }
@@ -74,21 +83,42 @@ export const findEpisode = id => store.episodes.find(e => e.id === id)
 // TODO: replace with a backend query once the real database exists
 export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
 
+/**
+ * Links a measurement device and persists it. The local temporary id is
+ * replaced by the backend-assigned id once the create request resolves.
+ * @param {string} type - Vital type the device measures (pa, spo2, fc, temp).
+ * @param {string} model - Device brand and model.
+ */
 export function addDevice(type, model) {
   const device = { type, model, online: true, lastUse: '' }
   store.devices.push(device)
   api.createDevice(plain(device)).then(r => { device.id = r.data.id }).catch(console.error)
 }
+/**
+ * Unlinks a measurement device and deletes it from the backend.
+ * @param {string|number} id - Device id.
+ */
 export function removeDevice(id) {
   store.devices = store.devices.filter(d => d.id !== id)
   if (!String(id).startsWith('tmp-')) api.deleteDevice(id).catch(console.error)
 }
 
 // Simulation: there is no real hardware yet
+/**
+ * Persists the current episode state (vitals, confirmation flags and any
+ * classification metadata) to the fake backend.
+ * @param {Object} ep - Episode to persist.
+ */
 export function saveEpisode(ep) {
   api.updateEpisode(ep.id, epResource(ep)).catch(console.error)
 }
 
+/**
+ * Produces a simulated automatic reading for the device type and stores it
+ * in the episode vitals. The episode is persisted afterwards.
+ * @param {Object} ep - Episode receiving the reading.
+ * @param {Object} d - Linked device ({ type, model, online }).
+ */
 export function readFromDevice(ep, d) {
   if (ep.confirmed || !d.online) return
   const t = vitalTypes.find(x => x.key === d.type)
@@ -96,10 +126,33 @@ export function readFromDevice(ep, d) {
   ep.vitals[d.type] = { value: t.sample(), source: 'auto', model: d.model, time }
   d.lastUse = time
 }
-export function setManual(ep, key, value) { ep.vitals[key] = { value, source: 'manual', time: nowTime() }; saveEpisode(ep) }
-export function clearVital(ep, key) { delete ep.vitals[key]; saveEpisode(ep) }
+/**
+ * Stores a manually entered vital sign value in the episode and persists it.
+ * @param {Object} ep - Episode receiving the value.
+ * @param {string} key - Vital type key (pa, spo2, fc, temp).
+ * @param {string} value - Manually entered value.
+ */
+export function setManual(ep, key, value) {
+  ep.vitals[key] = { value, source: 'manual', time: nowTime() }
+  saveEpisode(ep)
+}
 
-/** Loads the persisted collections on app startup (before mounting). */
+/**
+ * Removes a vital sign reading from the episode and persists the change.
+ * @param {Object} ep - Episode whose reading is removed.
+ * @param {string} key - Vital type key to clear.
+ */
+export function clearVital(ep, key) {
+  delete ep.vitals[key]
+  saveEpisode(ep)
+}
+
+/**
+ * Loads patients, episodes and devices from the fake backend into the
+ * reactive store before the app mounts, and re-links every episode with
+ * its patient record (the episode resource does not duplicate patient data).
+ * @returns {Promise<void>}
+ */
 export async function loadFromServer() {
   try {
     const [pts, eps, devs] = await Promise.all([api.getPatients(), api.getEpisodes(), api.getDevices()])
