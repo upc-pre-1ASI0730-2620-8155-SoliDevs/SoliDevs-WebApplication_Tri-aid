@@ -233,15 +233,29 @@ function rejectReadings() {
           <button class="ta-btn ta-btn--ghost" @click="rejectReadings">{{ t('pf.reject') }}</button>
           <button class="ta-btn" @click="confirmReadings">{{ t('pf.confirm') }}</button>
         </div>
-        <div v-else class="fi-actions fi-sealed">
-          <i class="pi pi-lock"></i>
-          <span>{{ t('pf.sealed') }}</span>
-          <router-link class="ta-btn ta-btn--ghost" :to="`/triage-classification/${ep.id}`">
-            <i class="pi pi-pencil"></i>{{ t('pf.editClass') }}
-          </router-link>
-          <router-link v-if="referred" class="ta-btn ta-btn--ghost" :to="`/specialty-assignment/${ep.id}`">
-            <i class="pi pi-directions"></i>{{ t('pf.viewReferral') }}
-          </router-link>
+        <div v-else class="fi-sealed">
+          <div class="fi-steps">
+            <span class="step done"><i class="pi pi-check-circle"></i>{{ t('pf.step.vitals') }}</span>
+            <span class="step-line"></span>
+            <span class="step done"><i class="pi pi-check-circle"></i>{{ t('pf.step.priority') }}
+              <b v-if="classified"> · {{ classifiedCode }}</b>
+            </span>
+            <span class="step-line"></span>
+            <span class="step" :class="referred ? 'done' : 'todo'">
+              <i :class="referred ? 'pi pi-check-circle' : 'pi pi-directions'"></i>{{ t('pf.step.referral') }}
+            </span>
+          </div>
+          <div class="fi-next">
+            <router-link v-if="!referred" class="ta-btn" :to="`/specialty-assignment/${ep.id}`">
+              <i class="pi pi-directions"></i>{{ t('pf.ctaReferral') }}
+            </router-link>
+            <router-link v-else class="ta-btn ta-btn--ghost" :to="`/specialty-assignment/${ep.id}`">
+              <i class="pi pi-qrcode"></i>{{ t('pf.viewReferral') }}
+            </router-link>
+            <router-link class="fi-adjust" :to="`/triage-classification/${ep.id}`">
+              <i class="pi pi-pencil"></i>{{ t('pf.adjustPriority') }}
+            </router-link>
+          </div>
         </div>
       </div>
 
@@ -323,7 +337,16 @@ function rejectReadings() {
 .fv-row{display:flex;gap:8px}
 
 .fi-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
-.fi-sealed{justify-content:flex-start;font-size:12px;color:var(--ta-muted)}
+.fi-sealed{display:grid;gap:12px;font-size:12px;color:var(--ta-muted)}
+.fi-steps{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fi-steps .step{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:4px 11px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
+.fi-steps .step i{font-size:11px}
+.fi-steps .step.done{background:#e3f3ea;color:var(--ta-brand)}
+.fi-steps .step.todo{background:#fff4e5;color:#b45309;font-weight:500}
+.fi-steps .step-line{width:22px;height:2px;background:var(--ta-line)}
+.fi-next{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fi-adjust{font-size:11.5px;color:var(--ta-muted);display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+.fi-adjust:hover{color:var(--ta-brand);text-decoration:underline}
 .fi-sealed i{color:var(--ta-brand)}
 .fi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
 .fi-done{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ta-brand);margin-right:auto}
