@@ -83,8 +83,18 @@ export class Nt158Engine {
   }
 
   /**
-   * Calcula la prioridad sugerida (US19). Devuelve
-   * { ok, level: <código>, levelKey, reasons: [...] } o { ok:false, error, missing }.
+   * Evaluates the vital signs summary against the normative rules and returns
+   * the most urgent level whose rules match. When no rule matches, the patient
+   * is classified as non-urgent. When mandatory metrics are missing the
+   * evaluation is stopped and the missing metrics are reported.
+   * @param {Object} vitals - Episode vital signs map ({ pa, spo2, fc, temp }).
+   * @returns {{ok: true, level: string, levelKey: string,
+   *            reasons: Array<{metric: string, level: string, value: number|null}>}
+   *           | {ok: false, error: string, missing: string[]}}
+   *   ok - whether a priority could be computed.
+   *   level / levelKey - suggested TriageLevel code and key.
+   *   reasons - rules that matched, for display purposes.
+   *   missing - labels of the mandatory vital signs without a value.
    */
   calculatePriority(vitals = {}) {
     const missing = this.missingMetrics(vitals)

@@ -17,9 +17,18 @@ const SYMPTOM_RULES = [
 
 export class SpecialtyRules {
   /**
-   * Suggests a specialty from the main symptom, the classified priority
-   * and the patient age (US30). Returns
-   * { ok, specialtyKey, rule } or { ok:false, error }.
+   * Resolves the suggested specialty. The symptom text is matched against
+   * a keyword table; the first matching rule wins. When nothing matches,
+   * the classified priority drives the destination: levels I-II go to
+   * General Surgery (surgical urgency) and the rest to Internal Medicine.
+   * @param {Object} input - Suggestion input.
+   * @param {string} input.symptom - Free-text main symptom.
+   * @param {string} [input.level] - Classified triage level code (I..V).
+   * @param {number} [input.age] - Patient age in years.
+   * @returns {{ok: boolean, specialtyKey?: string, rule?: string, error?: string}}
+   *   ok - false only when the symptom text is empty.
+   *   specialtyKey - suggested Specialty key.
+   *   rule - which strategy produced the suggestion ('symptom' | 'priority').
    */
   suggest({ symptom = '', level = null, age = null }) {
     const text = String(symptom || '').toLowerCase()
@@ -36,8 +45,12 @@ export class SpecialtyRules {
   }
 
   /**
-   * Demographic restriction (US32, scenario 2): e.g. do not refer an
-   * elderly patient to Pediatrics.
+   * Checks whether a specialty rejects the patient's demographic profile.
+   * Used before referring: Pediatrics only admits patients up to its
+   * maxAge, age-gated specialties require at least minAge.
+   * @param {Object|null} specialty - Catalog specialty (maxAge/minAge fields).
+   * @param {number|null} age - Patient age in years.
+   * @returns {boolean} true when the patient does not fit the specialty.
    */
   violatesDemographics(specialty, age = null) {
     if (!specialty) return false
