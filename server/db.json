@@ -3,17 +3,37 @@
     {
       "id": 1,
       "episodeId": "EP-261004-0001",
-      "level": "I_Resuscitation",
-      "suggestedLevel": "I_Resuscitation",
+      "level": "II_Emergency",
+      "suggestedLevel": "II_Emergency",
       "state": "Confirmed",
       "overriddenBy": null,
-      "justification": "Paciente refiere dolor torácico irradiado",
-      "suggestedAt": "2026-10-04T12:29:08.305Z",
-      "confirmedAt": "2026-10-04T12:29:10.490Z"
+      "justification": null,
+      "suggestedAt": "2026-10-04T13:15:20.093Z",
+      "confirmedAt": "2026-10-04T13:15:23.112Z"
     }
   ],
-  "referrals": [],
-  "vouchers": [],
+  "referrals": [
+    {
+      "id": 1,
+      "episodeId": "EP-261004-0001",
+      "specialty": "Traumatologia",
+      "room": "TT-3",
+      "queuePosition": 1,
+      "state": "Referred",
+      "changeReason": null,
+      "referredAt": "2026-10-04T13:15:27.116Z",
+      "symptom": "Dolor abdominal intenso en cuadrante inferior"
+    }
+  ],
+  "vouchers": [
+    {
+      "id": 1,
+      "referralId": 1,
+      "qrCode": "TRI-AID|EP-261004-0001|Traumatologia|TT-3|#1",
+      "channel": "QrPortal",
+      "sentAt": null
+    }
+  ],
   "specialties": [
     {
       "id": 1,
@@ -21,7 +41,8 @@
       "name": "Medicina Interna",
       "room": "MI-2",
       "active": true,
-      "minAge": 0
+      "minAge": 0,
+      "waiting": 6
     },
     {
       "id": 2,
@@ -29,7 +50,8 @@
       "name": "Cirugía General",
       "room": "CG-1",
       "active": true,
-      "minAge": 0
+      "minAge": 0,
+      "waiting": 2
     },
     {
       "id": 3,
@@ -37,7 +59,8 @@
       "name": "Traumatología",
       "room": "TT-3",
       "active": true,
-      "minAge": 0
+      "minAge": 0,
+      "waiting": 4
     },
     {
       "id": 4,
@@ -46,7 +69,8 @@
       "room": "GI-1",
       "active": true,
       "minAge": 0,
-      "sex": "F"
+      "sex": "F",
+      "waiting": 1
     },
     {
       "id": 5,
@@ -54,7 +78,8 @@
       "name": "Cardiología",
       "room": "CA-2",
       "active": true,
-      "minAge": 0
+      "minAge": 0,
+      "waiting": 3
     },
     {
       "id": 6,
@@ -62,7 +87,8 @@
       "name": "Pediatría",
       "room": "PD-1",
       "active": true,
-      "maxAge": 14
+      "maxAge": 14,
+      "waiting": 3
     },
     {
       "id": 7,
@@ -70,7 +96,8 @@
       "name": "Neurología",
       "room": "NE-1",
       "active": false,
-      "minAge": 0
+      "minAge": 0,
+      "waiting": 0
     }
   ]
 }
