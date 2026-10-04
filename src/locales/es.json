@@ -158,5 +158,19 @@
   "fg.ok": "Si el correo está registrado, recibirás el enlace en unos minutos.",
   "fg.send": "Enviar enlace de recuperación",
   "fg.sending": "Enviando…",
-  "fg.back": "Volver a iniciar sesión"
+  "fg.back": "Volver a iniciar sesión",
+  "alerting.title": "Centro de alertas",
+  "alerting.active": "activas",
+  "alerting.nurse": "Enf.",
+  "alerting.soundActive": "Alerta sonora activa",
+  "alerting.resolved": "Resuelta",
+  "alerting.generated": "generada",
+  "alerting.safeRange": "rango seguro",
+  "alerting.backToNormal": "Valor regresó al rango seguro",
+  "alerting.acknowledge": "Reconocer alerta",
+  "alerting.escalate": "Escalar a atención inmediata",
+  "alerting.confirmTitle": "Confirmar acción",
+  "alerting.confirmMsg": "¿Estás seguro de que deseas reconocer y silenciar esta alerta?",
+  "alerting.yes": "Sí, reconocer",
+  "alerting.no": "Cancelar"
 }
