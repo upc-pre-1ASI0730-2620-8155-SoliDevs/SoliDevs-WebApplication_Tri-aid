@@ -6,6 +6,8 @@ import { i18n } from './shared/application/i18n.js'
 
 import PrimeVue from 'primevue/config'
 import Material from '@primeuix/themes/material'
+import ConfirmationService from "primevue/confirmationservice";
+import ConfirmDialog from 'primevue/confirmdialog'
 import 'primeflex/primeflex.css'
 import 'primeicons/primeicons.css'
 
@@ -21,6 +23,9 @@ app.use(PrimeVue, {
         }
     }
 })
+
+app.use(ConfirmationService)
+app.component('ConfirmDialog', ConfirmDialog);
 
 router.isReady().then(() => app.mount('#app'))
 
