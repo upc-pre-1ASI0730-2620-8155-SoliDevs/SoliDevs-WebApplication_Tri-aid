@@ -2,19 +2,40 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useConfirm } from 'primevue/useconfirm';
 import { AlertingService } from '../../infrastructure/alerting.service.js';
 
 const { t } = useI18n();
-import { useConfirm } from 'primevue/useconfirm';
+const confirm = useConfirm();
 const activeAlerts = ref([]);
 const alertingService = new AlertingService();
 const router = useRouter();
-const confirm = useConfirm();
 
 onMounted(async () => {
   try {
     const response = await alertingService.getActiveAlerts();
     activeAlerts.value = response.data;
+
+    // PRUEBA DE ESTRÉS: Simular la llegada de un paciente crítico a los 3 segundos
+    setTimeout(() => {
+      console.log("¡Alerta entrante! Inyectando nuevo paciente crítico...");
+      const nuevaAlerta = {
+        id: 'new-999',
+        patientName: 'Mendoza Ruiz, Carlos', // El 4to dato de prueba
+        priority: 'I',
+        vitalSign: 'SpO2',
+        dni: '44556677',
+        episode: 'EP-240911-0099',
+        time: '11:15', // Más reciente
+        value: '82 %',
+        safeRange: '94-100 %',
+        severity: 'critical'
+      };
+
+      // En lugar de usar .push() (que lo mandaría al fondo), usamos .unshift()
+      activeAlerts.value.unshift(nuevaAlerta);
+    }, 3000);
+
   } catch (error) {
     console.error("Error al cargar alertas:", error);
   }
@@ -22,22 +43,36 @@ onMounted(async () => {
 
 const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved').length);
 
+// 1. NUEVA LÓGICA DE ORDENAMIENTO (Garantiza que lo crítico siempre va arriba)
+const sortedAlerts = computed(() => {
+  return [...activeAlerts.value].sort((a, b) => {
+    // Si uno está resuelto y el otro no, el resuelto siempre va al fondo
+    if (a.severity === 'resolved' && b.severity !== 'resolved') return 1;
+    if (a.severity !== 'resolved' && b.severity === 'resolved') return -1;
+
+    // Jerarquía de prioridades: I > II > III
+    const priorityWeight = { 'I': 3, 'II': 2, 'III': 1 };
+    const weightA = priorityWeight[a.priority] || 0;
+    const weightB = priorityWeight[b.priority] || 0;
+
+    // Si tienen la misma prioridad, el más reciente (time) podría desempatar aquí
+    return weightB - weightA;
+  });
+});
 
 const acknowledgeAlert = (id) => {
   confirm.require({
     message: t('alerting.confirmMsg'),
     header: t('alerting.confirmTitle'),
-    icon: 'pi pi-exclamation-triangle text-red-500 text-2xl',
+    icon: 'pi pi-exclamation-triangle',
     rejectProps: {
       label: t('alerting.no'),
       outlined: true,
-      // Aplicamos el diseño de píldora y grises neutros de tu UI
       class: 'border-round-2xl px-4 py-2 text-gray-800 border-gray-300 hover:bg-gray-100'
     },
     acceptProps: {
       label: t('alerting.yes'),
       severity: 'danger',
-      // Píldora roja sin bordes
       class: 'border-round-2xl px-4 py-2 border-none'
     },
     accept: () => {
@@ -51,7 +86,6 @@ const acknowledgeAlert = (id) => {
     }
   });
 };
-
 
 const escalateToEmergency = (id) => {
   console.log(`Derivando alerta ${id} a Trauma Shock...`);
@@ -81,13 +115,13 @@ const escalateToEmergency = (id) => {
 
     <!-- Lista de Tarjetas (Diseño Refinado) -->
     <div class="flex flex-column gap-3">
-      <div v-for="alert in activeAlerts" :key="alert.id"
+      <div v-for="alert in sortedAlerts" :key="alert.id"
            class="surface-card p-4 shadow-1 border-round-xl flex flex-column gap-3 bg-white border-1"
            :class="{
-             'border-red-400': alert.severity === 'critical',
-             'border-orange-400': alert.severity === 'warning',
-             'border-green-500': alert.severity === 'resolved'
-           }">
+       'border-red-400': alert.severity === 'critical',
+       'border-orange-400': alert.severity === 'warning',
+       'border-green-500': alert.severity === 'resolved'
+     }">
 
         <!-- Primera fila: Nombre, Prioridad y Badge Sonora -->
         <div class="flex align-items-center gap-2">
