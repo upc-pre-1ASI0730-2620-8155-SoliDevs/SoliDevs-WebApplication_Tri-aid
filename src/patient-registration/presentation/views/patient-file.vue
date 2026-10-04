@@ -38,6 +38,7 @@ const rows = computed(() => [
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 // Classification and referral are fetched from the fake backend (they survive F5)
 const classified = ref(null)
+const classifiedConfirmed = ref(false)
 const referred = ref(false)
 
 onMounted(async () => {
@@ -48,6 +49,7 @@ onMounted(async () => {
     if (c?.level) {
       const l = levelByCode(c.level.split('_')[0])
       classified.value = l ? { code: l.code, name: t('triage.level.' + l.code + '.name'), color: l.color } : null
+      classifiedConfirmed.value = c.isConfirmed
     }
   } catch (e) { console.error(e) }
   try {
@@ -237,8 +239,9 @@ function rejectReadings() {
           <div class="fi-steps">
             <span class="step done"><i class="pi pi-check-circle"></i>{{ t('pf.step.vitals') }}</span>
             <span class="step-line"></span>
-            <span class="step done"><i class="pi pi-check-circle"></i>{{ t('pf.step.priority') }}
-              <b v-if="classified"> · {{ classifiedCode }}</b>
+            <span class="step" :class="classifiedConfirmed ? 'done' : 'todo'">
+              <i :class="classifiedConfirmed ? 'pi pi-check-circle' : 'pi pi-clock'"></i>{{ t('pf.step.priority') }}
+              <b v-if="classifiedCode"> · {{ classifiedCode }}</b>
             </span>
             <span class="step-line"></span>
             <span class="step" :class="referred ? 'done' : 'todo'">
@@ -246,14 +249,17 @@ function rejectReadings() {
             </span>
           </div>
           <div class="fi-next">
-            <router-link v-if="!referred" class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
+            <router-link v-if="classifiedConfirmed" class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
               <i class="pi pi-arrow-right"></i>{{ t('pf.ctaReferral') }}
             </router-link>
-            <router-link v-else class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
-              <i class="pi pi-qrcode"></i>{{ t('pf.viewReferral') }}
+            <router-link v-else-if="classified" class="ta-btn fi-cta" :to="`/triage-classification/${ep.id}`">
+              <i class="pi pi-check-square"></i>{{ t('pf.finishClass') }}
             </router-link>
-            <router-link class="ta-btn ta-btn--ghost fi-ghost" :to="`/triage-classification/${ep.id}`">
-              <i class="pi pi-pencil"></i>{{ t('pf.adjustPriority') }}
+            <router-link v-else class="ta-btn fi-cta" :to="`/triage-classification/${ep.id}`">
+              <i class="pi pi-sort-amount-up"></i>{{ t('panel.btnClassify') }}
+            </router-link>
+            <router-link v-if="referred" class="ta-btn ta-btn--ghost fi-ghost" :to="`/specialty-assignment/${ep.id}`">
+              <i class="pi pi-qrcode"></i>{{ t('pf.viewReferral') }}
             </router-link>
           </div>
         </div>

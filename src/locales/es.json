@@ -285,5 +285,6 @@
   "pf.step.priority": "Prioridad",
   "pf.step.referral": "Derivación",
   "pf.ctaReferral": "Continuar derivación",
-  "pf.adjustPriority": "Ajustar prioridad"
+  "pf.adjustPriority": "Ajustar prioridad",
+  "pf.finishClass": "Terminar clasificación"
 }
