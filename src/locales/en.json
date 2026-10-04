@@ -158,5 +158,20 @@
   "fg.ok": "If the email is registered, you will receive the link in a few minutes.",
   "fg.send": "Send recovery link",
   "fg.sending": "Sending…",
-  "fg.back": "Back to sign in"
+  "fg.back": "Back to sign in",
+  "alerting.title": "Alert Center",
+  "alerting.active": "active",
+  "alerting.nurse": "Nurse",
+  "alerting.soundActive": "Active sound alert",
+  "alerting.resolved": "Resolved",
+  "alerting.generated": "generated",
+  "alerting.safeRange": "safe range",
+  "alerting.backToNormal": "Value returned to safe range",
+  "alerting.acknowledge": "Acknowledge alert",
+  "alerting.escalate": "Escalate to immediate care",
+  "alerting.confirmTitle": "Confirm action",
+  "alerting.confirmMsg": "Are you sure you want to acknowledge and mute this alert?",
+  "alerting.yes": "Yes, acknowledge",
+  "alerting.no": "Cancel"
+
 }
