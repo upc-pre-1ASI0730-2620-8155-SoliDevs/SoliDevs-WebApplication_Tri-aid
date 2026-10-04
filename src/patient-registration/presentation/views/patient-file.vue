@@ -2,7 +2,6 @@
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital } from '../../application/patient-store.js'
-import { findClassification } from '../../../triage-classification/application/triage-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
@@ -33,7 +32,7 @@ const rows = computed(() => [
   [t('pf.r.address'), p.value.address]
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
-const classified = computed(() => findClassification(ep.value.id)?.level || null)
+const classified = computed(() => ep.value.classifiedLevel || null)
 
 const tabs = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },

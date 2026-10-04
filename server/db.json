@@ -1,0 +1,76 @@
+{
+  "triage-classifications": [
+    {
+      "id": 1,
+      "episodeId": "EP-261004-0001",
+      "level": "I_Resuscitation",
+      "suggestedLevel": "I_Resuscitation",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": "Paciente refiere dolor torácico irradiado",
+      "suggestedAt": "2026-10-04T12:29:08.305Z",
+      "confirmedAt": "2026-10-04T12:29:10.490Z"
+    }
+  ],
+  "referrals": [],
+  "vouchers": [],
+  "specialties": [
+    {
+      "id": 1,
+      "key": "MedicinaInterna",
+      "name": "Medicina Interna",
+      "room": "MI-2",
+      "active": true,
+      "minAge": 0
+    },
+    {
+      "id": 2,
+      "key": "CirugiaGeneral",
+      "name": "Cirugía General",
+      "room": "CG-1",
+      "active": true,
+      "minAge": 0
+    },
+    {
+      "id": 3,
+      "key": "Traumatologia",
+      "name": "Traumatología",
+      "room": "TT-3",
+      "active": true,
+      "minAge": 0
+    },
+    {
+      "id": 4,
+      "key": "Ginecologia",
+      "name": "Ginecología",
+      "room": "GI-1",
+      "active": true,
+      "minAge": 0,
+      "sex": "F"
+    },
+    {
+      "id": 5,
+      "key": "Cardiologia",
+      "name": "Cardiología",
+      "room": "CA-2",
+      "active": true,
+      "minAge": 0
+    },
+    {
+      "id": 6,
+      "key": "Pediatria",
+      "name": "Pediatría",
+      "room": "PD-1",
+      "active": true,
+      "maxAge": 14
+    },
+    {
+      "id": 7,
+      "key": "Neurologia",
+      "name": "Neurología",
+      "room": "NE-1",
+      "active": false,
+      "minAge": 0
+    }
+  ]
+}

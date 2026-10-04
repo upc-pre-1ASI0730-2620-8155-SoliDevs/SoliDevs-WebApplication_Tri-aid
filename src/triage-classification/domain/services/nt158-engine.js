@@ -72,11 +72,10 @@ export class Nt158Engine {
   /** Valores fuera del rango habitual, para el aviso de la vista. */
   outOfRange(vitals = {}) {
     const s = vitalsSummary(vitals)
-    const labels = { spo2: 'SpO₂', fc: 'Frecuencia cardíaca', pas: 'Presión arterial', pad: 'Presión arterial', temp: 'Temperatura' }
     const out = []
     for (const [metric, ok] of Object.entries(HABITUAL)) {
       const v = s[metric]
-      if (v !== null && !ok(v)) out.push({ metric, label: labels[metric], value: v })
+      if (v !== null && !ok(v)) out.push({ metric, value: v })
     }
     return out
   }
