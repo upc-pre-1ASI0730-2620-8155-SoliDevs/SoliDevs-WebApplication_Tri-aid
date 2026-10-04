@@ -242,17 +242,17 @@ function rejectReadings() {
             </span>
             <span class="step-line"></span>
             <span class="step" :class="referred ? 'done' : 'todo'">
-              <i :class="referred ? 'pi pi-check-circle' : 'pi pi-directions'"></i>{{ t('pf.step.referral') }}
+              <i :class="referred ? 'pi pi-check-circle' : 'pi pi-clock'"></i>{{ t('pf.step.referral') }}
             </span>
           </div>
           <div class="fi-next">
-            <router-link v-if="!referred" class="ta-btn" :to="`/specialty-assignment/${ep.id}`">
-              <i class="pi pi-directions"></i>{{ t('pf.ctaReferral') }}
+            <router-link v-if="!referred" class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
+              <i class="pi pi-arrow-right"></i>{{ t('pf.ctaReferral') }}
             </router-link>
-            <router-link v-else class="ta-btn ta-btn--ghost" :to="`/specialty-assignment/${ep.id}`">
+            <router-link v-else class="ta-btn fi-cta" :to="`/specialty-assignment/${ep.id}`">
               <i class="pi pi-qrcode"></i>{{ t('pf.viewReferral') }}
             </router-link>
-            <router-link class="fi-adjust" :to="`/triage-classification/${ep.id}`">
+            <router-link class="ta-btn ta-btn--ghost fi-ghost" :to="`/triage-classification/${ep.id}`">
               <i class="pi pi-pencil"></i>{{ t('pf.adjustPriority') }}
             </router-link>
           </div>
@@ -345,8 +345,9 @@ function rejectReadings() {
 .fi-steps .step.todo{background:#fff4e5;color:#b45309;font-weight:500}
 .fi-steps .step-line{width:22px;height:2px;background:var(--ta-line)}
 .fi-next{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.fi-adjust{font-size:11.5px;color:var(--ta-muted);display:inline-flex;align-items:center;gap:5px;text-decoration:none}
-.fi-adjust:hover{color:var(--ta-brand);text-decoration:underline}
+.fi-next a{text-decoration:none}
+.fi-next .fi-cta i{margin-right:6px}
+.fi-ghost{font-size:12px}
 .fi-sealed i{color:var(--ta-brand)}
 .fi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
 .fi-done{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ta-brand);margin-right:auto}

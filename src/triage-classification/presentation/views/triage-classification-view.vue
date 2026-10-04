@@ -218,7 +218,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
               <template v-if="cycleMinutes(ep) !== null"> · {{ t('triage.cycle', { min: cycleMinutes(ep) }) }}</template>
             </span>
             <router-link v-if="classification?.isConfirmed" class="ta-btn" :to="`/specialty-assignment/${ep.id}`">
-              <i class="pi pi-directions"></i>{{ t('triage.toReferral') }}
+              <i class="pi pi-arrow-right"></i>{{ t('triage.toReferral') }}
             </router-link>
           </div>
         </template>
@@ -286,6 +286,8 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
 .tc-link{border:0;background:none;font:inherit;font-size:12px;color:var(--ta-brand);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .tc-done{font-size:12px;color:var(--ta-brand);display:inline-flex;align-items:center;gap:6px}
 .tc-foot{display:flex;justify-content:space-between;gap:12px;margin-top:16px}
+.tc-foot a{text-decoration:none}
+.tc-actions a{text-decoration:none}
 .tc-overlay{position:fixed;inset:0;background:rgba(8,20,14,.45);display:grid;place-items:center;z-index:40;padding:20px}
 .tc-modal{width:min(520px,100%);display:grid;gap:10px}
 .tc-modal__actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
