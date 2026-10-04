@@ -277,5 +277,8 @@
   "panel.btnRefer": "Refer",
   "panel.btnClassify": "Classify",
   "referral.err.catalog": "Select a symptom from the catalog (type to search).",
-  "triage.toReferral": "Continue to referral"
+  "triage.toReferral": "Continue to referral",
+  "pl.status.pending": "Vitals pending",
+  "pl.status.toRefer": "Referral pending",
+  "pl.status.referred": "Referred"
 }
