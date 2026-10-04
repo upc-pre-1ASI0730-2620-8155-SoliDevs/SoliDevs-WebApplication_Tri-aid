@@ -3,17 +3,37 @@
     {
       "id": 1,
       "episodeId": "EP-261004-0001",
-      "level": "II_Emergency",
-      "suggestedLevel": "II_Emergency",
-      "state": "PendingConfirmation",
+      "level": "III_Urgent",
+      "suggestedLevel": "III_Urgent",
+      "state": "Confirmed",
       "overriddenBy": null,
       "justification": null,
-      "suggestedAt": "2026-10-04T13:42:30.887Z",
-      "confirmedAt": null
+      "suggestedAt": "2026-10-04T18:34:05.840Z",
+      "confirmedAt": "2026-10-04T18:34:08.897Z"
     }
   ],
-  "referrals": [],
-  "vouchers": [],
+  "referrals": [
+    {
+      "id": 1,
+      "episodeId": "EP-261004-0001",
+      "specialty": "Traumatologia",
+      "room": "TT-3",
+      "queuePosition": 5,
+      "state": "Referred",
+      "changeReason": null,
+      "referredAt": "2026-10-04T18:34:14.655Z",
+      "symptom": "TRAU-002 — Ankle fracture"
+    }
+  ],
+  "vouchers": [
+    {
+      "id": 1,
+      "referralId": 1,
+      "qrCode": "TRI-AID|EP-261004-0001|Traumatologia|TT-3|#5",
+      "channel": "QrPortal",
+      "sentAt": null
+    }
+  ],
   "specialties": [
     {
       "id": 1,
@@ -84,49 +104,53 @@
     {
       "sinDni": false,
       "docType": "dni",
-      "dni": "09871234",
-      "names": "Ana Lucía",
-      "surnames": "Flores Rojas",
-      "birth": "1990-04-12",
+      "dni": "55667788",
+      "names": "Diego",
+      "surnames": "Ramírez Torres",
+      "birth": "1998-01-15",
       "sex": "F",
-      "phone": "987654321",
-      "address": "Av. Los Álamos 412",
+      "phone": "987111222",
+      "address": "Av. Brasil 900",
       "id": 1
     }
   ],
   "episodes": [
     {
       "id": "EP-261004-0001",
-      "key": "09871234",
-      "arrival": "2026-10-04T13:42:22.263Z",
+      "key": "55667788",
+      "arrival": "2026-10-04T18:33:59.513Z",
       "vitals": {
         "pa": {
-          "value": "154/84",
+          "value": "150/94",
           "source": "auto",
           "model": "Omron",
-          "time": "08:42"
+          "time": "13:34"
         },
         "spo2": {
-          "value": "92",
+          "value": "94",
           "source": "auto",
           "model": "Nonin",
-          "time": "08:42"
+          "time": "13:34"
         },
         "fc": {
-          "value": "79",
+          "value": "55",
           "source": "auto",
           "model": "Polar",
-          "time": "08:42"
+          "time": "13:34"
         },
         "temp": {
-          "value": "37.3",
+          "value": "37.1",
           "source": "auto",
           "model": "Bosch",
-          "time": "08:42"
+          "time": "13:34"
         }
       },
       "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-04T13:42:28.045Z"
+      "vitalsConfirmedAt": "2026-10-04T18:34:05.328Z",
+      "classifiedLevel": "III_Urgent",
+      "classifiedLevelCode": "III",
+      "classifiedLevelColor": "#ca8a04",
+      "referred": true
     }
   ],
   "devices": [
@@ -157,6 +181,104 @@
       "online": true,
       "lastUse": "",
       "id": 4
+    }
+  ],
+  "symptoms": [
+    {
+      "id": "RFF10",
+      "es": "Dolor abdominal agudo",
+      "en": "Acute abdominal pain",
+      "specialty": "CirugiaGeneral"
+    },
+    {
+      "id": "RFF11",
+      "es": "Dolor abdominal crónico",
+      "en": "Chronic abdominal pain",
+      "specialty": "CirugiaGeneral"
+    },
+    {
+      "id": "TRAU-002",
+      "es": "Fractura de tobillo",
+      "en": "Ankle fracture",
+      "specialty": "Traumatologia"
+    },
+    {
+      "id": "TRAU-005",
+      "es": "Esguince de rodilla",
+      "en": "Knee sprain",
+      "specialty": "Traumatologia"
+    },
+    {
+      "id": "TRAU-009",
+      "es": "Traumatismo de cráneo",
+      "en": "Head injury",
+      "specialty": "Neurologia"
+    },
+    {
+      "id": "CARD-001",
+      "es": "Dolor torácico",
+      "en": "Chest pain",
+      "specialty": "Cardiologia"
+    },
+    {
+      "id": "CARD-004",
+      "es": "Palpitaciones",
+      "en": "Palpitations",
+      "specialty": "Cardiologia"
+    },
+    {
+      "id": "NEU-003",
+      "es": "Cefalea intensa",
+      "en": "Severe headache",
+      "specialty": "Neurologia"
+    },
+    {
+      "id": "NEU-007",
+      "es": "Convulsiones",
+      "en": "Seizures",
+      "specialty": "Neurologia"
+    },
+    {
+      "id": "GIN-001",
+      "es": "Dolor pélvico femenino",
+      "en": "Female pelvic pain",
+      "specialty": "Ginecologia"
+    },
+    {
+      "id": "GIN-004",
+      "es": "Sangrado vaginal anormal",
+      "en": "Abnormal vaginal bleeding",
+      "specialty": "Ginecologia"
+    },
+    {
+      "id": "PED-001",
+      "es": "Fiebre en niño",
+      "en": "Fever in child",
+      "specialty": "Pediatria"
+    },
+    {
+      "id": "PED-005",
+      "es": "Vómitos en lactante",
+      "en": "Vomiting in infant",
+      "specialty": "Pediatria"
+    },
+    {
+      "id": "MED-002",
+      "es": "Fiebre persistente en adulto",
+      "en": "Persistent fever in adult",
+      "specialty": "MedicinaInterna"
+    },
+    {
+      "id": "MED-006",
+      "es": "Deshidratación",
+      "en": "Dehydration",
+      "specialty": "MedicinaInterna"
+    },
+    {
+      "id": "MED-009",
+      "es": "Crisis asmática",
+      "en": "Asthma attack",
+      "specialty": "MedicinaInterna"
     }
   ]
 }
