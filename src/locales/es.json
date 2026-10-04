@@ -277,5 +277,8 @@
   "panel.btnRefer": "Derivar",
   "panel.btnClassify": "Clasificar",
   "referral.err.catalog": "Selecciona un síntoma del catálogo (escribe para buscar).",
-  "triage.toReferral": "Continuar a derivación"
+  "triage.toReferral": "Continuar a derivación",
+  "pl.status.pending": "Signos pendientes",
+  "pl.status.toRefer": "Derivación pendiente",
+  "pl.status.referred": "Derivado"
 }
