@@ -219,6 +219,9 @@ function rejectReadings() {
           <router-link class="ta-btn ta-btn--ghost" :to="`/triage-classification/${ep.id}`">
             <i class="pi pi-pencil"></i>{{ t('pf.editClass') }}
           </router-link>
+          <router-link v-if="ep.referred" class="ta-btn ta-btn--ghost" :to="`/specialty-assignment/${ep.id}`">
+            <i class="pi pi-directions"></i>{{ t('pf.viewReferral') }}
+          </router-link>
         </div>
       </div>
 

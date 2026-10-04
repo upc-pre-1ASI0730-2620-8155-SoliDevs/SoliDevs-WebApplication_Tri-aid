@@ -261,5 +261,8 @@
   "referral.spec.Neurologia": "Neurology",
   "referral.suggestBtn": "Get suggestion",
   "pf.editClass": "Edit classification",
-  "pf.sealed": "Vital signs sealed by the classification."
+  "pf.sealed": "Vital signs sealed by the classification.",
+  "pf.viewReferral": "View referral",
+  "referral.showVoucher": "View voucher",
+  "referral.update": "Update referral"
 }
