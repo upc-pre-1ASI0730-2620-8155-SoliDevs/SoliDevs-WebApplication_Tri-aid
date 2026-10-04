@@ -1,11 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { AlertingService } from '../../infrastructure/alerting.service.js';
 
+const { t } = useI18n();
+import { useConfirm } from 'primevue/useconfirm';
 const activeAlerts = ref([]);
 const alertingService = new AlertingService();
 const router = useRouter();
+const confirm = useConfirm();
 
 onMounted(async () => {
   try {
@@ -18,20 +22,39 @@ onMounted(async () => {
 
 const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved').length);
 
-// 1. Lógica del botón "Reconocer alerta"
+
 const acknowledgeAlert = (id) => {
-  const alertIndex = activeAlerts.value.findIndex(a => a.id === id);
-  if (alertIndex !== -1) {
-    // Cambiamos el estado localmente para simular la actualización del backend
-    activeAlerts.value[alertIndex].severity = 'resolved';
-    activeAlerts.value[alertIndex].value = 'Valor regresó al rango seguro · ' + activeAlerts.value[alertIndex].value;
-  }
+  confirm.require({
+    message: t('alerting.confirmMsg'),
+    header: t('alerting.confirmTitle'),
+    icon: 'pi pi-exclamation-triangle text-red-500 text-2xl',
+    rejectProps: {
+      label: t('alerting.no'),
+      outlined: true,
+      // Aplicamos el diseño de píldora y grises neutros de tu UI
+      class: 'border-round-2xl px-4 py-2 text-gray-800 border-gray-300 hover:bg-gray-100'
+    },
+    acceptProps: {
+      label: t('alerting.yes'),
+      severity: 'danger',
+      // Píldora roja sin bordes
+      class: 'border-round-2xl px-4 py-2 border-none'
+    },
+    accept: () => {
+      const alertIndex = activeAlerts.value.findIndex(a => a.id === id);
+      if (alertIndex !== -1) {
+        activeAlerts.value[alertIndex].severity = 'resolved';
+        if (!activeAlerts.value[alertIndex].value.includes(t('alerting.backToNormal'))) {
+          activeAlerts.value[alertIndex].value = `${t('alerting.backToNormal')} · ${activeAlerts.value[alertIndex].value}`;
+        }
+      }
+    }
+  });
 };
 
-// 2. Lógica del botón "Escalar a atención inmediata"
+
 const escalateToEmergency = (id) => {
   console.log(`Derivando alerta ${id} a Trauma Shock...`);
-  // Redirigimos al Bounded Context correspondiente (ej. reports o derivación)
   router.push('/reports');
 };
 </script>
@@ -41,11 +64,11 @@ const escalateToEmergency = (id) => {
 
     <!-- Cabecera idéntica al mockup -->
     <div class="flex justify-content-between align-items-center mb-4 border-bottom-1 border-300 pb-3">
-      <h2 class="text-2xl font-bold text-gray-900 m-0">Centro de alertas</h2>
+      <h2 class="text-2xl font-bold text-gray-900 m-0">{{ $t('alerting.title') }}</h2>
 
       <div class="flex align-items-center gap-3">
         <span class="text-red-600 font-bold bg-red-100 px-3 py-1 border-round-2xl text-sm">
-          {{ criticalCount }} activas
+          {{ criticalCount }} {{ $t('alerting.active') }}
         </span>
         <div class="flex align-items-center gap-2">
           <span class="bg-green-100 text-green-800 font-bold flex align-items-center justify-content-center border-circle text-xs" style="width: 30px; height: 30px;">
@@ -107,17 +130,26 @@ const escalateToEmergency = (id) => {
         <div class="flex gap-3 mt-1" v-if="alert.severity !== 'resolved'">
           <button @click="acknowledgeAlert(alert.id)"
                   class="p-button p-component p-button-outlined bg-white text-gray-800 border-gray-300 border-round-2xl px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors">
-            <span class="text-sm font-bold">Reconocer alerta</span>
+            <span class="text-sm font-bold">{{ $t('alerting.acknowledge') }}</span>
           </button>
 
           <button @click="escalateToEmergency(alert.id)"
                   class="p-button p-component text-white border-none border-round-2xl px-3 py-2 cursor-pointer hover:opacity-90 transition-opacity"
                   style="background-color: #0b3d2c;">
-            <span class="text-sm font-bold">Escalar a atención inmediata</span>
+            <span class="text-sm font-bold">{{ $t('alerting.escalate') }}</span>
           </button>
         </div>
 
       </div>
     </div>
+    <ConfirmDialog
+        :pt="{
+    root: { class: 'border-round-2xl shadow-4 border-none' },
+    header: { class: 'border-bottom-1 border-300 pb-3 pt-4 px-4' },
+    content: { class: 'pt-4 px-4 text-gray-800 text-lg' },
+    footer: { class: 'pt-3 pb-4 px-4' },
+    mask: { class: 'bg-black-alpha-40' }
+  }"
+    ></ConfirmDialog>
   </div>
 </template>
