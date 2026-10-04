@@ -172,5 +172,8 @@
   "alerting.confirmTitle": "Confirmar acción",
   "alerting.confirmMsg": "¿Estás seguro de que deseas reconocer y silenciar esta alerta?",
   "alerting.yes": "Sí, reconocer",
-  "alerting.no": "Cancelar"
+  "alerting.no": "Cancelar",
+  "alerting.filterAll": "Todas",
+  "alerting.filterCritical": "Solo críticas",
+  "alerting.filterUnresolved": "Ocultar resueltas"
 }
