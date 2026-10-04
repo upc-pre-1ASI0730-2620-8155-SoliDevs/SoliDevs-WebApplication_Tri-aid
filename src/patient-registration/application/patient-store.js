@@ -1,17 +1,21 @@
 import { reactive } from 'vue'
 import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
 
-// Estado local (cache reactiva) sincronizado con el backend falso (json-server).
-// Las mutaciones se escriben a traves de la API (write-through) y al arrancar
-// la app se cargan las colecciones persistidas (ver loadFromServer al final).
+/**
+ * Local reactive-cache state synced with the fake backend (json-server).
+ * Every mutation is written through the API, and persisted collections
+ * are loaded on app startup (see loadFromServer at the bottom).
+ */
+// (handled by the header JSDoc)
+
 const api = new PatientRegistrationApi()
 export const store = reactive({ patients: [], episodes: [], devices: [], seq: 0, devSeq: 0, loaded: false })
 
-// serializa un proxy reactivo a JSON plano para las peticiones
+// serializes a reactive proxy into plain JSON for HTTP requests
 const plain = o => JSON.parse(JSON.stringify(o))
 const epResource = ep => {
   const copy = plain(ep)
-  delete copy.patient // el paciente vive en su propia coleccion
+  delete copy.patient // the patient lives in its own collection
   return copy
 }
 
@@ -54,7 +58,7 @@ export function registerEpisode(data) {
   }
 
   store.seq++
-  // El prefijo cambia a diario; el correlativo sigue la cifra del dia (sin colisiones tras recargar)
+  // The prefix changes daily; the sequence follows that day count (no collisions after reloads)
   const prefix = `EP-${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
   const todays = store.episodes.filter(e => String(e.id || '').startsWith(prefix))
   const next = todays.reduce((mx, e) => Math.max(mx, parseInt(String(e.id).split('-')[2]) || 0), 0) + 1
@@ -67,7 +71,7 @@ export function registerEpisode(data) {
 
 export const findEpisode = id => store.episodes.find(e => e.id === id)
 
-// TODO: reemplazar por consulta al backend cuando exista la BD
+// TODO: replace with a backend query once the real database exists
 export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
 
 export function addDevice(type, model) {
@@ -80,7 +84,7 @@ export function removeDevice(id) {
   if (!String(id).startsWith('tmp-')) api.deleteDevice(id).catch(console.error)
 }
 
-// Simulación: aún no hay hardware real
+// Simulation: there is no real hardware yet
 export function saveEpisode(ep) {
   api.updateEpisode(ep.id, epResource(ep)).catch(console.error)
 }
@@ -95,15 +99,15 @@ export function readFromDevice(ep, d) {
 export function setManual(ep, key, value) { ep.vitals[key] = { value, source: 'manual', time: nowTime() }; saveEpisode(ep) }
 export function clearVital(ep, key) { delete ep.vitals[key]; saveEpisode(ep) }
 
-/** Carga las colecciones persistidas al arrancar la app (antes de montar). */
+/** Loads the persisted collections on app startup (before mounting). */
 export async function loadFromServer() {
   try {
     const [pts, eps, devs] = await Promise.all([api.getPatients(), api.getEpisodes(), api.getDevices()])
     store.patients = pts.data || []
     store.episodes = eps.data || []
     store.devices = devs.data || []
-    // re-enlazar cada episodio con su paciente (el recurso del episodio no
-    // duplica los datos del paciente)
+    // re-link each episode with its patient (the episode resource does not
+    // duplicate patient data)
     for (const e of store.episodes) {
       e.patient = store.patients.find(pt => String(pt.dni) === String(e.key))
         || store.patients.find(pt => String(pt.id) === String(e.key)) || e.patient

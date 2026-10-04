@@ -1,6 +1,8 @@
 <script setup>
-// Autocomplete del catalogo codificado de sintomas (US30).
-// El usuario busca por nombre (ES/EN) y viaja el CODIGO, no el texto libre.
+/**
+ * Autocomplete for the coded symptom catalog (US30).
+ * The user searches by name (ES/EN) and the CODE travels, not the free text.
+ */
 import { ref, computed, onMounted } from 'vue'
 import { SpecialtyAssignmentApi } from '../../infrastructure/specialty-assignment-api.js'
 import { t } from '../../../shared/application/i18n.js'

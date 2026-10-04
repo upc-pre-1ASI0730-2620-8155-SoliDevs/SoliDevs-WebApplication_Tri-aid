@@ -1,5 +1,7 @@
 <script setup>
-// Guia de la Norma Tecnica N. 158-MINSA (US23): parametros sobrepuestos a la vista.
+/**
+ * Health Technical Standard No. 158-MINSA guide (US23): parameters overlaid on the view.
+ */
 import { TRIAGE_LEVELS } from '../../domain/model/triage-level.js'
 import { t } from '../../../shared/application/i18n.js'
 

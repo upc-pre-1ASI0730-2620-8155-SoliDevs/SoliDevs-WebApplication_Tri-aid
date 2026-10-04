@@ -1,5 +1,7 @@
-// Aggregate Root del Bounded Context: Specialty Assignment.
-// Espeja la clase Referral del diagrama de clases del informe.
+/**
+ * Aggregate Root of the Specialty Assignment bounded context.
+ * Mirrors the Referral class from the report class diagram.
+ */
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 
 export const ReferralState = {
@@ -32,7 +34,7 @@ export class Referral {
     this.symptom = symptom
   }
 
-  /** US32: reasignacion manual con motivo justificado. */
+  /** US32: manual reassignment with a justified reason. */
   changeSpecialty(newSpecialty, reason) {
     if (!newSpecialty) return { ok: false, error: 'referral.error.invalidSpecialty' }
     if (!String(reason || '').trim()) return { ok: false, error: 'referral.error.reasonRequired' }
@@ -46,7 +48,7 @@ export class Referral {
     this.queuePosition = position
   }
 
-  /** Prioridad de atencion derivada de la clasificacion (I es primero). */
+  /** Attention priority derived from the classification (I goes first). */
   get priorityOrder() {
     return levelByCode(this.level)?.order ?? 9
   }

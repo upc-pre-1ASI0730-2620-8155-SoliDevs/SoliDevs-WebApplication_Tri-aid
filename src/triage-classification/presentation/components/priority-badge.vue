@@ -1,5 +1,7 @@
 <script setup>
-// Insignia visual del nivel de prioridad: circulo con el codigo, nombre y descripcion.
+/**
+ * Visual badge of the priority level: circle with the code, name and description.
+ */
 defineProps({
     level: { type: Object, required: true } // { code, name, desc }
 })

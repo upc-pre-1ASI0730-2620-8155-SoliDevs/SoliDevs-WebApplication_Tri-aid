@@ -1,7 +1,9 @@
-// Servicio del Bounded Context Specialty Assignment.
-// Espeja IReferralService del informe: SuggestSpecialty, Refer,
-// ChangeSpecialty, GenerateVoucher y SendVoucher. Persiste contra
-// el backend falso (json-server) via SpecialtyAssignmentApi.
+/**
+ * Service of the Specialty Assignment bounded context.
+ * Mirrors IReferralService from the report: SuggestSpecialty, Refer,
+ * ChangeSpecialty, GenerateVoucher and SendVoucher. Persists against
+ * the fake backend (json-server) through SpecialtyAssignmentApi.
+ */
 import { Referral, ReferralState } from '../domain/model/referral.entity.js'
 import { Voucher, DeliveryChannel } from '../domain/model/voucher.entity.js'
 import { specialtyRules } from '../domain/services/specialty-rules.js'
@@ -11,7 +13,7 @@ import { VoucherAssembler } from './voucher.assembler.js'
 
 const delay = (ms = 200) => new Promise(r => setTimeout(r, ms))
 
-// Codigos de sala del turno, usados al asignar consultorio (US31).
+// Shift room codes, used when assigning a consulting room (US31).
 const ROOMS = { MedicinaInterna: 'MI-2', CirugiaGeneral: 'CG-1', Traumatologia: 'TT-3', Ginecologia: 'GI-1', Cardiologia: 'CA-2', Pediatria: 'PD-1', Neurologia: 'NE-1' }
 
 export class SpecialtyAssignmentService {
@@ -20,18 +22,18 @@ export class SpecialtyAssignmentService {
         this.seq = 0
     }
 
-    /** Catalogo codificado de sintomas (CIAP-2-like) desde el backend falso. */
+    /** Coded symptom catalog (CIAP-2-like) served by the fake backend. */
     async getSymptoms() {
         const response = await this.api.getSymptoms()
         return { ok: true, data: response.data || [] }
     }
 
-    /** Sintoma principal obligatorio (US30, escenario 2). */
+    /** Main symptom is mandatory (US30, scenario 2). */
     static validateSymptom(symptom) {
         return String(symptom || '').trim() ? { ok: true } : { ok: false, error: 'referral.error.symptomRequired' }
     }
 
-    /** Lista de especialidades con su cola del turno (US34). */
+    /** Specialties with their shift queue (US34). */
     async getSpecialties() {
         const response = await this.api.getSpecialties()
         const referrals = (await this.api.getReferrals()).data || []
@@ -43,9 +45,9 @@ export class SpecialtyAssignmentService {
     }
 
     /**
-     * Sugiere la especialidad a partir del sintoma CODIFICADO del catalogo
-     * (US30): cada sintoma del catalogo trae su especialidad amarrada, igual
-     * que pasaria con un catalogo CIAP-2/SNOMED en produccion.
+     * Suggests the specialty from the CODED catalog symptom
+     * (US30): every catalog symptom carries its bound specialty, exactly
+     * like a CIAP-2/SNOMED catalog would in production.
      */
     async suggestSpecialty({ symptomId, symptom, level, age }) {
         await delay()
@@ -82,7 +84,7 @@ export class SpecialtyAssignmentService {
             const updated = await this.api.updateReferral(referral.id, ReferralAssembler.toResource(referral))
             return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
         }
-        // Posicion en cola = cola base del turno + derivaciones vivas previas + 1 (US34)
+        // Queue position = shift base queue + previous live referrals + 1 (US34)
         const [specResponse, refResponse] = await Promise.all([this.api.getSpecialties(), this.api.getReferrals()])
         const baseWaiting = (specResponse.data || []).find(sp => sp.key === specialty)?.waiting || 0
         const liveReferrals = (refResponse.data || []).filter(r => r.specialty === specialty && r.state !== 'Attended' && String(r.episodeId) !== String(episodeId))
@@ -122,7 +124,7 @@ export class SpecialtyAssignmentService {
         await delay(150)
         const qrCode = `TRI-AID|${referral.episodeId}|${referral.specialty}|${referral.room}|#${referral.queuePosition}`
 
-        // Si ya existe un comprobante para la derivacion, se actualiza (US33, escenario 2)
+        // If a voucher already exists for the referral, it is updated (US33, scenario 2)
         const existing = ((await this.api.getVouchers()).data || []).find(v => String(v.referralId) === String(referral.id))
         if (existing) {
             existing.qrCode = qrCode
