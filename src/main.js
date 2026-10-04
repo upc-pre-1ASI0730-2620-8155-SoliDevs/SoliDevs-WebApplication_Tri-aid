@@ -28,7 +28,7 @@ router.isReady().then(async () => {
     app.mount('#app')
 })
 
-// Oculta el badge "Invalid PrimeUI License"
+// Hides the "Invalid PrimeUI License" badge
 const style = document.createElement('style')
 style.textContent = '#p-license-host { display: none !important; }'
 document.head.appendChild(style)

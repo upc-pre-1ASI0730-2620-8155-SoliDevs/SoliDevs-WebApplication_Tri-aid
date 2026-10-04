@@ -1,7 +1,10 @@
-// Servicio del Bounded Context Triage Classification.
-// Espeja IClassificationService del informe: SuggestPriority, ApproveSuggestion,
-// ModifyLevel, ResetToSuggestion y Confirm. La sugerencia la calcula el motor
-// NT-158 en el frontend; la persistencia va contra el backend falso (json-server).
+/**
+ * Service of the Triage Classification bounded context.
+ * Mirrors IClassificationService from the report: SuggestPriority,
+ * ApproveSuggestion, ModifyLevel, ResetToSuggestion and Confirm. The suggestion
+ * is computed by the NT-158 engine in the frontend; persistence goes against
+ * the fake backend (json-server).
+ */
 import { Classification } from '../domain/model/classification.entity.js'
 import { Nt158Engine, nt158Engine } from '../domain/services/nt158-engine.js'
 import { TriageApi } from './triage-api.js'
@@ -18,14 +21,14 @@ export class TriageClassificationService {
 
     #episodesKey = id => String(id)
 
-    /** Busca la clasificacion del episodio en json-server. */
+    /** Finds the episode classification in json-server. */
     async findByEpisode(episodeId) {
         const response = await this.api.getClassificationByEpisode(episodeId)
         const list = response.data || []
         return ClassificationAssembler.toEntity(list[0] || null)
     }
 
-    /** Guarda (crea o actualiza) la clasificacion. */
+    /** Persists (creates or updates) the classification. */
     async persist(classification) {
         const resource = ClassificationAssembler.toResource(classification)
         if (classification.id) {
@@ -36,7 +39,7 @@ export class TriageClassificationService {
         return ClassificationAssembler.toEntity(response.data)
     }
 
-    /** Sugiere un nivel de prioridad a partir de los signos vitales (US19). */
+    /** Suggests a priority level from the vital signs (US19). */
     async suggestPriority(episode, vitals) {
         await delay()
         const result = this.engine.calculatePriority(vitals)
@@ -55,7 +58,7 @@ export class TriageClassificationService {
         return { ok: true, data: classification, reasons: result.reasons }
     }
 
-    /** Aprueba la sugerencia del sistema (US20). */
+    /** Approves the system suggestion (US20). */
     async approveSuggestion(episodeId, userId = null) {
         await delay(120)
         const c = await this.findByEpisode(episodeId)
@@ -65,7 +68,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Modifica el nivel clinico con justificacion obligatoria (US21, US22). */
+    /** Modifies the clinical level with mandatory justification (US21, US22). */
     async modifyLevel(episodeId, { level, justification }, userId = null) {
         await delay(120)
         const c = await this.findByEpisode(episodeId)
@@ -75,7 +78,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Restablece la sugerencia original (US21, escenario 2). */
+    /** Restores the original suggestion (US21, scenario 2). */
     async resetToSuggestion(episodeId, userId = null) {
         await delay(120)
         const c = await this.findByEpisode(episodeId)
@@ -85,7 +88,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Confirma la clasificacion y registra la hora de fin del triaje (US24). */
+    /** Confirms the classification and records the triage end time (US24). */
     async confirmClassification(episodeId, userId = null) {
         await delay(180)
         const c = await this.findByEpisode(episodeId)
@@ -95,7 +98,7 @@ export class TriageClassificationService {
         return { ok: true, data: await this.persist(c) }
     }
 
-    /** Parametros de la norma tecnica para la guia de triaje (US23). */
+    /** Standard parameters for the triage guide (US23). */
     async getGuide() {
         await delay(100)
         return { ok: true, data: this.engine.guide() }
