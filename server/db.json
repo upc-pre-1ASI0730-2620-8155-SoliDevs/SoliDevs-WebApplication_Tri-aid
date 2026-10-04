@@ -5,35 +5,15 @@
       "episodeId": "EP-261004-0001",
       "level": "II_Emergency",
       "suggestedLevel": "II_Emergency",
-      "state": "Confirmed",
+      "state": "PendingConfirmation",
       "overriddenBy": null,
       "justification": null,
-      "suggestedAt": "2026-10-04T13:15:20.093Z",
-      "confirmedAt": "2026-10-04T13:15:23.112Z"
+      "suggestedAt": "2026-10-04T13:42:30.887Z",
+      "confirmedAt": null
     }
   ],
-  "referrals": [
-    {
-      "id": 1,
-      "episodeId": "EP-261004-0001",
-      "specialty": "Traumatologia",
-      "room": "TT-3",
-      "queuePosition": 1,
-      "state": "Referred",
-      "changeReason": null,
-      "referredAt": "2026-10-04T13:15:27.116Z",
-      "symptom": "Dolor abdominal intenso en cuadrante inferior"
-    }
-  ],
-  "vouchers": [
-    {
-      "id": 1,
-      "referralId": 1,
-      "qrCode": "TRI-AID|EP-261004-0001|Traumatologia|TT-3|#1",
-      "channel": "QrPortal",
-      "sentAt": null
-    }
-  ],
+  "referrals": [],
+  "vouchers": [],
   "specialties": [
     {
       "id": 1,
@@ -98,6 +78,85 @@
       "active": false,
       "minAge": 0,
       "waiting": 0
+    }
+  ],
+  "patients": [
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "09871234",
+      "names": "Ana Lucía",
+      "surnames": "Flores Rojas",
+      "birth": "1990-04-12",
+      "sex": "F",
+      "phone": "987654321",
+      "address": "Av. Los Álamos 412",
+      "id": 1
+    }
+  ],
+  "episodes": [
+    {
+      "id": "EP-261004-0001",
+      "key": "09871234",
+      "arrival": "2026-10-04T13:42:22.263Z",
+      "vitals": {
+        "pa": {
+          "value": "154/84",
+          "source": "auto",
+          "model": "Omron",
+          "time": "08:42"
+        },
+        "spo2": {
+          "value": "92",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "08:42"
+        },
+        "fc": {
+          "value": "79",
+          "source": "auto",
+          "model": "Polar",
+          "time": "08:42"
+        },
+        "temp": {
+          "value": "37.3",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "08:42"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-04T13:42:28.045Z"
+    }
+  ],
+  "devices": [
+    {
+      "type": "pa",
+      "model": "Omron",
+      "online": true,
+      "lastUse": "",
+      "id": 1
+    },
+    {
+      "type": "spo2",
+      "model": "Nonin",
+      "online": true,
+      "lastUse": "",
+      "id": 2
+    },
+    {
+      "type": "fc",
+      "model": "Polar",
+      "online": true,
+      "lastUse": "",
+      "id": 3
+    },
+    {
+      "type": "temp",
+      "model": "Bosch",
+      "online": true,
+      "lastUse": "",
+      "id": 4
     }
   ]
 }

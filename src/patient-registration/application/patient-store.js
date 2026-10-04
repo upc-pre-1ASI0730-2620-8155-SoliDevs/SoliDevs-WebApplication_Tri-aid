@@ -1,7 +1,19 @@
 import { reactive } from 'vue'
+import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
 
-// Estado en memoria (aún sin backend). TODO: reemplazar por llamadas al API (ASP.NET Core).
-export const store = reactive({ patients: [], episodes: [], devices: [], seq: 0, devSeq: 0 })
+// Estado local (cache reactiva) sincronizado con el backend falso (json-server).
+// Las mutaciones se escriben a traves de la API (write-through) y al arrancar
+// la app se cargan las colecciones persistidas (ver loadFromServer al final).
+const api = new PatientRegistrationApi()
+export const store = reactive({ patients: [], episodes: [], devices: [], seq: 0, devSeq: 0, loaded: false })
+
+// serializa un proxy reactivo a JSON plano para las peticiones
+const plain = o => JSON.parse(JSON.stringify(o))
+const epResource = ep => {
+  const copy = plain(ep)
+  delete copy.patient // el paciente vive en su propia coleccion
+  return copy
+}
 
 const pad = n => String(n).padStart(2, '0')
 const rnd = (a, b) => Math.round(a + Math.random() * (b - a))
@@ -30,12 +42,26 @@ export function registerEpisode(data) {
   const now = new Date()
   const patient = { ...data }
   const i = data.dni ? store.patients.findIndex(p => p.dni === data.dni) : -1
-  if (i >= 0) store.patients[i] = patient; else store.patients.push(patient)
+  if (i >= 0) {
+    store.patients[i] = { ...store.patients[i], ...patient }
+    api.updatePatient(store.patients[i].id ?? store.patients[i].dni, plain(store.patients[i])).catch(console.error)
+  } else {
+    store.patients.push(patient)
+    api.createPatient(plain(patient)).then(r => {
+      const j = store.patients.findIndex(x => x.dni === patient.dni)
+      if (j >= 0) store.patients[j].id = r.data.id
+    }).catch(console.error)
+  }
+
   store.seq++
-  // TODO: el código del episodio lo generará el backend
-  const id = `EP-${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${String(store.seq).padStart(4, '0')}`
+  // El prefijo cambia a diario; el correlativo sigue la cifra del dia (sin colisiones tras recargar)
+  const prefix = `EP-${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
+  const todays = store.episodes.filter(e => String(e.id || '').startsWith(prefix))
+  const next = todays.reduce((mx, e) => Math.max(mx, parseInt(String(e.id).split('-')[2]) || 0), 0) + 1
+  const id = `${prefix}-${String(next).padStart(4, '0')}`
   const ep = { id, key: data.dni || `temp-${store.seq}`, patient, arrival: now.toISOString(), vitals: {}, confirmed: false }
   store.episodes.push(ep)
+  api.createEpisode(epResource(ep)).catch(console.error)
   return ep
 }
 
@@ -45,11 +71,20 @@ export const findEpisode = id => store.episodes.find(e => e.id === id)
 export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
 
 export function addDevice(type, model) {
-  store.devices.push({ id: ++store.devSeq, type, model, online: true, lastUse: '' })
+  const device = { type, model, online: true, lastUse: '' }
+  store.devices.push(device)
+  api.createDevice(plain(device)).then(r => { device.id = r.data.id }).catch(console.error)
 }
-export function removeDevice(id) { store.devices = store.devices.filter(d => d.id !== id) }
+export function removeDevice(id) {
+  store.devices = store.devices.filter(d => d.id !== id)
+  if (!String(id).startsWith('tmp-')) api.deleteDevice(id).catch(console.error)
+}
 
 // Simulación: aún no hay hardware real
+export function saveEpisode(ep) {
+  api.updateEpisode(ep.id, epResource(ep)).catch(console.error)
+}
+
 export function readFromDevice(ep, d) {
   if (ep.confirmed || !d.online) return
   const t = vitalTypes.find(x => x.key === d.type)
@@ -57,5 +92,29 @@ export function readFromDevice(ep, d) {
   ep.vitals[d.type] = { value: t.sample(), source: 'auto', model: d.model, time }
   d.lastUse = time
 }
-export function setManual(ep, key, value) { ep.vitals[key] = { value, source: 'manual', time: nowTime() } }
-export function clearVital(ep, key) { delete ep.vitals[key] }
+export function setManual(ep, key, value) { ep.vitals[key] = { value, source: 'manual', time: nowTime() }; saveEpisode(ep) }
+export function clearVital(ep, key) { delete ep.vitals[key]; saveEpisode(ep) }
+
+/** Carga las colecciones persistidas al arrancar la app (antes de montar). */
+export async function loadFromServer() {
+  try {
+    const [pts, eps, devs] = await Promise.all([api.getPatients(), api.getEpisodes(), api.getDevices()])
+    store.patients = pts.data || []
+    store.episodes = eps.data || []
+    store.devices = devs.data || []
+    // re-enlazar cada episodio con su paciente (el recurso del episodio no
+    // duplica los datos del paciente)
+    for (const e of store.episodes) {
+      e.patient = store.patients.find(pt => String(pt.dni) === String(e.key))
+        || store.patients.find(pt => String(pt.id) === String(e.key)) || e.patient
+    }
+    store.devSeq = store.devices.reduce((mx, d) => {
+      const n = parseInt(String(d.id))
+      return String(d.id || '').startsWith('tmp-') || isNaN(n) ? mx : Math.max(mx, n)
+    }, 0)
+    store.loaded = true
+  } catch (e) {
+    console.error('No se pudo cargar la data persistida:', e)
+    store.loaded = true
+  }
+}
