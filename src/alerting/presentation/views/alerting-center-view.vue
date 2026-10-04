@@ -11,6 +11,9 @@ const activeAlerts = ref([]);
 const alertingService = new AlertingService();
 const router = useRouter();
 
+// Variable para controlar el filtro seleccionado por defecto
+const activeFilter = ref('all');
+
 onMounted(async () => {
   try {
     const response = await alertingService.getActiveAlerts();
@@ -21,18 +24,17 @@ onMounted(async () => {
       console.log("¡Alerta entrante! Inyectando nuevo paciente crítico...");
       const nuevaAlerta = {
         id: 'new-999',
-        patientName: 'Mendoza Ruiz, Carlos', // El 4to dato de prueba
+        patientName: 'Mendoza Ruiz, Carlos',
         priority: 'I',
         vitalSign: 'SpO2',
         dni: '44556677',
         episode: 'EP-240911-0099',
-        time: '11:15', // Más reciente
+        time: '11:15',
         value: '82 %',
         safeRange: '94-100 %',
         severity: 'critical'
       };
 
-      // En lugar de usar .push() (que lo mandaría al fondo), usamos .unshift()
       activeAlerts.value.unshift(nuevaAlerta);
     }, 3000);
 
@@ -43,19 +45,25 @@ onMounted(async () => {
 
 const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved').length);
 
-// 1. NUEVA LÓGICA DE ORDENAMIENTO (Garantiza que lo crítico siempre va arriba)
-const sortedAlerts = computed(() => {
-  return [...activeAlerts.value].sort((a, b) => {
-    // Si uno está resuelto y el otro no, el resuelto siempre va al fondo
+// Lógica combinada: Filtra primero, ordena después
+const displayAlerts = computed(() => {
+  // 1. Filtrado dinámico
+  let filtered = activeAlerts.value;
+  if (activeFilter.value === 'critical') {
+    filtered = filtered.filter(a => a.severity === 'critical');
+  } else if (activeFilter.value === 'unresolved') {
+    filtered = filtered.filter(a => a.severity !== 'resolved');
+  }
+
+  // 2. Ordenamiento inquebrantable (I > II > III y resueltas al fondo)
+  return filtered.sort((a, b) => {
     if (a.severity === 'resolved' && b.severity !== 'resolved') return 1;
     if (a.severity !== 'resolved' && b.severity === 'resolved') return -1;
 
-    // Jerarquía de prioridades: I > II > III
     const priorityWeight = { 'I': 3, 'II': 2, 'III': 1 };
     const weightA = priorityWeight[a.priority] || 0;
     const weightB = priorityWeight[b.priority] || 0;
 
-    // Si tienen la misma prioridad, el más reciente (time) podría desempatar aquí
     return weightB - weightA;
   });
 });
@@ -96,9 +104,30 @@ const escalateToEmergency = (id) => {
 <template>
   <div class="p-4 w-full">
 
-    <!-- Cabecera idéntica al mockup -->
+    <!-- Cabecera -->
     <div class="flex justify-content-between align-items-center mb-4 border-bottom-1 border-300 pb-3">
-      <h2 class="text-2xl font-bold text-gray-900 m-0">{{ $t('alerting.title') }}</h2>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 m-0">{{ $t('alerting.title') }}</h2>
+
+        <!-- Botones de filtrado tipo píldora -->
+        <div class="flex gap-2 mt-3">
+          <button @click="activeFilter = 'all'"
+                  class="border-none border-round-2xl px-3 py-1 text-xs font-bold cursor-pointer transition-colors"
+                  :class="activeFilter === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+            {{ $t('alerting.filterAll') }}
+          </button>
+          <button @click="activeFilter = 'critical'"
+                  class="border-none border-round-2xl px-3 py-1 text-xs font-bold cursor-pointer transition-colors"
+                  :class="activeFilter === 'critical' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+            {{ $t('alerting.filterCritical') }}
+          </button>
+          <button @click="activeFilter = 'unresolved'"
+                  class="border-none border-round-2xl px-3 py-1 text-xs font-bold cursor-pointer transition-colors"
+                  :class="activeFilter === 'unresolved' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+            {{ $t('alerting.filterUnresolved') }}
+          </button>
+        </div>
+      </div>
 
       <div class="flex align-items-center gap-3">
         <span class="text-red-600 font-bold bg-red-100 px-3 py-1 border-round-2xl text-sm">
@@ -113,15 +142,15 @@ const escalateToEmergency = (id) => {
       </div>
     </div>
 
-    <!-- Lista de Tarjetas (Diseño Refinado) -->
+    <!-- Lista de Tarjetas (Usando displayAlerts) -->
     <div class="flex flex-column gap-3">
-      <div v-for="alert in sortedAlerts" :key="alert.id"
+      <div v-for="alert in displayAlerts" :key="alert.id"
            class="surface-card p-4 shadow-1 border-round-xl flex flex-column gap-3 bg-white border-1"
            :class="{
-       'border-red-400': alert.severity === 'critical',
-       'border-orange-400': alert.severity === 'warning',
-       'border-green-500': alert.severity === 'resolved'
-     }">
+             'border-red-400': alert.severity === 'critical',
+             'border-orange-400': alert.severity === 'warning',
+             'border-green-500': alert.severity === 'resolved'
+           }">
 
         <!-- Primera fila: Nombre, Prioridad y Badge Sonora -->
         <div class="flex align-items-center gap-2">
@@ -135,16 +164,16 @@ const escalateToEmergency = (id) => {
           </span>
 
           <span v-if="alert.severity === 'critical'" class="bg-red-100 text-red-600 px-2 py-1 border-round-2xl text-xs font-bold flex align-items-center gap-1 ml-2">
-            <i class="pi pi-volume-up text-xs"></i> Alerta sonora activa
+            <i class="pi pi-volume-up text-xs"></i> {{ $t('alerting.soundActive') }}
           </span>
           <span v-if="alert.severity === 'resolved'" class="bg-gray-200 text-gray-700 px-2 py-1 border-round-2xl text-xs font-bold ml-2">
-            Resuelta
+            {{ $t('alerting.resolved') }}
           </span>
         </div>
 
         <!-- Segunda fila: Datos del paciente -->
         <div class="text-500 text-sm">
-          {{ alert.vitalSign }} · DNI {{ alert.dni }} · {{ alert.episode }} · generada {{ alert.time }}
+          {{ alert.vitalSign }} · DNI {{ alert.dni }} · {{ alert.episode }} · {{ $t('alerting.generated') }} {{ alert.time }}
         </div>
 
         <!-- Tercera fila: Valores -->
@@ -156,7 +185,7 @@ const escalateToEmergency = (id) => {
             <span class="font-bold" :class="{'text-red-500': alert.severity === 'critical', 'text-orange-500': alert.severity === 'warning'}">
               {{ alert.value }}
             </span>
-            <span class="text-500 ml-1">· rango seguro {{ alert.safeRange }}</span>
+            <span class="text-500 ml-1">· {{ $t('alerting.safeRange') }} {{ alert.safeRange }}</span>
           </template>
         </div>
 
@@ -178,12 +207,12 @@ const escalateToEmergency = (id) => {
     </div>
     <ConfirmDialog
         :pt="{
-    root: { class: 'border-round-2xl shadow-4 border-none' },
-    header: { class: 'border-bottom-1 border-300 pb-3 pt-4 px-4' },
-    content: { class: 'pt-4 px-4 text-gray-800 text-lg' },
-    footer: { class: 'pt-3 pb-4 px-4' },
-    mask: { class: 'bg-black-alpha-40' }
-  }"
+          root: { class: 'border-round-2xl shadow-4 border-none' },
+          header: { class: 'border-bottom-1 border-300 pb-3 pt-4 px-4' },
+          content: { class: 'pt-4 px-4 text-gray-800 text-lg' },
+          footer: { class: 'pt-3 pb-4 px-4' },
+          mask: { class: 'bg-black-alpha-40' }
+        }"
     ></ConfirmDialog>
   </div>
 </template>
