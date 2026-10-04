@@ -276,5 +276,6 @@
   "panel.toClassify": "Por clasificar",
   "panel.btnRefer": "Derivar",
   "panel.btnClassify": "Clasificar",
-  "referral.err.catalog": "Selecciona un síntoma del catálogo (escribe para buscar)."
+  "referral.err.catalog": "Selecciona un síntoma del catálogo (escribe para buscar).",
+  "triage.toReferral": "Continuar a derivación"
 }
