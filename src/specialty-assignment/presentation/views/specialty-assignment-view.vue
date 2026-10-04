@@ -48,6 +48,7 @@ const sugErr = ref('')
 const chgReason = ref('')
 const chgErr = ref(false)
 const consulted = ref(false)
+const consulting = ref(false)
 
 const suggestedSpecialty = computed(() => specialties.value.find(s => s.key === suggestion.value) || null)
 const selectedSpecialty = computed(() => specialties.value.find(s => s.key === selected.value) || null)
@@ -56,12 +57,14 @@ const specName = key => t('referral.spec.' + key)
 
 async function consult() {
   symptomErr.value = false; sugErr.value = ''
+  consulting.value = true
   if (!selectedSymptom.value) { symptomErr.value = true; return }
   const r = await service.suggestSpecialty({
     symptomId: selectedSymptom.value.id,
     symptom: selectedSymptom.value.es,
     level: level.value?.key, age: age.value
   })
+  consulting.value = false
   if (!r.ok) { sugErr.value = t(r.error); return }
   suggestion.value = r.specialtyKey
   selected.value = r.specialtyKey
@@ -160,18 +163,22 @@ onMounted(async () => {
 
       <div class="rc-symrow">
         <SymptomAutocomplete v-model="selectedSymptom" :error="symptomErr" />
-        <button class="ta-btn" @click="consult"><i class="pi pi-sparkles"></i>{{ t('referral.suggestBtn') }}</button>
+        <button class="ta-btn" :disabled="consulting" @click="consult">
+          <i class="pi" :class="consulting ? 'pi-spin pi-spinner' : 'pi-sparkles'"></i>{{ t('referral.suggestBtn') }}
+        </button>
       </div>
       <p v-if="symptomErr" class="ta-err">{{ t('referral.err.catalog') }}</p>
 
-      <div v-if="consulted" class="rc-sugg">
-        <span class="rc-arrow"><i class="pi pi-arrow-right"></i></span>
-        <div>
-          <small>{{ t('referral.suggested') }}</small>
-          <b>{{ specName(suggestion) }}</b>
+      <Transition name="sugg">
+        <div v-if="consulted" class="rc-sugg">
+          <span class="rc-arrow"><i class="pi pi-arrow-right"></i></span>
+          <div>
+            <small>{{ t('referral.suggested') }}</small>
+            <b>{{ specName(suggestion) }}</b>
+          </div>
+          <span class="rc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
         </div>
-        <span class="rc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
-      </div>
+      </Transition>
 
       <template v-if="consulted">
         <label class="ta-label" for="chg-spec">{{ t('referral.change') }}</label>
@@ -222,7 +229,8 @@ onMounted(async () => {
 .rc-symrow{display:flex;gap:10px;align-items:flex-start}
 .rc-symrow .ta-btn{white-space:nowrap}
 .rc-symrow > :first-child{flex:1}
-.rc-sugg{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff}
+.rc-sugg{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff;animation:sugg-in .35s cubic-bezier(.2,.9,.3,1.15) both}
+@keyframes sugg-in{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
 .rc-arrow{width:30px;height:30px;border-radius:8px;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;flex:none}
 .rc-sugg small{display:block;font-size:10.5px;color:var(--ta-muted)}
 .rc-sugg b{font-size:15px}
