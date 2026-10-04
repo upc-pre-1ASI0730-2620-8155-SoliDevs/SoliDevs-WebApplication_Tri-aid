@@ -217,6 +217,9 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
             <span v-else class="tc-done"><i class="pi pi-check-circle"></i> {{ t('triage.confirmedAt', { time: fmtTime(classification.confirmedAt) }) }}
               <template v-if="cycleMinutes(ep) !== null"> · {{ t('triage.cycle', { min: cycleMinutes(ep) }) }}</template>
             </span>
+            <router-link v-if="classification?.isConfirmed" class="ta-btn" :to="`/specialty-assignment/${ep.id}`">
+              <i class="pi pi-directions"></i>{{ t('triage.toReferral') }}
+            </router-link>
           </div>
         </template>
 
