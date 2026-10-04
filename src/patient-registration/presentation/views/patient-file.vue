@@ -352,6 +352,7 @@ function rejectReadings() {
 .fi-steps .step-line{width:22px;height:2px;background:var(--ta-line)}
 .fi-next{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .fi-next a{text-decoration:none}
+.fi-next .ta-btn i{color:#fff}
 .fi-next .fi-cta i{margin-right:6px}
 .fi-ghost{font-size:12px}
 .fi-sealed i{color:var(--ta-brand)}
