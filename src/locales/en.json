@@ -225,7 +225,7 @@
   "referral.symptomTitle": "Main symptom and specialty",
   "referral.symptomSub": "The system suggests the specialty based on the symptom and the classification",
   "referral.symptom": "Main symptom *",
-  "referral.symptomPh": "E.g. intense abdominal pain",
+  "referral.symptomPh": "Type to search: e.g. abdominal pain…",
   "referral.err.symptom": "The main symptom is required to refer the patient.",
   "referral.suggested": "Suggested specialty",
   "referral.change": "Change specialty",
@@ -275,5 +275,6 @@
   "panel.toRefer": "Pending referral",
   "panel.toClassify": "Pending classification",
   "panel.btnRefer": "Refer",
-  "panel.btnClassify": "Classify"
+  "panel.btnClassify": "Classify",
+  "referral.err.catalog": "Select a symptom from the catalog (type to search)."
 }

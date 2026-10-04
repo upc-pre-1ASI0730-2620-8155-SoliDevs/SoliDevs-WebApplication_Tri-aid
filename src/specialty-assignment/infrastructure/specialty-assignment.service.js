@@ -20,6 +20,12 @@ export class SpecialtyAssignmentService {
         this.seq = 0
     }
 
+    /** Catalogo codificado de sintomas (CIAP-2-like) desde el backend falso. */
+    async getSymptoms() {
+        const response = await this.api.getSymptoms()
+        return { ok: true, data: response.data || [] }
+    }
+
     /** Sintoma principal obligatorio (US30, escenario 2). */
     static validateSymptom(symptom) {
         return String(symptom || '').trim() ? { ok: true } : { ok: false, error: 'referral.error.symptomRequired' }
@@ -36,13 +42,19 @@ export class SpecialtyAssignmentService {
         return { ok: true, data }
     }
 
-    /** Sugiere la especialidad mas pertinente (US30). */
-    async suggestSpecialty({ symptom, level, age }) {
+    /**
+     * Sugiere la especialidad a partir del sintoma CODIFICADO del catalogo
+     * (US30): cada sintoma del catalogo trae su especialidad amarrada, igual
+     * que pasaria con un catalogo CIAP-2/SNOMED en produccion.
+     */
+    async suggestSpecialty({ symptomId, symptom, level, age }) {
         await delay()
         const v = SpecialtyAssignmentService.validateSymptom(symptom)
         if (!v.ok) return v
-        const r = specialtyRules.suggest({ symptom, level, age })
-        return { ...r }
+        const symptoms = (await this.api.getSymptoms()).data || []
+        const entry = symptoms.find(x => String(x.id) === String(symptomId))
+        if (!entry) return { ok: false, error: 'referral.error.symptomCatalog' }
+        return { ok: true, specialtyKey: entry.specialty, rule: 'coded-catalog' }
     }
 
     /** Busca la derivacion existente del episodio. */

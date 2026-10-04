@@ -4,6 +4,7 @@ import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint.js'
 const referralsEndpointPath = import.meta.env.VITE_REFERRALS_ENDPOINT_PATH
 const specialtiesEndpointPath = import.meta.env.VITE_SPECIALTIES_ENDPOINT_PATH
 const vouchersEndpointPath = import.meta.env.VITE_VOUCHERS_ENDPOINT_PATH
+const symptomsEndpointPath = import.meta.env.VITE_SYMPTOMS_ENDPOINT_PATH
 
 /**
  * Infrastructure gateway del bounded context Specialty Assignment.
@@ -13,12 +14,14 @@ export class SpecialtyAssignmentApi extends BaseApi {
     #referralsEndpoint
     #specialtiesEndpoint
     #vouchersEndpoint
+    #symptomsEndpoint
 
     constructor() {
         super()
         this.#referralsEndpoint = new BaseEndpoint(this, referralsEndpointPath)
         this.#specialtiesEndpoint = new BaseEndpoint(this, specialtiesEndpointPath)
         this.#vouchersEndpoint = new BaseEndpoint(this, vouchersEndpointPath)
+        this.#symptomsEndpoint = new BaseEndpoint(this, symptomsEndpointPath)
     }
 
     getReferrals() {
@@ -39,6 +42,10 @@ export class SpecialtyAssignmentApi extends BaseApi {
 
     getSpecialties() {
         return this.#specialtiesEndpoint.getAll()
+    }
+
+    getSymptoms() {
+        return this.#symptomsEndpoint.getAll()
     }
 
     getVouchers() {

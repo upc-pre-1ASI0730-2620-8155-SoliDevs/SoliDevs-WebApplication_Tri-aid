@@ -225,7 +225,7 @@
   "referral.symptomTitle": "Síntoma principal y especialidad",
   "referral.symptomSub": "El sistema sugiere la especialidad a partir del síntoma y la clasificación",
   "referral.symptom": "Síntoma principal *",
-  "referral.symptomPh": "Ej. dolor abdominal intenso",
+  "referral.symptomPh": "Escribe para buscar: ej. dolor abdominal…",
   "referral.err.symptom": "El síntoma principal es obligatorio para derivar.",
   "referral.suggested": "Especialidad sugerida",
   "referral.change": "Cambiar especialidad",
@@ -275,5 +275,6 @@
   "panel.toRefer": "Por derivar",
   "panel.toClassify": "Por clasificar",
   "panel.btnRefer": "Derivar",
-  "panel.btnClassify": "Clasificar"
+  "panel.btnClassify": "Clasificar",
+  "referral.err.catalog": "Selecciona un síntoma del catálogo (escribe para buscar)."
 }

@@ -53,6 +53,10 @@ onMounted(async () => {
     consulted.value = true
     alreadyReferred.value = true
   }
+  try {
+    const rs = await service.getSymptoms()
+    symptoms.value = rs.data
+  } catch (e) { console.error(e) }
   await loadQueues()
 })
 
@@ -72,10 +76,39 @@ const chgReason = ref('')
 const chgErr = ref(false)
 const consulted = ref(false)
 
+// Catalogo codificado de sintomas (json-server): el usuario escribe y elige;
+// viaja el CODIGO, no el texto libre.
+const symptoms = ref([])
+const symptomQuery = ref('')
+const symptomOpen = ref(false)
+const selectedSymptom = ref(null)
+
+const locale = () => (t('lang.label') === 'Idioma' ? 'es' : 'en')
+const symptomLabel = s => s[locale()] || s.es
+const filteredSymptoms = computed(() => {
+  const q = symptomQuery.value.trim().toLowerCase()
+  if (!q) return []
+  // busca en ambas lenguas del catalogo
+  return symptoms.value
+    .filter(s => s.es.toLowerCase().includes(q) || s.en.toLowerCase().includes(q))
+    .slice(0, 8)
+})
+
+function pickSymptom(s) {
+  selectedSymptom.value = s
+  symptomQuery.value = symptomLabel(s)
+  symptomOpen.value = false
+  symErr.value = false
+}
+
 async function consult() {
   symErr.value = false; sugErr.value = ''
-  if (!symptom.value.trim()) { symErr.value = true; return }
-  const r = await service.suggestSpecialty({ symptom: symptom.value, level: level.value?.key, age: age.value })
+  if (!selectedSymptom.value) { symErr.value = true; return }
+  const r = await service.suggestSpecialty({
+    symptomId: selectedSymptom.value.id,
+    symptom: symptomLabel(selectedSymptom.value),
+    level: level.value?.key, age: age.value
+  })
   if (!r.ok) { sugErr.value = t(r.error); return }
   suggestion.value = r.specialtyKey
   selected.value = r.specialtyKey
@@ -97,7 +130,7 @@ async function refer() {
   referring.value = true
   const r = await service.refer(id, {
     specialtyRef: selectedSpecialty.value || suggestedSpecialty.value,
-    symptom: symptom.value
+    symptom: selectedSymptom.value ? `${selectedSymptom.value.id} — ${symptomLabel(selectedSymptom.value)}` : ''
   }, age.value)
   referring.value = false
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
@@ -166,11 +199,17 @@ function closeVoucher() {
       <p class="ta-sub">{{ t('referral.symptomSub') }}</p>
 
       <label class="ta-label" for="symptom">{{ t('referral.symptom') }}</label>
-      <div class="rc-symrow">
-        <input id="symptom" class="ta-input rc-sym" v-model="symptom" :class="{ bad: symErr }" :placeholder="t('referral.symptomPh')" @keyup.enter="consult" />
+      <div class="rc-symrow rc-autocomplete">
+        <input id="symptom" class="ta-input rc-sym" v-model="symptomQuery" :class="{ bad: symErr }" :placeholder="t('referral.symptomPh')" autocomplete="off" @focus="symptomOpen = true" @input="symptomOpen = true" @keyup.enter="filteredSymptoms.length && pickSymptom(filteredSymptoms[0])" />
         <button class="ta-btn" @click="consult"><i class="pi pi-sparkles"></i>{{ t('referral.suggestBtn') }}</button>
+        <ul v-if="symptomOpen && filteredSymptoms.length" class="rc-dropdown">
+          <li v-for="s in filteredSymptoms" :key="s.id" @mousedown.prevent="pickSymptom(s)">
+            <code>{{ s.id }}</code> {{ symptomLabel(s) }}
+          </li>
+        </ul>
       </div>
-      <p v-if="symErr" class="ta-err">{{ t('referral.err.symptom') }}</p>
+      <p v-if="selectedSymptom" class="rc-selected"><i class="pi pi-check-circle"></i>{{ selectedSymptom.id }} — {{ symptomLabel(selectedSymptom) }}</p>
+      <p v-if="symErr" class="ta-err">{{ t('referral.err.catalog') }}</p>
 
       <div v-if="suggestion" class="rc-sugg">
         <span class="rc-arrow"><i class="pi pi-arrow-right"></i></span>
@@ -255,6 +294,12 @@ function closeVoucher() {
 .rc-symrow{display:flex;gap:10px;align-items:flex-start}
 .rc-symrow .ta-input{flex:1}
 .rc-symrow .ta-btn{white-space:nowrap}
+.rc-autocomplete{position:relative}
+.rc-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--ta-line);border-radius:10px;list-style:none;margin:0;padding:4px;z-index:20;max-height:240px;overflow:auto;box-shadow:0 10px 26px rgba(10,40,25,.14)}
+.rc-dropdown li{padding:9px 12px;font-size:12.5px;cursor:pointer;border-radius:8px;display:flex;gap:8px;align-items:center}
+.rc-dropdown li:hover{background:#eef7f2}
+.rc-dropdown code{font-family:var(--ta-mono);font-size:10px;color:var(--ta-brand);background:#e3f3ea;border-radius:4px;padding:1px 5px}
+.rc-selected{margin:8px 0 0;font-size:12px;color:var(--ta-brand);display:flex;align-items:center;gap:6px}
 .rc-sugg{margin-top:18px;margin-bottom:22px}
 .rc-card label.ta-label{display:block;margin-top:18px;margin-bottom:6px}
 .rc-card .rc-select{margin-top:0}
