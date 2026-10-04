@@ -41,7 +41,7 @@ const blocks = computed(() => {
                 <div><dt>{{ t('referral.vEpisode') }}</dt><dd>{{ episodeId }}</dd></div>
                 <div><dt>{{ t('referral.vSpecialty') }}</dt><dd>{{ t('referral.spec.' + referral.specialty) }}</dd></div>
                 <div><dt>{{ t('referral.vRoom') }}</dt><dd>{{ referral.room }}</dd></div>
-                <div v-if="level"><dt>{{ t('referral.vPriority') }}</dt><dd>{{ level.code }} · {{ level.name }}</dd></div>
+                <div v-if="level"><dt>{{ t('referral.vPriority') }}</dt><dd>{{ level.code }} · {{ t('triage.level.' + level.code + '.name') }}</dd></div>
                 <div><dt>{{ t('referral.vQueue') }}</dt><dd>#{{ referral.queuePosition }}</dd></div>
             </dl>
 
@@ -62,7 +62,7 @@ const blocks = computed(() => {
 .vd-qr{display:grid;grid-template-columns:repeat(11,1fr);gap:2px;width:150px;padding:10px;background:#fff;border:1px solid var(--ta-line);border-radius:10px}
 .vd-qr span{aspect-ratio:1;border-radius:1px}
 .vd-qr span.on{background:var(--ta-ink)}
-.vd-code{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted);word-break:break-all}
+.vd-code{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-text);background:#f2f6f4;border:1px solid var(--ta-line);border-radius:8px;padding:6px 10px;word-break:break-all;text-decoration:none}
 .vd-dl{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin:4px 0 0}
 .vd-dl div{display:grid;gap:3px}
 .vd-dl dt{font-size:11px;color:var(--ta-muted)}
