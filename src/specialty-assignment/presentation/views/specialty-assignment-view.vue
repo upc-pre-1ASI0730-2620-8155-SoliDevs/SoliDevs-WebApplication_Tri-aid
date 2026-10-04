@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { store, findEpisode, ageOf, fmtTime } from '../../../patient-registration/application/patient-store.js'
+import { store, findEpisode, ageOf, fmtTime, saveEpisode } from '../../../patient-registration/application/patient-store.js'
 import { docLabel } from '../../../patient-registration/application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
@@ -34,12 +34,24 @@ const meta = computed(() => [
 const level = ref(null)
 const confirmedAt = ref(null)
 
+const alreadyReferred = ref(false)
+
 onMounted(async () => {
   const response = await triageApi.getClassificationByEpisode(id)
   const c = ClassificationAssembler.toEntity((response.data || [])[0] || null)
   if (c?.level) {
     level.value = levelByCode(c.level.split('_')[0])
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
+  }
+  // si el episodio ya fue derivado, restaurar el contexto (US31/US33)
+  const existing = await service.findByEpisode(id)
+  if (existing) {
+    referral.value = existing
+    symptom.value = existing.symptom || ''
+    suggestion.value = existing.specialty
+    selected.value = existing.specialty
+    consulted.value = true
+    alreadyReferred.value = true
   }
   await loadQueues()
 })
@@ -90,6 +102,8 @@ async function refer() {
   referring.value = false
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
   referral.value = r.data
+  ep.value.referred = true
+  saveEpisode(ep.value)
   await loadQueues()
   await makeVoucher()
 }
@@ -182,8 +196,11 @@ function closeVoucher() {
 
         <div class="rc-actions">
           <router-link class="ta-btn ta-btn--ghost" :to="`/patient-registration/${ep.id}`">{{ t('triage.cancel') }}</router-link>
+          <button v-if="alreadyReferred" class="ta-btn ta-btn--ghost" @click="makeVoucher">
+            <i class="pi pi-qrcode"></i>{{ t('referral.showVoucher') }}
+          </button>
           <button class="ta-btn" :disabled="referring" @click="refer">
-            <i class="pi pi-check"></i>{{ t('referral.confirm') }}
+            <i class="pi pi-check"></i>{{ alreadyReferred ? t('referral.update') : t('referral.confirm') }}
           </button>
         </div>
       </template>
