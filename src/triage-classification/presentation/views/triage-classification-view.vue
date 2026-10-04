@@ -123,10 +123,16 @@ async function confirmClassification() {
     title: t('triage.toast.confirmed'),
     detail: min === null ? '' : t('triage.cycle', { min })
   })
-  router.push('/patient-registration')
+  router.push(`/specialty-assignment/${ep.value.id}`)
 }
 
 const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
+// Tiempo de ciclo del triaje en minutos: llegada del episodio -> confirmacion (US24)
+const cycleMinutes = episode => {
+  const c = classification.value
+  if (!c?.confirmedAt || !episode?.arrival) return null
+  return Math.max(0, Math.round((new Date(c.confirmedAt) - new Date(episode.arrival)) / 60000))
+}
 </script>
 
 <template>
