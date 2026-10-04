@@ -45,9 +45,16 @@ export class SpecialtyAssignmentService {
     }
 
     /**
-     * Suggests the specialty from the CODED catalog symptom
-     * (US30): every catalog symptom carries its bound specialty, exactly
-     * like a CIAP-2/SNOMED catalog would in production.
+     * Resolves the suggested specialty from the coded symptom selected in
+     * the catalog. The symptom carries its bound specialty, so the mapping
+     * is deterministic; free-text guessing is not used.
+     * @param {Object} input - Suggestion input.
+     * @param {string} input.symptomId - Coded symptom id (e.g. TRAU-002).
+     * @param {string} input.symptom - Symptom label, for storage.
+     * @param {string} [input.level] - Classified triage level key.
+     * @param {number} [input.age] - Patient age in years.
+     * @returns {Promise<{ok: boolean, specialtyKey?: string,
+     *   rule?: string, error?: string}>}
      */
     async suggestSpecialty({ symptomId, symptom, level, age }) {
         await delay()
@@ -108,7 +115,6 @@ export class SpecialtyAssignmentService {
     /** Reasignacion manual de especialidad con motivo (US32). */
     async changeSpecialty(referralId, { specialty, reason }) {
         await delay(150)
-        const response = await this.api.getById ? null : null // placeholder
         const referrals = (await this.api.getReferrals()).data || []
         const raw = referrals.find(r => String(r.id) === String(referralId))
         if (!raw) return { ok: false, error: 'referral.error.notFound' }

@@ -42,7 +42,12 @@ export class Classification {
     return this.state === ClassificationState.Confirmed
   }
 
-  /** The system proposes a level from the NT-158 engine. */
+  /**
+   * Stores the level computed by the NT-158 engine and moves the
+   * classification to PendingConfirmation, refreshing the suggestion time.
+   * @param {string} levelKey - TriageLevel key proposed by the engine.
+   * @returns {Classification} this, for chaining.
+   */
   suggest(levelKey) {
     this.suggestedLevel = levelKey
     this.level = levelKey
@@ -51,7 +56,13 @@ export class Classification {
     return this
   }
 
-  /** The triage nurse approves the system suggestion (US20). */
+  /**
+   * Makes the suggested level official. The state moves to Assigned and any
+   * previous override is discarded. The classification can still be modified
+   * or reset until it gets confirmed.
+   * @param {string|null} userId - Staff member performing the action.
+   * @returns {{ok: boolean, error?: string}} Result of the operation.
+   */
   approve(userId = null) {
     if (!this.suggestedLevel) return { ok: false, error: 'classification.error.noSuggestion' }
     this.level = this.suggestedLevel
@@ -61,7 +72,16 @@ export class Classification {
     return { ok: true }
   }
 
-  /** The triage nurse changes the clinical level (US21) and must justify it (US22). */
+  /**
+   * Applies a different level chosen by the staff based on clinical judgement.
+   * A written justification is mandatory: without it the change is rejected.
+   * The state moves to Overridden and the justification is kept for audit.
+   * @param {string} newLevelKey - TriageLevel key selected by the staff.
+   * @param {string} justification - Clinical reason for the change.
+   * @param {string|null} userId - Staff member performing the action.
+   * @returns {{ok: boolean, error?: string}} Result; fails when the level is
+   * invalid or the justification is empty.
+   */
   override(newLevelKey, justification, userId = null) {
     if (!levelByKey(newLevelKey)) return { ok: false, error: 'classification.error.invalidLevel' }
     if (!String(justification || '').trim()) return { ok: false, error: 'classification.error.justificationRequired' }
@@ -72,7 +92,12 @@ export class Classification {
     return { ok: true }
   }
 
-  /** The triage nurse retracts and returns to the original suggestion (US21, scenario 2). */
+  /**
+   * Discards the override and restores the level originally proposed by the
+   * engine, moving the state back to Assigned and clearing the justification.
+   * @param {string|null} userId - Staff member performing the action.
+   * @returns {{ok: boolean, error?: string}} Result of the operation.
+   */
   resetToSuggestion(userId = null) {
     if (!this.suggestedLevel) return { ok: false, error: 'classification.error.noSuggestion' }
     this.level = this.suggestedLevel
@@ -82,7 +107,12 @@ export class Classification {
     return { ok: true }
   }
 
-  /** Closes the classification with an immutable timestamp (US24). */
+  /**
+   * Seals the classification: the state moves to Confirmed and the current
+   * time is stamped as the immutable end of the triage assessment.
+   * @param {string|null} userId - Staff member performing the action.
+   * @returns {{ok: boolean, error?: string}} Result of the operation.
+   */
   confirm(userId = null) {
     if (!this.level) return { ok: false, error: 'classification.error.noLevel' }
     this.state = ClassificationState.Confirmed
