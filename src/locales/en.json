@@ -280,5 +280,10 @@
   "triage.toReferral": "Continue to referral",
   "pl.status.pending": "Vitals pending",
   "pl.status.toRefer": "Referral pending",
-  "pl.status.referred": "Referred"
+  "pl.status.referred": "Referred",
+  "pf.step.vitals": "Vital signs",
+  "pf.step.priority": "Priority",
+  "pf.step.referral": "Referral",
+  "pf.ctaReferral": "Continue referral",
+  "pf.adjustPriority": "Adjust priority"
 }

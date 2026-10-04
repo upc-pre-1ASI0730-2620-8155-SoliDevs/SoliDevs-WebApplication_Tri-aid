@@ -280,5 +280,10 @@
   "triage.toReferral": "Continuar a derivación",
   "pl.status.pending": "Signos pendientes",
   "pl.status.toRefer": "Derivación pendiente",
-  "pl.status.referred": "Derivado"
+  "pl.status.referred": "Derivado",
+  "pf.step.vitals": "Signos vitales",
+  "pf.step.priority": "Prioridad",
+  "pf.step.referral": "Derivación",
+  "pf.ctaReferral": "Continuar derivación",
+  "pf.adjustPriority": "Ajustar prioridad"
 }
