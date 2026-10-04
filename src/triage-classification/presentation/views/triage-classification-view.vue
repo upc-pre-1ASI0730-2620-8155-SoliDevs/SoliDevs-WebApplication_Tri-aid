@@ -130,7 +130,14 @@ async function confirmClassification() {
 const tone = lvl => lvl ? `lv lv--${lvl.tone}` : 'lv'
 // Sincroniza el nivel con el episodio para que la ficha del paciente
 // deje de mostrar "Sin clasificar" en cuanto hay una decision.
-const syncEpisodeLevel = () => { if (ep.value && classification.value) ep.value.classifiedLevel = classification.value.level }
+const syncEpisodeLevel = () => {
+  if (ep.value && classification.value) {
+    const l = levelByKey(classification.value.level)
+    ep.value.classifiedLevel = classification.value.level
+    ep.value.classifiedLevelCode = l?.code || null
+    ep.value.classifiedLevelColor = l?.color || null
+  }
+}
 // Tiempo de ciclo del triaje en minutos: llegada del episodio -> confirmacion (US24)
 const cycleMinutes = episode => {
   const c = classification.value

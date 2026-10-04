@@ -33,6 +33,8 @@ const rows = computed(() => [
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 const classified = computed(() => ep.value.classifiedLevel || null)
+const classifiedCode = computed(() => ep.value.classifiedLevelCode || String(ep.value.classifiedLevel || '').split('_')[0])
+const classifiedColor = computed(() => ep.value.classifiedLevelColor || '#6b7280')
 
 const tabs = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
@@ -129,8 +131,15 @@ function rejectReadings() {
         <div class="fi-meta">{{ meta }}</div>
       </div>
       <span class="fi-pill" :class="{ done: classified }">
-        {{ classified ? t('pf.classified', { level: classified }) : t('pf.unclassified') }}
+        <template v-if="classified">
+          <i class="fi-dot" :style="{ background: classifiedColor }"></i>
+          {{ t('pf.classified', { level: classifiedCode }) }}
+        </template>
+        <template v-else>{{ t('pf.unclassified') }}</template>
       </span>
+      <router-link v-if="classified" class="fi-edit" :to="`/triage-classification/${ep.id}`">
+        <i class="pi pi-pencil"></i>{{ t('pf.editClass') }}
+      </router-link>
     </section>
 
     <nav class="fi-tabs fi-in" style="--d:1">
@@ -203,9 +212,16 @@ function rejectReadings() {
           </article>
         </div>
 
-        <div class="fi-actions">
-          <button class="ta-btn ta-btn--ghost" :disabled="ep.confirmed" @click="rejectReadings">{{ t('pf.reject') }}</button>
-          <button class="ta-btn" :disabled="ep.confirmed" @click="confirmReadings">{{ t('pf.confirm') }}</button>
+        <div v-if="!ep.confirmed" class="fi-actions">
+          <button class="ta-btn ta-btn--ghost" @click="rejectReadings">{{ t('pf.reject') }}</button>
+          <button class="ta-btn" @click="confirmReadings">{{ t('pf.confirm') }}</button>
+        </div>
+        <div v-else class="fi-actions fi-sealed">
+          <i class="pi pi-lock"></i>
+          <span>{{ t('pf.sealed') }}</span>
+          <router-link class="ta-btn ta-btn--ghost" :to="`/triage-classification/${ep.id}`">
+            <i class="pi pi-pencil"></i>{{ t('pf.editClass') }}
+          </router-link>
         </div>
       </div>
 
@@ -287,6 +303,11 @@ function rejectReadings() {
 .fv-row{display:flex;gap:8px}
 
 .fi-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
+.fi-sealed{justify-content:flex-start;font-size:12px;color:var(--ta-muted)}
+.fi-sealed i{color:var(--ta-brand)}
+.fi-edit{margin-left:8px;font-size:11px;color:var(--ta-brand);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.fi-edit:hover{text-decoration:underline}
+.fi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
 .fi-done{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ta-brand);margin-right:auto}
 .fi-dl{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
 .fi-dl div{display:grid;gap:4px}
