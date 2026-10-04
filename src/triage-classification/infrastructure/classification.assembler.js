@@ -1,6 +1,6 @@
 /**
- * Traduce entre el resource plano del backend falso y la entidad de dominio
- * Classification (aggregate root del bounded context).
+ * Translates between the flat fake-backend resource and the Classification
+ * domain entity (aggregate root of the bounded context).
  */
 import { Classification } from '../domain/model/classification.entity.js'
 import { ClassificationResource } from './classification.resource.js'

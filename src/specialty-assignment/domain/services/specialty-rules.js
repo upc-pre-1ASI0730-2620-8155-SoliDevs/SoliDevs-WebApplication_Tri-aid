@@ -1,6 +1,6 @@
 /**
- * Domain Service: clinical rules for specialty recommendation (US30)
- * and demographic restrictions (US32, scenario 2).
+ * Domain Service: clinical rules for specialty recommendation
+ * and demographic restrictions.
  */
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 

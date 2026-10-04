@@ -1,6 +1,6 @@
 /**
- * Resource que viaja hacia/desde el endpoint /triage-classifications.
- * Representa el payload plano del backend falso (json-server).
+ * Resource traveling to/from the /triage-classifications endpoint.
+ * Represents the flat payload of the fake backend (json-server).
  */
 export class ClassificationResource {
     constructor({ id, episodeId, level, suggestedLevel, state, overriddenBy, justification, suggestedAt, confirmedAt }) {

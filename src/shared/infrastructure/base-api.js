@@ -4,8 +4,8 @@ const triAidApiUrl = import.meta.env.VITE_TRIAGE_PLATFORM_API_URL
 
 /**
  * Cliente HTTP compartido de la plataforma Tri-Aid.
- * La URL base apunta al backend falso (json-server) en desarrollo.
- * Espeja la clase BaseApi del repositorio de referencia (learning-center).
+ * The base URL points to the fake backend (json-server) in development.
+ * Mirrors the BaseApi class of the reference repository (learning-center).
  */
 export class BaseApi {
     #http
