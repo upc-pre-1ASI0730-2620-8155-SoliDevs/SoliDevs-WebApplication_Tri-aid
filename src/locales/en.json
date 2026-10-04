@@ -276,5 +276,6 @@
   "panel.toClassify": "Pending classification",
   "panel.btnRefer": "Refer",
   "panel.btnClassify": "Classify",
-  "referral.err.catalog": "Select a symptom from the catalog (type to search)."
+  "referral.err.catalog": "Select a symptom from the catalog (type to search).",
+  "triage.toReferral": "Continue to referral"
 }
