@@ -23,4 +23,9 @@ export class BaseApi {
     get http() {
         return this.#http
     }
+
+    /** True when the backend is Firebase RTDB (REST API needs .json suffix). */
+    get isRtdb() {
+        return /firebaseio\.com|firebasedatabase\.app/.test(this.#http.defaults.baseURL || '')
+    }
 }
