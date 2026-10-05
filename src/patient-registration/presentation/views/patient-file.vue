@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
@@ -60,6 +60,9 @@ onMounted(async () => {
     referred.value = (rr.data || []).length > 0
   } catch (e) { console.error(e) }
 })
+
+// El formulario de vinculacion se cierra al cambiar de pestaña
+watch(tab, () => closeForm())
 
 const tabs = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
