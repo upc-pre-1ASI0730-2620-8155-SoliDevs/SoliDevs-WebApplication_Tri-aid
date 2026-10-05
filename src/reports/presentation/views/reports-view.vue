@@ -104,6 +104,7 @@ const metrics = computed(() => {
 
     <section class="ta-card rp-card">
       <h3 class="ta-h">{{ t('reports.logTitle') }}</h3>
+      <div class="rp-twrap">
       <table class="rp-table">
         <thead>
           <tr>
@@ -138,10 +139,12 @@ const metrics = computed(() => {
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
 
     <section class="ta-card rp-card">
       <h3 class="ta-h">{{ t('reports.alertLog') }}</h3>
+      <div class="rp-twrap">
       <table class="rp-table">
         <thead>
           <tr>
@@ -165,6 +168,7 @@ const metrics = computed(() => {
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
   </div>
 </template>
@@ -179,8 +183,10 @@ const metrics = computed(() => {
 .rp-stat b{font-size:22px;font-weight:600}
 .rp-stat.crit b{color:var(--ta-danger)}
 .rp-stat span{font-size:11px;color:var(--ta-muted)}
-.rp-card{padding:16px 20px;margin-bottom:16px;overflow-x:auto}
-.rp-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+.rp-card{padding:16px 20px;margin-bottom:16px}
+.rp-twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px}
+.rp-table{width:100%;min-width:560px;border-collapse:collapse;font-size:12.5px}
+@media(max-width:760px){.rp-table{font-size:12px}.rp-table th{padding:7px 8px}.rp-table td{padding:8px 8px}}
 .rp-table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ta-muted);padding:8px 10px;border-bottom:2px solid var(--ta-line)}
 .rp-table td{padding:9px 10px;border-bottom:1px solid var(--ta-line)}
 .rp-patient{font-weight:500}
