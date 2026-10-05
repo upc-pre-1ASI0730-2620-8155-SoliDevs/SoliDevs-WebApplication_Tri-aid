@@ -9,6 +9,7 @@ import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { session } from '../../../shared/application/demo-session.js'
 import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
 import { alertStore } from '../../../alerting/application/alert-store.js'
+import { findOutOfRangeVitals } from '../../../alerting/domain/services/vital-range-rules.js'
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import PriorityBadge from '../components/priority-badge.vue'
 import TriageGuideModal from '../components/triage-guide-modal.vue'
@@ -135,13 +136,13 @@ async function confirmClassification() {
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
   classification.value = r.data
   syncEpisodeLevel()
-  // Prioridad I/II confirmada: alerta critica hacia el centro de alertas.
+  // Alertas de la clasificacion confirmada y de lecturas fuera de rango
   try {
     const alerting = new AlertingService()
     const generated = await alerting.generateForEpisode({
       episode: { id: ep.value.id, arrival: ep.value.arrival },
       patient: p.value,
-      outOfRange: [],
+      outOfRange: findOutOfRangeVitals(ep.value.vitals),
       levelCode: levelDisplay(current.value)?.code
     })
     for (const a of generated.data) alertStore.items.push({ ...a, read: false })
@@ -310,4 +311,5 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
 .tc-levels button.on{transform:translateY(-2px);border-color:var(--ta-brand)}
 .tc-area{min-height:88px;resize:vertical;padding:10px}
 @media(max-width:900px){.tc-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.tc-vitals{grid-template-columns:1fr 1fr;gap:10px}}
 </style>

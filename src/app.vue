@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import './shared/presentation/styles/tokens.css'
 import './shared/presentation/styles/ui.css'
@@ -12,6 +12,9 @@ import { session } from './shared/application/demo-session.js'
 
 const route = useRoute()
 const isAuth = computed(() => route.meta.layout === 'auth')
+const sbOpen = ref(false)
+function onKey(e) { if (e.key === 'Escape') sbOpen.value = false }
+onMounted(() => window.addEventListener('keydown', onKey))
 const scroller = ref(null)
 const progress = ref(0)
 
@@ -21,6 +24,7 @@ function onScroll() {
   progress.value = max > 0 ? el.scrollTop / max : 0
 }
 watch(() => route.fullPath, () => {
+  sbOpen.value = false
   scroller.value?.scrollTo({ top: 0, behavior: 'instant' })
   progress.value = 0
 })
@@ -34,10 +38,18 @@ watch(() => route.fullPath, () => {
   </router-view>
 
   <div v-else class="shell">
-    <TheSidebar />
+    <transition name="fade">
+      <div v-if="sbOpen" class="sb-backdrop show" @click="sbOpen = false"></div>
+    </transition>
+    <TheSidebar :class="{ 'sb--open': sbOpen }" />
     <div class="shell__main">
       <header v-if="route.meta.titleKey" class="tb">
-        <span class="tb__title">{{ t(route.meta.titleKey) }}</span>
+        <div class="tb__left">
+          <button class="tb__burger" aria-label="Menú" @click="sbOpen = !sbOpen">
+            <i class="pi" :class="sbOpen ? 'pi-times' : 'pi-bars'"></i>
+          </button>
+          <span class="tb__title">{{ t(route.meta.titleKey) }}</span>
+        </div>
         <div class="tb__right">
           <LangSwitch />
           <NotificationBell />
@@ -69,4 +81,20 @@ body { margin: 0; }
 .content{flex:1;overflow-y:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--ta-brand) transparent}
 .content::-webkit-scrollbar{width:8px}
 .content::-webkit-scrollbar-thumb{background:var(--ta-brand);border-radius:8px}
+
+/* Responsive: topbar compacta en móvil */
+.tb__left{display:flex;align-items:center;gap:12px;min-width:0}
+.tb__burger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--ta-line);border-radius:9px;background:var(--ta-surface);color:var(--ta-text);font-size:15px;cursor:pointer;transition:background .2s,border-color .2s;flex:none}
+.tb__burger:hover{border-color:var(--ta-brand);color:var(--ta-brand);background:#f2f8f4}
+.tb__burger:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
+@media(max-width:900px){
+  .tb__burger{display:inline-flex}
+  .shell{position:relative}
+}
+@media(max-width:760px){
+  .tb{padding:0 14px}
+  .tb__right{gap:10px}
+  .tb__user span:not(.tb__av){display:none}
+  .tb__title{font-size:13px}
+}
 </style>

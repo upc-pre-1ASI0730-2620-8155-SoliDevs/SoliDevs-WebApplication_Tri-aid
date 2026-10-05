@@ -82,8 +82,16 @@ function reset() {
 <template>
   <div class="ta-page">
     <section class="ta-card">
-      <h3 class="ta-h">{{ t('rg.title') }}</h3>
-      <p class="ta-sub">{{ t('rg.sub') }}</p>
+      <div class="rg-head">
+        <router-link to="/patient-registration" class="rg-backlink" :aria-label="t('rg.back')">
+          <i class="pi pi-arrow-left"></i>
+        </router-link>
+        <div class="rg-titlebox">
+          <h3 class="ta-h">{{ t('rg.title') }}</h3>
+          <p class="ta-sub">{{ t('rg.sub') }}</p>
+        </div>
+        <button class="ta-btn ta-btn--ghost ta-btn--sm rg-clearbtn" @click="reset"><i class="pi pi-filter-slash"></i>{{ t('rg.clear') }}</button>
+      </div>
 
       <div class="rg-field">
         <span class="ta-label">{{ t('rg.docType') }}</span>
@@ -93,6 +101,10 @@ function reset() {
             <button type="button" role="tab" :aria-selected="f.docType === dt.key" :class="{ on: f.docType === dt.key }" :disabled="f.sinDni" :title="t('doc.' + dt.key + '.full')" @click="pick(dt.key)">{{ t('doc.' + dt.key + '.label') }}</button>
           </template>
         </div>
+        <!-- Móvil: selector desplegable nativo -->
+        <select class="ta-select rg-seg--mobile" :aria-label="t('rg.docType')" :disabled="f.sinDni" :value="f.docType" @change="pick($event.target.value)">
+          <option v-for="dt in docTypes" :key="dt.key" :value="dt.key">{{ t('doc.' + dt.key + '.full') }}</option>
+        </select>
       </div>
 
       <div class="rg-grid">
@@ -143,8 +155,6 @@ function reset() {
       </label>
 
       <div class="rg-actions">
-        <router-link to="/patient-registration" class="ta-btn ta-btn--ghost">{{ t('rg.back') }}</router-link>
-        <button class="ta-btn ta-btn--ghost" @click="reset">{{ t('rg.clear') }}</button>
         <button class="ta-btn" @click="submit">{{ t('rg.submit') }}</button>
       </div>
     </section>
@@ -160,6 +170,12 @@ function reset() {
 .rg-seg button.on{background:#fff;color:var(--ta-brand);border-color:var(--ta-brand);box-shadow:0 0 0 3px rgba(10,107,56,.12)}
 .rg-seg button:disabled{cursor:not-allowed}
 .rg-seg button:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
+.rg-seg--mobile{display:none;max-width:280px}
+.rg-seg--mobile:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){
+  .rg-seg{display:none}
+  .rg-seg--mobile{display:block}
+}
 .rg-sep{width:1px;height:16px;background:var(--ta-line)}
 .rg-hint{font-size:11px;color:var(--ta-muted)}
 
@@ -167,7 +183,21 @@ function reset() {
 .rg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
 .rg-f{display:grid;gap:6px;align-content:start}
 .rg-wide{grid-column:1/-1}
-.rg-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}
+.rg-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 .rg-actions .ta-btn{text-decoration:none}
+.rg-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.rg-backlink{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:13px;color:var(--ta-muted);text-decoration:none;border-radius:8px;border:1px solid var(--ta-line);background:#fff;transition:color .2s,background .2s,border-color .2s;flex:none;margin-top:2px}
+.rg-backlink:hover{color:var(--ta-brand);background:#f2f8f4;border-color:var(--ta-brand)}
+.rg-titlebox{flex:1;min-width:0}
+.rg-titlebox .ta-h{margin-bottom:2px}
+.rg-titlebox .ta-sub{margin-bottom:0}
+.rg-clearbtn{flex:none}
+
+/* Móvil: volver arriba (solo icono), limpiar arriba derecha, registrar abajo */
+@media(max-width:760px){
+  .rg-head{flex-wrap:wrap;gap:10px}
+  .rg-titlebox{flex:1 1 calc(100% - 100px)}
+  .rg-clearbtn span{display:none}
+}
 @media(max-width:760px){.rg-grid{grid-template-columns:1fr}}
 </style>

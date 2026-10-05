@@ -1,4 +1,5 @@
 .ta-page{max-width:1100px;margin:0 auto;padding:28px 36px 90px;display:grid;gap:18px;font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4}
+.ta-page > *{min-width:0}
 .ta-card{background:var(--ta-surface);border:1px solid var(--ta-line);border-radius:14px;padding:22px 24px;scroll-margin-top:20px}
 .ta-h{margin:0 0 4px;font-size:17px;font-weight:600;color:var(--ta-text);font-family:var(--ta-font)}
 .ta-sub{margin:0 0 18px;font-size:12px;color:var(--ta-muted)}
@@ -19,7 +20,7 @@
 .ta-err{color:var(--ta-danger);font-size:11px}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s cubic-bezier(.2,.8,.2,1)}
 .reveal.in{opacity:1;transform:none}
-@keyframes ta-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes ta-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .fade-enter-active,.fade-leave-active{transition:opacity .3s,transform .3s}
 .fade-enter-from,.fade-leave-to{opacity:0;transform:translateY(-4px)}
 .flip-enter-active,.flip-leave-active{transition:all .22s}
@@ -29,7 +30,16 @@
 .list-enter-from,.list-leave-to{opacity:0;transform:translateX(24px)}
 .toast-enter-active,.toast-leave-active{transition:all .4s cubic-bezier(.2,.8,.2,1)}
 .toast-enter-from,.toast-leave-to{opacity:0;transform:translateY(20px)}
-.page-enter-active,.page-leave-active{transition:opacity .25s,transform .25s}
-.page-enter-from{opacity:0;transform:translateY(10px)}
+.page-enter-active,.page-leave-active{transition:opacity .14s ease,transform .14s ease}
+.page-enter-from{opacity:0;transform:translateY(5px)}
 .page-leave-to{opacity:0;transform:translateY(-6px)}
 @media(prefers-reduced-motion:reduce){.reveal,.ta-page *{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+
+/* ---- Responsive global ---- */
+@media(max-width:760px){
+  .ta-page{padding:16px 14px 80px;gap:14px}
+  .ta-card{padding:16px;border-radius:12px}
+  .ta-btn{padding:0 14px}
+  .fi-actions{flex-direction:column-reverse;align-items:stretch}
+  .fi-actions .ta-btn{width:100%}
+}

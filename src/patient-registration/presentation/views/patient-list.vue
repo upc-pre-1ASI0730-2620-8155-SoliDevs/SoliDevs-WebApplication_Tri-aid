@@ -58,9 +58,11 @@ const fullName = p => `${p.surnames}, ${p.names}`
             <small>{{ fmtDateTime(r.last.arrival) }}</small>
           </div>
           <span class="pl-visits">{{ visitsText(r.visits) }}</span>
-          <span v-if="r.last.classifiedLevelCode" class="pl-lv" :style="{ background: r.last.classifiedLevelColor }">{{ r.last.classifiedLevelCode }}</span>
-          <span class="pl-st" :class="{ ok: r.last.referred, warn: r.last.confirmed && !r.last.referred }">
-            {{ r.last.referred ? t('pl.status.referred') : (r.last.confirmed ? t('pl.status.toRefer') : t('pl.status.pending')) }}
+          <span class="pl-meta">
+            <span v-if="r.last.classifiedLevelCode" class="pl-lv" :style="{ background: r.last.classifiedLevelColor }">{{ r.last.classifiedLevelCode }}</span>
+            <span class="pl-st" :class="{ ok: r.last.referred, warn: r.last.confirmed && !r.last.referred }">
+              {{ r.last.referred ? t('pl.status.referred') : (r.last.confirmed ? t('pl.status.toRefer') : t('pl.status.pending')) }}
+            </span>
           </span>
           <i class="pi pi-angle-right pl-go"></i>
         </router-link>
@@ -91,8 +93,9 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-who small,.pl-ep small{font-size:11px;color:var(--ta-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pl-ep span{font-family:var(--ta-mono);font-size:11.5px}
 .pl-ep small{font-family:var(--ta-mono);font-size:10px}
-.pl-visits{font-size:11px;color:var(--ta-muted);white-space:nowrap}
-.pl-st{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted);white-space:nowrap}
+.pl-visits{font-size:11px;color:var(--ta-muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.pl-meta{display:flex;align-items:center;gap:8px;justify-self:end;min-width:0}
+.pl-st{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
 .pl-st.warn{background:#fff4e5;color:#b45309}
 .pl-lv{color:#fff;font-weight:700;font-size:10.5px;border-radius:999px;padding:3px 9px}
 .pl-st.ok{background:#e3f3ea;color:var(--ta-brand)}
@@ -103,5 +106,5 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-empty b{font-size:14px;font-weight:600}
 .pl-empty p{margin:0 0 10px;font-size:12px;color:var(--ta-muted)}
 .pl-empty .ta-btn{text-decoration:none}
-@media(max-width:760px){.pl-row{grid-template-columns:36px minmax(0,1fr) 14px}.pl-ep,.pl-visits,.pl-st{display:none}}
+@media(max-width:760px){.pl-row{grid-template-columns:36px minmax(0,1fr) 14px}.pl-ep,.pl-visits,.pl-meta{display:none}.pl-top{flex-direction:column;align-items:stretch}.pl-top .ta-btn{width:100%}}
 </style>

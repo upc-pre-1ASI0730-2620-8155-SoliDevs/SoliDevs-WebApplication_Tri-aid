@@ -21,10 +21,128 @@
       "justification": null,
       "suggestedAt": "2026-10-05T11:27:45.781Z",
       "confirmedAt": "2026-10-05T11:27:48.620Z"
+    },
+    {
+      "id": 3,
+      "episodeId": "EP-261005-0003",
+      "level": "V_NonUrgent",
+      "suggestedLevel": "V_NonUrgent",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T18:50:29.396Z",
+      "confirmedAt": "2026-10-05T18:50:33.361Z"
+    },
+    {
+      "id": 4,
+      "episodeId": "EP-261005-0004",
+      "level": "III_Urgent",
+      "suggestedLevel": "III_Urgent",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T20:38:45.983Z",
+      "confirmedAt": "2026-10-05T20:38:54.455Z"
+    },
+    {
+      "id": 5,
+      "episodeId": "EP-261005-0005",
+      "level": "I_Resuscitation",
+      "suggestedLevel": "I_Resuscitation",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T20:48:46.520Z",
+      "confirmedAt": "2026-10-05T20:48:48.580Z"
+    },
+    {
+      "id": 6,
+      "episodeId": "EP-261005-0006",
+      "level": "III_Urgent",
+      "suggestedLevel": "III_Urgent",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T20:49:40.731Z",
+      "confirmedAt": "2026-10-05T20:49:42.484Z"
     }
   ],
-  "referrals": [],
-  "vouchers": [],
+  "referrals": [
+    {
+      "id": 1,
+      "episodeId": "EP-261005-0002",
+      "specialty": "CirugiaGeneral",
+      "room": "CG-1",
+      "queuePosition": 3,
+      "state": "Referred",
+      "changeReason": null,
+      "referredAt": "2026-10-05T18:46:20.960Z",
+      "symptom": "EMERGENCIA — Frecuencia cardíaca 128 lpm"
+    },
+    {
+      "id": 2,
+      "episodeId": "EP-261005-0003",
+      "specialty": "Cardiologia",
+      "room": "CA-2",
+      "queuePosition": 4,
+      "state": "Referred",
+      "changeReason": null,
+      "referredAt": "2026-10-05T18:50:40.897Z",
+      "symptom": "CARD-001 — Dolor torácico"
+    },
+    {
+      "id": 3,
+      "episodeId": "EP-261005-0001",
+      "specialty": "CirugiaGeneral",
+      "room": "CG-1",
+      "queuePosition": 4,
+      "state": "Referred",
+      "changeReason": null,
+      "referredAt": "2026-10-05T20:25:41.234Z",
+      "symptom": "RFF10 — Dolor abdominal agudo"
+    },
+    {
+      "id": 4,
+      "episodeId": "EP-261005-0004",
+      "specialty": "CirugiaGeneral",
+      "room": "CG-1",
+      "queuePosition": 5,
+      "state": "Referred",
+      "changeReason": null,
+      "referredAt": "2026-10-05T20:41:22.905Z",
+      "symptom": "RFF10 — Dolor abdominal agudo"
+    }
+  ],
+  "vouchers": [
+    {
+      "id": 1,
+      "referralId": 1,
+      "qrCode": "TRI-AID|EP-261005-0002|CirugiaGeneral|CG-1|#3",
+      "channel": "QrPortal",
+      "sentAt": null
+    },
+    {
+      "id": 2,
+      "referralId": 2,
+      "qrCode": "TRI-AID|EP-261005-0003|Cardiologia|CA-2|#4",
+      "channel": "QrPortal",
+      "sentAt": null
+    },
+    {
+      "id": 3,
+      "referralId": 3,
+      "qrCode": "TRI-AID|EP-261005-0001|CirugiaGeneral|CG-1|#4",
+      "channel": "QrPortal",
+      "sentAt": null
+    },
+    {
+      "id": 4,
+      "referralId": 4,
+      "qrCode": "TRI-AID|EP-261005-0004|CirugiaGeneral|CG-1|#5",
+      "channel": "QrPortal",
+      "sentAt": null
+    }
+  ],
   "specialties": [
     {
       "id": 1,
@@ -89,6 +207,15 @@
       "active": false,
       "minAge": 0,
       "waiting": 0
+    },
+    {
+      "key": "TraumaShock",
+      "name": "Trauma Shock",
+      "room": "TS-1",
+      "active": true,
+      "minAge": 0,
+      "waiting": 0,
+      "id": 8
     }
   ],
   "patients": [
@@ -115,6 +242,42 @@
       "phone": "",
       "address": "",
       "id": 2
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "56456464",
+      "names": "Hernan",
+      "surnames": "Huayta",
+      "birth": "1992-10-10",
+      "sex": "M",
+      "phone": "",
+      "address": "",
+      "id": 3
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "15467468",
+      "names": "Hernan",
+      "surnames": "Huayta",
+      "birth": "1992-10-10",
+      "sex": "F",
+      "phone": "",
+      "address": "",
+      "id": 4
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "12313213",
+      "names": "Hernan",
+      "surnames": "Huayta",
+      "birth": "1992-10-10",
+      "sex": "F",
+      "phone": "",
+      "address": "",
+      "id": 5
     }
   ],
   "episodes": [
@@ -149,7 +312,8 @@
         }
       },
       "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-05T11:27:33.003Z"
+      "vitalsConfirmedAt": "2026-10-05T20:25:34.711Z",
+      "referred": true
     },
     {
       "id": "EP-261005-0002",
@@ -157,90 +321,264 @@
       "arrival": "2026-10-05T11:27:38.887Z",
       "vitals": {
         "pa": {
-          "value": "154/66",
+          "value": "124/47",
+          "source": "auto",
+          "model": "1",
+          "time": "13:45"
+        },
+        "spo2": {
+          "value": "94",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "13:43"
+        },
+        "temp": {
+          "value": "36.0",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "13:45"
+        },
+        "fc": {
+          "value": "58",
+          "source": "auto",
+          "model": "Polar",
+          "time": "13:45"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T20:26:04.191Z",
+      "referred": true
+    },
+    {
+      "id": "EP-261005-0003",
+      "key": "15467468",
+      "arrival": "2026-10-05T18:49:37.919Z",
+      "vitals": {
+        "pa": {
+          "value": "101/77",
           "source": "auto",
           "model": "Omron",
-          "time": "06:27"
+          "time": "13:50"
+        },
+        "temp": {
+          "value": "36.2",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "13:50"
+        },
+        "spo2": {
+          "value": "96",
+          "source": "auto",
+          "model": "skibidi",
+          "time": "13:50"
+        },
+        "fc": {
+          "value": "83",
+          "source": "auto",
+          "model": "toilet",
+          "time": "13:50"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T18:50:28.846Z",
+      "classifiedLevel": "V_NonUrgent",
+      "classifiedLevelCode": "V",
+      "classifiedLevelColor": "#2563eb",
+      "referred": true
+    },
+    {
+      "id": "EP-261005-0004",
+      "key": "12313213",
+      "arrival": "2026-10-05T20:29:50.200Z",
+      "vitals": {
+        "temp": {
+          "value": "38.2",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "15:38"
+        },
+        "pa": {
+          "value": "97/83",
+          "source": "auto",
+          "model": "Omron",
+          "time": "15:38"
         },
         "spo2": {
           "value": "95",
           "source": "auto",
           "model": "Nonin",
-          "time": "06:27"
+          "time": "15:38"
         },
         "fc": {
-          "value": "84",
+          "value": "117",
           "source": "auto",
-          "model": "Polar",
-          "time": "06:27"
-        },
-        "temp": {
-          "value": "36.1",
-          "source": "auto",
-          "model": "Bosch",
-          "time": "06:27"
+          "model": "toilet",
+          "time": "15:38"
         }
       },
       "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-05T11:27:45.269Z"
+      "vitalsConfirmedAt": "2026-10-05T20:41:12.719Z",
+      "classifiedLevel": "III_Urgent",
+      "classifiedLevelCode": "III",
+      "classifiedLevelColor": "#ca8a04",
+      "referred": true
+    },
+    {
+      "id": "EP-261005-0005",
+      "key": "12313213",
+      "patient": {
+        "sinDni": false,
+        "docType": "dni",
+        "dni": "12313213",
+        "names": "Hernan",
+        "surnames": "Huayta",
+        "birth": "1992-10-10",
+        "sex": "F",
+        "phone": "",
+        "address": ""
+      },
+      "arrival": "2026-10-05T20:44:18.519Z",
+      "vitals": {
+        "fc": {
+          "value": "124",
+          "source": "auto",
+          "model": "Polar",
+          "time": "15:45"
+        },
+        "spo2": {
+          "value": "89",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "15:45"
+        },
+        "pa": {
+          "value": "143/85",
+          "source": "auto",
+          "model": "Omron",
+          "time": "15:45"
+        },
+        "temp": {
+          "value": "38.4",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "15:44"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T20:48:46.080Z",
+      "classifiedLevel": "I_Resuscitation",
+      "classifiedLevelCode": "I",
+      "classifiedLevelColor": "#b42318"
+    },
+    {
+      "id": "EP-261005-0006",
+      "key": "12313213",
+      "patient": {
+        "sinDni": false,
+        "docType": "dni",
+        "dni": "12313213",
+        "names": "Hernan",
+        "surnames": "Huayta",
+        "birth": "1992-10-10",
+        "sex": "F",
+        "phone": "",
+        "address": ""
+      },
+      "arrival": "2026-10-05T20:49:24.648Z",
+      "vitals": {
+        "temp": {
+          "value": "38.4",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "15:49"
+        },
+        "pa": {
+          "value": "105/67",
+          "source": "auto",
+          "model": "1",
+          "time": "15:49"
+        },
+        "spo2": {
+          "value": "94",
+          "source": "auto",
+          "model": "skibidi",
+          "time": "15:49"
+        },
+        "fc": {
+          "value": "77",
+          "source": "auto",
+          "model": "toilet",
+          "time": "15:49"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T20:49:40.296Z"
     }
   ],
   "devices": [
     {
+      "type": "temp",
+      "model": "Bosch",
+      "online": true,
+      "lastUse": "15:38",
+      "id": 4,
+      "linkedEpisode": "EP-261005-0005"
+    },
+    {
       "type": "pa",
       "model": "Omron",
       "online": true,
-      "lastUse": "",
-      "id": 1
+      "lastUse": "15:38",
+      "id": 5,
+      "linkedEpisode": "EP-261005-0005"
     },
     {
       "type": "spo2",
       "model": "Nonin",
       "online": true,
-      "lastUse": "",
-      "id": 2
+      "lastUse": "15:38",
+      "id": 6,
+      "linkedEpisode": "EP-261005-0005"
     },
     {
       "type": "fc",
       "model": "Polar",
       "online": true,
       "lastUse": "",
-      "id": 3
+      "id": 7,
+      "linkedEpisode": "EP-261005-0005"
     },
     {
       "type": "temp",
       "model": "Bosch",
       "online": true,
       "lastUse": "",
-      "id": 4
+      "id": 8,
+      "linkedEpisode": "EP-261005-0006"
     },
     {
       "type": "pa",
-      "model": "Omron",
+      "model": "1",
       "online": true,
       "lastUse": "",
-      "id": 5
+      "id": 9,
+      "linkedEpisode": "EP-261005-0006"
     },
     {
       "type": "spo2",
-      "model": "Nonin",
+      "model": "skibidi",
       "online": true,
       "lastUse": "",
-      "id": 6
+      "id": 10,
+      "linkedEpisode": "EP-261005-0006"
     },
     {
       "type": "fc",
-      "model": "Polar",
+      "model": "toilet",
       "online": true,
-      "lastUse": "",
-      "id": 7
-    },
-    {
-      "type": "temp",
-      "model": "Bosch",
-      "online": true,
-      "lastUse": "",
-      "id": 8
+      "lastUse": "15:38",
+      "id": 11,
+      "linkedEpisode": "EP-261005-0006"
     }
   ],
   "symptoms": [
@@ -352,8 +690,8 @@
       "time": "06:27",
       "value": "91 %",
       "safeRange": "94-100 %",
-      "severity": "critical",
-      "acknowledgedAt": null,
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:22:52.019Z",
       "escalatedAt": null,
       "escalatedTo": null,
       "createdAt": "2026-10-05T11:27:33.004Z"
@@ -368,8 +706,8 @@
       "time": "06:27",
       "value": "119 lpm",
       "safeRange": "60-100 lpm",
-      "severity": "warning",
-      "acknowledgedAt": null,
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:23:13.146Z",
       "escalatedAt": null,
       "escalatedTo": null,
       "createdAt": "2026-10-05T11:27:33.004Z"
@@ -384,8 +722,8 @@
       "time": "06:27",
       "value": "93 mmHg",
       "safeRange": "",
-      "severity": "warning",
-      "acknowledgedAt": null,
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:23:18.928Z",
       "escalatedAt": null,
       "escalatedTo": null,
       "createdAt": "2026-10-05T11:27:33.004Z"
@@ -400,8 +738,8 @@
       "time": "06:27",
       "value": "Prioridad II confirmada",
       "safeRange": "Atención inmediata",
-      "severity": "critical",
-      "acknowledgedAt": null,
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:22:48.246Z",
       "escalatedAt": null,
       "escalatedTo": null,
       "createdAt": "2026-10-05T11:27:36.377Z"
@@ -416,11 +754,75 @@
       "time": "06:27",
       "value": "154 mmHg",
       "safeRange": "",
-      "severity": "warning",
-      "acknowledgedAt": null,
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:23:43.197Z",
       "escalatedAt": null,
       "escalatedTo": null,
       "createdAt": "2026-10-05T11:27:45.269Z"
+    },
+    {
+      "id": "6",
+      "patientName": "Diaz Soto, Marco",
+      "priority": "II",
+      "vitalSign": "Frecuencia cardíaca",
+      "dni": "20202020",
+      "episode": "EP-261005-0002",
+      "time": "13:58",
+      "value": "128 lpm",
+      "safeRange": "60-100 lpm",
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T21:01:39.951Z",
+      "escalatedAt": "2026-10-05T21:00:30.833Z",
+      "escalatedTo": "Trauma Shock",
+      "createdAt": "2026-10-05T20:28:16.787Z"
+    },
+    {
+      "id": "7",
+      "patientName": "Quispe Ramos, Luz",
+      "priority": "III",
+      "vitalSign": "Temperatura",
+      "dni": "30303030",
+      "episode": "EP-261005-0003",
+      "time": "14:05",
+      "value": "39.2 °C",
+      "safeRange": "36-38 °C",
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:28:31.356Z",
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T20:28:16.787Z"
+    },
+    {
+      "id": "8",
+      "patientName": "Mendoza Cruz, Pedro",
+      "priority": "IV",
+      "vitalSign": "Presión arterial",
+      "dni": "40404040",
+      "episode": "EP-261005-0001",
+      "time": "14:12",
+      "value": "150/95 mmHg",
+      "safeRange": "100-140 mmHg",
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T20:28:27.940Z",
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T20:28:16.787Z"
+    },
+    {
+      "id": "G4nG9aH",
+      "patientName": "Huayta, Hernan",
+      "priority": "I",
+      "vitalSign": "Clasificación de triaje",
+      "dni": "12313213",
+      "episode": "EP-261005-0005",
+      "time": "15:48",
+      "value": "Prioridad I confirmada",
+      "safeRange": "Atención inmediata",
+      "severity": "critical",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T20:48:48.611Z"
     }
   ]
 }

@@ -2,15 +2,21 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useConfirm } from 'primevue/useconfirm';
+import { gsap } from 'gsap';
 import { AlertingService } from '../../infrastructure/alerting.service.js';
+import { SpecialtyAssignmentService } from '../../../specialty-assignment/infrastructure/specialty-assignment.service.js';
+import { findEpisode, saveEpisode } from '../../../patient-registration/application/patient-store.js';
+import { releaseEpisodeDevices } from '../../../vital-signs-capture/application/vitals-store.js';
 import { session } from '../../../shared/application/demo-session.js';
+import { notify } from '../../../shared/application/toast-store.js';
 
 const { t } = useI18n();
-const confirm = useConfirm();
 const activeAlerts = ref([]);
 const alertingService = new AlertingService();
 const router = useRouter();
+const doneId = ref(null);
+const pendingId = ref(null);
+const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Variable para controlar el filtro seleccionado por defecto
 const activeFilter = ref('all');
@@ -81,44 +87,123 @@ const displayAlerts = computed(() => {
 });
 
 const acknowledgeAlert = (id) => {
-  confirm.require({
-    message: t('alerting.confirmMsg'),
-    header: t('alerting.confirmTitle'),
-    icon: 'pi pi-exclamation-triangle',
-    rejectProps: {
-      label: t('alerting.no'),
-      outlined: true,
-      class: 'border-round-2xl px-4 py-2 text-gray-800 border-gray-300 hover:bg-gray-100'
-    },
-    acceptProps: {
-      label: t('alerting.yes'),
-      severity: 'danger',
-      class: 'border-round-2xl px-4 py-2 border-none'
-    },
-    accept: async () => {
-      const r = await alertingService.acknowledgeAlert(id, session.name || null);
-      if (r.ok) {
-        const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
-        if (i !== -1) {
-          activeAlerts.value[i] = r.data;
-          if (!r.data.value.includes(t('alerting.backToNormal'))) {
-            activeAlerts.value[i].value = `${t('alerting.backToNormal')} · ${r.data.value}`;
-          }
-        }
-      }
-    }
-  });
+  pendingId.value = id;
 };
 
-const escalateToEmergency = async (id) => {
-  const r = await alertingService.escalateAlert(id, {
-    userId: session.name || null,
-    to: 'Trauma Shock'
-  });
+const pendingEsc = ref(null);
+const escalateAlertPrompt = (id) => { pendingEsc.value = id; };
+const cancelEscalate = () => { pendingEsc.value = null; };
+const specialtyService = new SpecialtyAssignmentService();
+
+const confirmEscalate = async () => {
+  const alert = activeAlerts.value.find(a => String(a.id) === String(pendingEsc.value));
+  pendingEsc.value = null;
+  if (!alert) return;
+  try {
+    // Direct emergency referral to the Trauma Shock critical care room
+    const specs = await specialtyService.getSpecialties();
+    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
+    if (trauma) {
+      const r = await specialtyService.refer(alert.episode, {
+        specialtyRef: trauma,
+        symptom: `EMERGENCIA — ${alert.vitalSign} ${alert.value}`
+      });
+      if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
+      const ep = findEpisode(alert.episode);
+      if (ep) { ep.referred = true; saveEpisode(ep); }
+    }
+    // Seal this alert as escalated and close the remaining ones
+    const up = await alertingService.escalateAlert(alert.id, { userId: session.name || null, to: 'Trauma Shock' });
+    if (up.ok) {
+      const i = activeAlerts.value.findIndex(a => String(a.id) === String(alert.id));
+      if (i !== -1) activeAlerts.value[i] = up.data;
+    }
+    await alertingService.resolveByEpisode(alert.episode);
+    releaseEpisodeDevices(alert.episode);
+    notify({ type: 'success', title: t('alerting.escDone'), detail: 'Trauma Shock · TS-1' });
+  } catch (e) { console.error(e); notify({ type: 'error', title: t('alerting.escError') }); }
+};
+
+const cancelAcknowledge = () => { pendingId.value = null; };
+
+const confirmAcknowledge = async () => {
+  const id = pendingId.value;
+  pendingId.value = null;
+
+  // 1) Celebrar primero, con la tarjeta en su posicion actual
+  doneId.value = id;
+  await new Promise(r => setTimeout(r, 1500));
+
+  // 2) Recien entonces actualizar el estado (la tarjeta se mueve/desaparece)
+  const r = await alertingService.acknowledgeAlert(id, session.name || null);
   if (r.ok) {
     const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
-    if (i !== -1) activeAlerts.value[i] = r.data;
+    if (i !== -1) {
+      activeAlerts.value[i] = r.data;
+      if (!r.data.value.includes(t('alerting.backToNormal'))) {
+        activeAlerts.value[i].value = `${t('alerting.backToNormal')} · ${r.data.value}`;
+      }
+    }
   }
+  setTimeout(() => { if (String(doneId.value) === String(id)) doneId.value = null; }, 400);
+};
+
+/* ---- Animaciones GSAP (repositorio gsap-alert-animation) ---- */
+const onCardEnter = (el, done) => {
+  if (reduce()) { done(); return; }
+  gsap.fromTo(el, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', clearProps: 'transform,opacity', onComplete: done });
+};
+
+const onCardLeave = (el, done) => {
+  if (reduce()) { done(); return; }
+  gsap.set(el, { overflow: 'hidden' });
+  gsap.timeline({ onComplete: done })
+    .to(el, { x: 56, opacity: 0, scale: 0.97, duration: 0.4, ease: 'power3.in' })
+    .to(el, { height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: 0, borderWidth: 0, duration: 0.35, ease: 'power2.inOut' }, '-=0.1');
+};
+
+const onModalEnter = (el, done) => {
+  const box = el.querySelector('.al-dialog');
+  const ico = el.querySelector('.al-dialog__ico');
+  const rows = el.querySelectorAll('.al-dialog__title, .al-dialog__msg, .al-dialog__actions');
+  if (reduce()) { done(); return; }
+  gsap.timeline({ onComplete: done })
+    .fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power1.out' })
+    .fromTo(box, { y: 28, scale: 0.92, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.6)' }, 0)
+    .fromTo(ico, { scale: 0, rotate: -40 }, { scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2.4)' }, 0.12)
+    .fromTo(rows, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.06, ease: 'power3.out' }, 0.18);
+};
+
+const onModalLeave = (el, done) => {
+  if (reduce()) { done(); return; }
+  const box = el.querySelector('.al-dialog');
+  gsap.timeline({ onComplete: done })
+    .to(box, { y: 16, scale: 0.95, opacity: 0, duration: 0.2, ease: 'power2.in' })
+    .to(el, { opacity: 0, duration: 0.2, ease: 'power1.in' }, 0.05);
+};
+
+const onDoneEnter = (el, done) => {
+  const svg = el.querySelector('.al-done__svg');
+  const disc = el.querySelector('.al-done__disc');
+  const tick = el.querySelector('.al-done__tick');
+  const pulse = el.querySelector('.al-done__pulse');
+  const txt = el.querySelector('.al-done__txt');
+  if (reduce()) {
+    gsap.set(el, { clipPath: 'none' });
+    done();
+    return;
+  }
+  gsap.set(tick, { strokeDasharray: 1, strokeDashoffset: 1 });
+  gsap.set(disc, { scale: 0, transformOrigin: '50% 50%' });
+  gsap.set(pulse, { scale: 1, opacity: 0, transformOrigin: '50% 50%' });
+  gsap.set(txt, { opacity: 0, y: 8 });
+  gsap.timeline({ onComplete: done })
+    .fromTo(el, { clipPath: 'circle(0% at 14% 88%)' }, { clipPath: 'circle(150% at 14% 88%)', duration: 0.6, ease: 'power3.inOut' })
+    .to(disc, { scale: 1, duration: 0.5, ease: 'back.out(2)' }, 0.3)
+    .to(tick, { strokeDashoffset: 0, duration: 0.38, ease: 'power2.out' }, 0.7)
+    .fromTo(pulse, { scale: 1, opacity: 0.6 }, { scale: 1.7, opacity: 0, duration: 0.7, ease: 'power2.out' }, 0.95)
+    .fromTo(svg, { scale: 1 }, { scale: 1.1, duration: 0.14, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 0.95)
+    .to(txt, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 1);
 };
 </script>
 
@@ -156,7 +241,7 @@ const escalateToEmergency = async (id) => {
     </section>
 
     <!-- Tarjetas de alertas -->
-    <TransitionGroup name="al" tag="div" class="al-stack">
+    <TransitionGroup :css="false" tag="div" class="al-stack" @enter="onCardEnter" @leave="onCardLeave">
       <article v-for="alert in displayAlerts" :key="alert.id"
                class="ta-card al-card"
                :class="'sev--' + alert.severity">
@@ -188,24 +273,39 @@ const escalateToEmergency = async (id) => {
           <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeAlert(alert.id)">
             {{ t('alerting.acknowledge') }}
           </button>
-          <button class="ta-btn ta-btn--sm al-btn-esc" @click="escalateToEmergency(alert.id)">
+          <button v-if="alert.severity !== 'escalated'" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateAlertPrompt(alert.id)">
             {{ t('alerting.escalate') }}
           </button>
         </div>
+
+        <Transition :css="false" @enter="onDoneEnter">
+          <div v-if="doneId === alert.id" class="al-done" aria-hidden="true">
+            <svg class="al-done__svg" viewBox="0 0 72 72">
+              <circle class="al-done__pulse" cx="36" cy="36" r="30" />
+              <circle class="al-done__disc" cx="36" cy="36" r="30" />
+              <path class="al-done__tick" d="M23 37l9 9 18-21" pathLength="1" />
+            </svg>
+            <span class="al-done__txt">{{ t('alerting.resolved') }}</span>
+          </div>
+        </Transition>
       </article>
     </TransitionGroup>
 
     <p v-if="!displayAlerts.length" class="ta-card al-none">{{ t('bell.empty') }}</p>
 
-    <ConfirmDialog
-        :pt="{
-          root: { class: 'border-round-2xl shadow-4 border-none' },
-          header: { class: 'border-bottom-1 border-300 pb-3 pt-4 px-4' },
-          content: { class: 'pt-4 px-4 text-gray-800 text-lg' },
-          footer: { class: 'pt-3 pb-4 px-4' },
-          mask: { class: 'bg-black-alpha-40' }
-        }"
-    ></ConfirmDialog>
+    <Transition :css="false" @enter="onModalEnter" @leave="onModalLeave">
+      <div v-if="pendingId !== null || pendingEsc !== null" class="al-modal" @click.self="pendingId !== null ? cancelAcknowledge() : cancelEscalate()">
+        <div class="al-dialog" role="alertdialog" aria-modal="true" aria-labelledby="al-dlg-title">
+          <span class="al-dialog__ico" :class="{ danger: pendingEsc !== null }"><i class="pi" :class="pendingEsc !== null ? 'pi-bolt' : 'pi-bell-slash'"></i></span>
+          <h3 id="al-dlg-title" class="al-dialog__title">{{ pendingEsc !== null ? t('alerting.escTitle') : t('alerting.confirmTitle') }}</h3>
+          <p class="al-dialog__msg">{{ pendingEsc !== null ? t('alerting.escMsg') : t('alerting.confirmMsg') }}</p>
+          <div class="al-dialog__actions">
+            <button class="ta-btn ta-btn--ghost" @click="pendingId !== null ? cancelAcknowledge() : cancelEscalate()">{{ t('alerting.no') }}</button>
+            <button class="ta-btn" :class="{ 'al-btn-esc': pendingEsc !== null }" @click="pendingId !== null ? confirmAcknowledge() : confirmEscalate()">{{ pendingEsc !== null ? t('alerting.escYes') : t('alerting.yes') }}</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -227,7 +327,7 @@ const escalateToEmergency = async (id) => {
 .al-av{width:30px;height:30px;border-radius:50%;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;font-size:10.5px;font-weight:700}
 .al-nname{font-size:12.5px;font-weight:600;color:var(--ta-text)}
 .al-stack{display:grid;gap:12px}
-.al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line)}
+.al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line);position:relative;overflow:hidden}
 .al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
 .al-card.sev--warning{border-left-color:#d97706}
 .al-card.sev--escalated{border-left-color:#6d28d9}
@@ -252,8 +352,9 @@ const escalateToEmergency = async (id) => {
 .al-safe{color:var(--ta-muted);font-size:11.5px}
 .al-ok{color:var(--ta-brand);display:inline-flex;align-items:center;gap:6px}
 .al-actions{display:flex;gap:10px;margin-top:2px}
-.al-btn-esc{background:var(--ta-ink);border-color:var(--ta-ink);color:#fff}
-.al-btn-esc:hover{background:#000;border-color:#000}
+.al-dialog__ico.danger{color:var(--ta-danger);background:linear-gradient(145deg,#fdecea,#fbd9d5);box-shadow:inset 0 0 0 1px rgba(200,55,45,.14)}
+.al-btn-esc{background:var(--ta-danger);border-color:var(--ta-danger);color:#fff}
+.al-btn-esc:hover{background:#a52a21;border-color:#a52a21}
 .al-none{padding:22px;text-align:center;color:var(--ta-muted);font-size:12.5px}
 
 /* animaciones de entrada/salida de las tarjetas */
@@ -261,4 +362,19 @@ const escalateToEmergency = async (id) => {
 .al-leave-active{transition:opacity .18s ease,transform .18s ease;position:absolute;width:100%}
 .al-enter-from,.al-leave-to{opacity:0;transform:translateY(8px)}
 .al-move{transition:transform .3s ease}
+
+/* --- Animación de confirmación (GSAP) --- */
+.al-done{position:absolute;inset:-1px;z-index:2;border-radius:inherit;display:grid;align-content:center;justify-items:center;gap:8px;color:#fff;background:radial-gradient(120% 170% at 50% 0%,var(--ta-brand),var(--ta-ink));clip-path:circle(0% at 14% 88%)}
+.al-done__svg{width:72px;height:72px;overflow:visible}
+.al-done__disc{fill:#fff}
+.al-done__pulse{fill:none;stroke:#fff;stroke-width:2}
+.al-done__tick{fill:none;stroke:var(--ta-brand);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.al-done__txt{font-size:15px;font-weight:600;letter-spacing:.02em}
+.al-modal{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:16px;background:rgba(6,28,19,.55);backdrop-filter:blur(3px)}
+.al-dialog{width:100%;max-width:400px;padding:26px 24px 22px;border-radius:20px;background:var(--ta-surface,#fff);border:1px solid var(--ta-line);box-shadow:0 30px 70px -20px rgba(5,25,16,.55);font-family:var(--ta-font);text-align:center}
+.al-dialog__ico{width:52px;height:52px;margin:0 auto 14px;border-radius:16px;display:grid;place-items:center;font-size:20px;color:var(--ta-brand);background:linear-gradient(145deg,#e3f3ea,#d6eedd);box-shadow:inset 0 0 0 1px rgba(10,107,56,.14)}
+.al-dialog__title{margin:0;font-size:17px;font-weight:600;color:var(--ta-text)}
+.al-dialog__msg{margin:8px 0 0;font-size:13.5px;line-height:1.5;color:var(--ta-muted)}
+.al-dialog__actions{display:flex;justify-content:center;gap:10px;margin-top:22px}
+.al-dialog__actions .ta-btn{min-width:120px}
 </style>

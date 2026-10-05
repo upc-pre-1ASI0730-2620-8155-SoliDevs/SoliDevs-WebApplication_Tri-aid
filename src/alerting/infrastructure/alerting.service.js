@@ -53,7 +53,7 @@ export class AlertingService {
                 dni: patient.dni,
                 episode: episode.id,
                 time,
-                value: `${o.value} ${({ spo2: '%', fc: 'lpm', pas: 'mmHg', pad: 'mmHg', temp: '°C' })[o.metric] || ''}`,
+                value: `${o.value} ${({ spo2: '%', fc: 'lpm', pa: 'mmHg', pas: 'mmHg', pad: 'mmHg', temp: '°C' })[o.metric] || ''}`,
                 safeRange: safeRanges[o.metric] || '',
                 severity,
                 createdAt: new Date().toISOString()
@@ -94,6 +94,27 @@ export class AlertingService {
         a.acknowledgedAt = new Date().toISOString()
         const updated = await this.api.updateAlert(id, { ...a })
         return { ok: true, data: new Alert(updated.data) }
+    }
+
+    /**
+     * Resolves every alert of an episode (e.g. when the referral is
+     * completed and the patient leaves the triage flow).
+     * @param {string} episodeId - Episode whose alerts are resolved.
+     * @returns {Promise<{ok: true, data: Alert[]}>} The alerts updated.
+     */
+    async resolveByEpisode(episodeId) {
+        const response = await this.api.getAlerts()
+        const mine = (response.data || []).filter(a => String(a.episode) === String(episodeId))
+        const updated = []
+        for (const raw of mine) {
+            if (raw.severity === 'resolved' || raw.severity === 'escalated') { updated.push(new Alert(raw)); continue }
+            const a = new Alert(raw)
+            a.severity = 'resolved'
+            a.acknowledgedAt = new Date().toISOString()
+            const saved = await this.api.updateAlert(a.id, { ...a })
+            updated.push(new Alert(saved.data))
+        }
+        return { ok: true, data: updated }
     }
 
     /** Escalates an alert to a higher-care destination, persisted for audit. */

@@ -120,7 +120,7 @@ function onVitalsConfirmed() {
 </template>
 
 <style>
-.fi-in{animation:ta-rise .6s calc(var(--d,0)*.1s) both}
+.fi-in{animation:ta-rise .35s calc(var(--d,0)*.05s) both}
 .fi-stack{display:grid;gap:16px}
 .fi-head{display:flex;align-items:center;gap:14px;padding:16px 20px}
 .fi-av{width:40px;height:40px;border-radius:10px;background:#d6eedd;color:var(--ta-brand);display:grid;place-items:center;font-weight:600;font-size:13px;flex:none}
@@ -143,4 +143,14 @@ function onVitalsConfirmed() {
 .fi-visits li{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--ta-line);border-radius:10px;background:#fff;font-size:12px}
 .fi-visits b{font-family:var(--ta-mono);font-weight:500}
 .fi-visits span{color:var(--ta-muted)}
+
+@media(max-width:760px){
+  .fi-head{flex-wrap:wrap;padding:14px 16px}
+  .fi-pill{margin-left:0;width:100%;justify-content:flex-start}
+  .fi-tabs{gap:16px;overflow-x:auto;scrollbar-width:none}
+  .fi-tabs::-webkit-scrollbar{display:none}
+  .fi-tabs button{flex:none}
+  .fi-dl{grid-template-columns:1fr;gap:12px}
+  .fi-stack{gap:12px}
+}
 </style>
