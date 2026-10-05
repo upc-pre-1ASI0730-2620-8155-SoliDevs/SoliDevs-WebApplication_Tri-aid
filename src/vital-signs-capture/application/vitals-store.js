@@ -1,6 +1,7 @@
 import { emit } from '../../shared/application/event-bus.js'
 import { VitalSignsApi } from '../infrastructure/vital-signs-api.js'
 import { VitalsConfirmedEvent } from '../domain/events/vitals-confirmed-event.js'
+import { deviceStore } from './device-store.js'
 
 const api = new VitalSignsApi()
 const plain = o => JSON.parse(JSON.stringify(o))
@@ -53,9 +54,28 @@ export function confirmReadings(ep) {
     persist(ep)
 }
 
-/** Rejects the readings: clears them for a new capture round. */
+/**
+ * Releases every device linked to an episode, making them available for
+ * the next patient. Persisted to the backend.
+ * @param {string} episodeId - Episode whose devices are released.
+ */
+export function releaseEpisodeDevices(episodeId) {
+    const plain2 = o => JSON.parse(JSON.stringify(o))
+    for (const d of deviceStore.devices) {
+        if (d.linkedEpisode && String(d.linkedEpisode) === String(episodeId)) {
+            d.linkedEpisode = null
+            if (!String(d.id).startsWith('tmp-')) {
+                api.updateDevice(d.id, plain2(d)).catch(console.error)
+            }
+        }
+    }
+}
+
+/** Rejects the readings: clears them and re-enables capture for a new round. */
 export function rejectReadings(ep) {
     ep.vitals = {}
+    ep.confirmed = false
+    ep.vitalsConfirmedAt = null
     persist(ep)
 }
 
