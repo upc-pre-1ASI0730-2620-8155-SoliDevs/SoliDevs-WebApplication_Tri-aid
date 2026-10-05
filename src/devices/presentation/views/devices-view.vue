@@ -30,23 +30,23 @@ function isLinked(model) {
 
 function handleAddCustom() {
   if (!newModel.value.trim()) {
-    notify({ type: 'error', title: t('pf.errModel') || 'Ingrese un modelo válido' })
+    notify({ type: 'error', title: t('pf.errModel') })
     return
   }
   addDevice(newType.value, newModel.value.trim())
-  notify({ type: 'success', title: 'Dispositivo vinculado con éxito' })
+  notify({ type: 'success', title: t('devices.toastLinked') })
   newModel.value = ''
 }
 
 function quickLink(template) {
   if (isLinked(template.model)) return
   addDevice(template.type, template.model)
-  notify({ type: 'success', title: `Dispositivo ${template.model} vinculado` })
+  notify({ type: 'success', title: t('devices.toastLinkedModel', { model: template.model }) })
 }
 
 function handleRemove(id) {
   removeDevice(id)
-  notify({ type: 'info', title: 'Dispositivo desvinculado' })
+  notify({ type: 'info', title: t('devices.toastUnlinked') })
 }
 
 function toggleOnline(d) {
@@ -85,37 +85,37 @@ function toggleOnline(d) {
 
     <!-- Formulario para Vincular Dispositivo Personalizado -->
     <section class="ta-card fi-in" style="--d:2">
-      <h4 class="dev-subtitle">Vincular Dispositivo Manual</h4>
+      <h4 class="dev-subtitle">{{ t("devices.manual") }}</h4>
       <div class="dev-form">
         <select class="ta-select" v-model="newType">
           <option v-for="vt in vitalTypes" :key="vt.key" :value="vt.key">
             {{ vt.device }} ({{ vt.label }})
           </option>
         </select>
-        <input class="ta-input" v-model="newModel" placeholder="Ej. Omron X7 Smart" @keyup.enter="handleAddCustom" />
-        <button class="ta-btn" @click="handleAddCustom">Vincular Dispositivo</button>
+        <input class="ta-input" v-model="newModel" :placeholder="t('devices.modelPh')" @keyup.enter="handleAddCustom" />
+        <button class="ta-btn" @click="handleAddCustom">{{ t("devices.linkDevice") }}</button>
       </div>
     </section>
 
     <!-- Listado de Dispositivos Actualmente Sincronizados -->
     <section class="ta-card fi-in" style="--d:3">
-      <h4 class="dev-subtitle">Dispositivos Sincronizados ({{ store.devices.length }})</h4>
+      <h4 class="dev-subtitle">{{ t("devices.sync") }} ({{ store.devices.length }})</h4>
 
       <TransitionGroup v-if="store.devices.length" name="list" tag="ul" class="fd-list">
         <li v-for="d in store.devices" :key="d.id">
           <span class="fd-ico"><svg viewBox="0 0 24 24" v-html="icons[d.type]"></svg></span>
           <div class="fd-info">
             <b>{{ getVitalInfo(d.type).device }} · {{ d.model }}</b>
-            <small>{{ d.lastUse ? `Última lectura: ${d.lastUse}` : 'Sin lecturas recientes' }}</small>
+            <small>{{ d.lastUse ? t('devices.lastUse', { time: d.lastUse }) : t('devices.noReads') }}</small>
           </div>
           <button class="fd-badge" :class="d.online ? 'on' : 'off'" @click="toggleOnline(d)">
-            <i></i>{{ d.online ? 'En línea' : 'Desconectado' }}
+            <i></i>{{ d.online ? t('devices.online') : t('devices.offline') }}
           </button>
-          <button class="fd-x" title="Desvincular" @click="handleRemove(d.id)">×</button>
+          <button class="fd-x" :title="t('devices.unlink')" @click="handleRemove(d.id)">×</button>
         </li>
       </TransitionGroup>
 
-      <p v-else class="fd-empty">No hay dispositivos vinculados actualmente.</p>
+      <p v-else class="fd-empty">{{ t("devices.empty") }}</p>
     </section>
   </div>
 </template>
@@ -130,6 +130,23 @@ function toggleOnline(d) {
 .dev-template-info b { font-size: 12.5px; font-weight: 600; }
 .dev-template-info small { font-size: 10.5px; color: var(--ta-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dev-form { display: grid; grid-template-columns: 200px 1fr auto; gap: 10px; }
+
+.fd-list, .fd-ico, .fd-info, .fd-badge, .fd-x, .fd-empty { all: revert; }
+
+.fd-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.fd-list li { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--ta-line); border-radius: 10px; background: #fff; flex-wrap: wrap; }
+.fd-ico { width: 30px; height: 30px; border-radius: 8px; background: #e3f3ea; color: var(--ta-brand); display: grid; place-items: center; flex: none; }
+.fd-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.fd-info { flex: 1; min-width: 160px; display: grid; }
+.fd-info b { font-size: 13px; font-weight: 500; }
+.fd-info small { font-family: var(--ta-mono); font-size: 10px; color: var(--ta-muted); }
+.fd-badge { display: flex; align-items: center; gap: 6px; border: 0; font: inherit; font-size: 11px; padding: 3px 10px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; }
+.fd-badge i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.fd-badge.on { background: #e3f3ea; color: var(--ta-brand); }
+.fd-badge.off { background: #eef0f2; color: var(--ta-muted); }
+.fd-x { border: 0; background: none; font-size: 20px; line-height: 1; color: var(--ta-muted); cursor: pointer; transition: color .2s; }
+.fd-x:hover { color: var(--ta-danger); }
+.fd-empty { margin: 16px 0 0; font-size: 12px; color: var(--ta-muted); text-align: center; }
 
 @media(max-width: 760px) {
   .dev-form { grid-template-columns: 1fr; }
