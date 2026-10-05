@@ -58,7 +58,10 @@ const fullName = p => `${p.surnames}, ${p.names}`
             <small>{{ fmtDateTime(r.last.arrival) }}</small>
           </div>
           <span class="pl-visits">{{ visitsText(r.visits) }}</span>
-          <span class="pl-st" :class="{ ok: r.last.confirmed }">{{ r.last.confirmed ? t('pl.confirmed') : t('pl.pending') }}</span>
+          <span v-if="r.last.classifiedLevelCode" class="pl-lv" :style="{ background: r.last.classifiedLevelColor }">{{ r.last.classifiedLevelCode }}</span>
+          <span class="pl-st" :class="{ ok: r.last.referred, warn: r.last.confirmed && !r.last.referred }">
+            {{ r.last.referred ? t('pl.status.referred') : (r.last.confirmed ? t('pl.status.toRefer') : t('pl.status.pending')) }}
+          </span>
           <i class="pi pi-angle-right pl-go"></i>
         </router-link>
       </TransitionGroup>
@@ -90,6 +93,8 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-ep small{font-family:var(--ta-mono);font-size:10px}
 .pl-visits{font-size:11px;color:var(--ta-muted);white-space:nowrap}
 .pl-st{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted);white-space:nowrap}
+.pl-st.warn{background:#fff4e5;color:#b45309}
+.pl-lv{color:#fff;font-weight:700;font-size:10.5px;border-radius:999px;padding:3px 9px}
 .pl-st.ok{background:#e3f3ea;color:var(--ta-brand)}
 .pl-go{font-size:14px;color:var(--ta-muted);transition:transform .2s,color .2s}
 .pl-row:hover .pl-go{transform:translateX(3px);color:var(--ta-brand)}

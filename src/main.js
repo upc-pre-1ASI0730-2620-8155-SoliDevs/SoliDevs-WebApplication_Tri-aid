@@ -3,9 +3,13 @@ import './style.css'
 import App from './app.vue'
 import router from './router/index.js'
 import { i18n } from './shared/application/i18n.js'
+import { loadFromServer } from './patient-registration/application/patient-store.js'
+import { loadDevices } from './vital-signs-capture/application/device-store.js'
 
 import PrimeVue from 'primevue/config'
 import Material from '@primeuix/themes/material'
+import ConfirmationService from "primevue/confirmationservice";
+import ConfirmDialog from 'primevue/confirmdialog'
 import 'primeflex/primeflex.css'
 import 'primeicons/primeicons.css'
 
@@ -22,9 +26,15 @@ app.use(PrimeVue, {
     }
 })
 
-router.isReady().then(() => app.mount('#app'))
+app.use(ConfirmationService)
+app.component('ConfirmDialog', ConfirmDialog)
 
-// Oculta el badge "Invalid PrimeUI License"
+router.isReady().then(async () => {
+    await Promise.all([loadFromServer(), loadDevices()])
+    app.mount('#app')
+})
+
+// Hides the "Invalid PrimeUI License" badge
 const style = document.createElement('style')
 style.textContent = '#p-license-host { display: none !important; }'
 document.head.appendChild(style)
