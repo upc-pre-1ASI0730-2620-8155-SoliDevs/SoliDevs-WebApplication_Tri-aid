@@ -122,115 +122,80 @@ const escalateToEmergency = async (id) => {
 </script>
 
 <template>
-  <div class="p-4 w-full">
+  <div class="ta-page al-page">
+    <!-- Cabecera: titulo, filtros, auditoria y enfermera de turno -->
+    <section class="ta-card al-head al-in" style="--d:0">
+      <div class="al-head__main">
+        <h3 class="ta-h">{{ t('alerting.title') }}</h3>
 
-    <!-- Cabecera -->
-    <div class="flex justify-content-between align-items-center mb-4 border-bottom-1 border-300 pb-3">
-      <div>
-        <h2 class="text-2xl font-bold text-gray-900 m-0">{{ $t('alerting.title') }}</h2>
-
-        <!-- Botones de filtrado tipo píldora -->
-        <div class="flex gap-2 mt-3">
-          <button @click="activeFilter = 'all'"
-                  class="border-none border-round-2xl px-3 py-1 text-xs font-bold cursor-pointer transition-colors"
-                  :class="activeFilter === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
-            {{ $t('alerting.filterAll') }}
+        <div class="al-filters">
+          <button class="al-pill" :class="{ on: activeFilter === 'all' }" @click="activeFilter = 'all'">
+            {{ t('alerting.filterAll') }}
           </button>
-          <button @click="activeFilter = 'critical'"
-                  class="border-none border-round-2xl px-3 py-1 text-xs font-bold cursor-pointer transition-colors"
-                  :class="activeFilter === 'critical' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
-            {{ $t('alerting.filterCritical') }}
+          <button class="al-pill al-pill--critical" :class="{ on: activeFilter === 'critical' }" @click="activeFilter = 'critical'">
+            {{ t('alerting.filterCritical') }}
           </button>
-          <button @click="activeFilter = 'unresolved'"
-                  class="border-none border-round-2xl px-3 py-1 text-xs font-bold cursor-pointer transition-colors"
-                  :class="activeFilter === 'unresolved' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
-            {{ $t('alerting.filterUnresolved') }}
+          <button class="al-pill" :class="{ on: activeFilter === 'unresolved' }" @click="activeFilter = 'unresolved'">
+            {{ t('alerting.filterUnresolved') }}
           </button>
         </div>
-        <div class="flex gap-2 mt-2 align-items-center">
-          <input type="date" v-model="auditFrom" class="p-inputtext p-component text-xs px-2 py-1 border-round-lg" :aria-label="t('alerting.auditFrom')" />
-          <span class="text-xs text-gray-500">→</span>
-          <input type="date" v-model="auditTo" class="p-inputtext p-component text-xs px-2 py-1 border-round-lg" :aria-label="t('alerting.auditTo')" />
+
+        <div class="al-audit">
+          <input type="date" v-model="auditFrom" class="ta-input al-date" :aria-label="t('alerting.auditFrom')" />
+          <span class="al-audit-arrow">→</span>
+          <input type="date" v-model="auditTo" class="ta-input al-date" :aria-label="t('alerting.auditTo')" />
         </div>
       </div>
 
-      <div class="flex align-items-center gap-3">
-        <span class="text-red-600 font-bold bg-red-100 px-3 py-1 border-round-2xl text-sm">
-          {{ criticalCount }} {{ $t('alerting.active') }}
-        </span>
-        <div class="flex align-items-center gap-2">
-          <span class="bg-green-100 text-green-800 font-bold flex align-items-center justify-content-center border-circle text-xs" style="width: 30px; height: 30px;">
-            {{ nurseInitials }}
-          </span>
-          <span class="font-bold text-gray-800 text-sm">{{ nurseName }}</span>
-        </div>
+      <div class="al-nurse">
+        <span class="al-count" :class="{ crit: criticalCount > 0 }">{{ criticalCount }} {{ t('alerting.active') }}</span>
+        <span class="al-av">{{ nurseInitials }}</span>
+        <span class="al-nname">{{ nurseName }}</span>
       </div>
-    </div>
+    </section>
 
-    <!-- Lista de Tarjetas (Usando displayAlerts) -->
-    <div class="flex flex-column gap-3">
-      <div v-for="alert in displayAlerts" :key="alert.id"
-           class="surface-card p-4 shadow-1 border-round-xl flex flex-column gap-3 bg-white border-1"
-           :class="{
-             'border-red-400': alert.severity === 'critical',
-             'border-orange-400': alert.severity === 'warning',
-             'border-purple-400': alert.severity === 'escalated',
-             'border-green-500': alert.severity === 'resolved'
-           }">
+    <!-- Tarjetas de alertas -->
+    <TransitionGroup name="al" tag="div" class="al-stack">
+      <article v-for="alert in displayAlerts" :key="alert.id"
+               class="ta-card al-card"
+               :class="'sev--' + alert.severity">
 
-        <!-- Primera fila: Nombre, Prioridad y Badge Sonora -->
-        <div class="flex align-items-center gap-2">
-          <i class="pi pi-circle-fill text-xs"
-             :class="{'text-red-500': alert.severity === 'critical', 'text-orange-500': alert.severity === 'warning', 'text-green-500': alert.severity === 'resolved'}"></i>
-          <span class="font-bold text-lg text-gray-900">{{ alert.patientName }}</span>
-
-          <span class="bg-gray-200 text-gray-700 px-2 py-1 border-round-2xl text-xs font-bold"
-                :class="{'bg-red-100 text-red-700': alert.severity === 'critical', 'bg-orange-100 text-orange-700': alert.severity === 'warning'}">
-            {{ alert.priority }}
+        <div class="al-row">
+          <i class="pi pi-circle-fill al-dot"></i>
+          <span class="al-name">{{ alert.patientName }}</span>
+          <span class="al-prio">{{ alert.priority }}</span>
+          <span v-if="alert.severity === 'critical'" class="al-sound">
+            <i class="pi pi-volume-up"></i>{{ t('alerting.soundActive') }}
           </span>
-
-          <span v-if="alert.severity === 'critical'" class="bg-red-100 text-red-600 px-2 py-1 border-round-2xl text-xs font-bold flex align-items-center gap-1 ml-2">
-            <i class="pi pi-volume-up text-xs"></i> {{ $t('alerting.soundActive') }}
-          </span>
-          <span v-if="alert.severity === 'resolved'" class="bg-gray-200 text-gray-700 px-2 py-1 border-round-2xl text-xs font-bold ml-2">
-            {{ $t('alerting.resolved') }}
-          </span>
+          <span v-if="alert.severity === 'escalated'" class="al-esc">{{ alert.escalatedTo }}</span>
+          <span v-if="alert.severity === 'resolved'" class="al-res">{{ t('alerting.resolved') }}</span>
         </div>
 
-        <!-- Segunda fila: Datos del paciente -->
-        <div class="text-500 text-sm">
-          {{ alert.vitalSign }} · DNI {{ alert.dni }} · {{ alert.episode }} · {{ $t('alerting.generated') }} {{ alert.time }}
+        <div class="al-meta">
+          {{ alert.vitalSign }} · DNI {{ alert.dni }} · {{ alert.episode }} · {{ t('alerting.generated') }} {{ alert.time }}
         </div>
 
-        <!-- Tercera fila: Valores -->
-        <div class="text-sm font-medium">
-          <span v-if="alert.severity === 'resolved'" class="text-green-600 flex align-items-center gap-2">
-            <i class="pi pi-check-circle"></i> {{ alert.value }}
-          </span>
+        <div class="al-value">
+          <span v-if="alert.severity === 'resolved'" class="al-ok"><i class="pi pi-check-circle"></i> {{ alert.value }}</span>
           <template v-else>
-            <span class="font-bold" :class="{'text-red-500': alert.severity === 'critical', 'text-orange-500': alert.severity === 'warning'}">
-              {{ alert.value }}
-            </span>
-            <span class="text-500 ml-1">· {{ $t('alerting.safeRange') }} {{ alert.safeRange }}</span>
+            <b class="al-val">{{ alert.value }}</b>
+            <span class="al-safe">· {{ t('alerting.safeRange') }} {{ alert.safeRange }}</span>
           </template>
         </div>
 
-        <!-- Cuarta fila: Botones de Acción -->
-        <div class="flex gap-3 mt-1" v-if="alert.severity !== 'resolved'">
-          <button @click="acknowledgeAlert(alert.id)"
-                  class="p-button p-component p-button-outlined bg-white text-gray-800 border-gray-300 border-round-2xl px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors">
-            <span class="text-sm font-bold">{{ $t('alerting.acknowledge') }}</span>
+        <div class="al-actions" v-if="alert.severity !== 'resolved'">
+          <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeAlert(alert.id)">
+            {{ t('alerting.acknowledge') }}
           </button>
-
-          <button @click="escalateToEmergency(alert.id)"
-                  class="p-button p-component text-white border-none border-round-2xl px-3 py-2 cursor-pointer hover:opacity-90 transition-opacity"
-                  style="background-color: #0b3d2c;">
-            <span class="text-sm font-bold">{{ $t('alerting.escalate') }}</span>
+          <button class="ta-btn ta-btn--sm al-btn-esc" @click="escalateToEmergency(alert.id)">
+            {{ t('alerting.escalate') }}
           </button>
         </div>
+      </article>
+    </TransitionGroup>
 
-      </div>
-    </div>
+    <p v-if="!displayAlerts.length" class="ta-card al-none">{{ t('bell.empty') }}</p>
+
     <ConfirmDialog
         :pt="{
           root: { class: 'border-round-2xl shadow-4 border-none' },
@@ -242,3 +207,57 @@ const escalateToEmergency = async (id) => {
     ></ConfirmDialog>
   </div>
 </template>
+
+<style scoped>
+.al-page{display:grid;gap:16px}
+.al-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 20px;flex-wrap:wrap}
+.al-head__main{display:grid;gap:12px}
+.al-filters{display:flex;gap:8px;flex-wrap:wrap}
+.al-pill{border:1px solid var(--ta-line);background:#fff;color:var(--ta-muted);font:inherit;font-size:11px;font-weight:600;padding:4px 12px;border-radius:999px;cursor:pointer;transition:all .15s ease}
+.al-pill:hover{border-color:var(--ta-brand);color:var(--ta-brand)}
+.al-pill.on{background:var(--ta-ink);border-color:var(--ta-ink);color:#fff}
+.al-pill--critical.on{background:#b42318;border-color:#b42318;color:#fff}
+.al-audit{display:flex;align-items:center;gap:8px}
+.al-date{height:32px;font-size:11.5px;width:auto;padding:0 8px}
+.al-audit-arrow{color:var(--ta-muted);font-size:11px}
+.al-nurse{display:flex;align-items:center;gap:10px}
+.al-count{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
+.al-count.crit{background:var(--ta-danger-bg);color:var(--ta-danger)}
+.al-av{width:30px;height:30px;border-radius:50%;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;font-size:10.5px;font-weight:700}
+.al-nname{font-size:12.5px;font-weight:600;color:var(--ta-text)}
+.al-stack{display:grid;gap:12px}
+.al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line)}
+.al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
+.al-card.sev--warning{border-left-color:#d97706}
+.al-card.sev--escalated{border-left-color:#6d28d9}
+.al-card.sev--resolved{border-left-color:var(--ta-brand)}
+.al-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.al-dot{font-size:8px;color:var(--ta-muted)}
+.sev--critical .al-dot{color:#b42318;animation:al-pulse 1.6s infinite}
+.sev--warning .al-dot{color:#d97706}
+.sev--escalated .al-dot{color:#6d28d9}
+.sev--resolved .al-dot{color:var(--ta-brand)}
+@keyframes al-pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+.al-name{font-size:14px;font-weight:600;color:var(--ta-text)}
+.al-prio{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
+.al-sound{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#b42318;background:#fee4e2;border-radius:999px;padding:3px 9px}
+.al-esc{font-size:10.5px;font-weight:600;color:#6d28d9;background:#ede9fe;border-radius:999px;padding:3px 9px}
+.al-res{font-size:10.5px;color:var(--ta-muted)}
+.al-meta{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
+.al-value{font-size:13px;display:flex;align-items:center;gap:6px}
+.al-val{font-weight:600}
+.sev--critical .al-val{color:#b42318}
+.sev--warning .al-val{color:#d97706}
+.al-safe{color:var(--ta-muted);font-size:11.5px}
+.al-ok{color:var(--ta-brand);display:inline-flex;align-items:center;gap:6px}
+.al-actions{display:flex;gap:10px;margin-top:2px}
+.al-btn-esc{background:var(--ta-ink);border-color:var(--ta-ink);color:#fff}
+.al-btn-esc:hover{background:#000;border-color:#000}
+.al-none{padding:22px;text-align:center;color:var(--ta-muted);font-size:12.5px}
+
+/* animaciones de entrada/salida de las tarjetas */
+.al-enter-active{transition:opacity .3s ease,transform .3s cubic-bezier(.2,.9,.3,1.1)}
+.al-leave-active{transition:opacity .18s ease,transform .18s ease;position:absolute;width:100%}
+.al-enter-from,.al-leave-to{opacity:0;transform:translateY(8px)}
+.al-move{transition:transform .3s ease}
+</style>
