@@ -14,7 +14,7 @@ import { VoucherAssembler } from './voucher.assembler.js'
 const delay = (ms = 200) => new Promise(r => setTimeout(r, ms))
 
 // Shift room codes, used when assigning a consulting room.
-const ROOMS = { MedicinaInterna: 'MI-2', CirugiaGeneral: 'CG-1', Traumatologia: 'TT-3', Ginecologia: 'GI-1', Cardiologia: 'CA-2', Pediatria: 'PD-1', Neurologia: 'NE-1' }
+const ROOMS = { MedicinaInterna: 'MI-2', CirugiaGeneral: 'CG-1', Traumatologia: 'TT-3', Ginecologia: 'GI-1', Cardiologia: 'CA-2', Pediatria: 'PD-1', Neurologia: 'NE-1', TraumaShock: 'TS-1' }
 
 export class SpecialtyAssignmentService {
     constructor() {
