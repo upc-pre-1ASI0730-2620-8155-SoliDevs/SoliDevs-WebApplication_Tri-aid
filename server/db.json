@@ -1,0 +1,426 @@
+{
+  "triage-classifications": [
+    {
+      "id": 1,
+      "episodeId": "EP-261005-0001",
+      "level": "II_Emergency",
+      "suggestedLevel": "II_Emergency",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T11:27:33.551Z",
+      "confirmedAt": "2026-10-05T11:27:36.371Z"
+    },
+    {
+      "id": 2,
+      "episodeId": "EP-261005-0002",
+      "level": "III_Urgent",
+      "suggestedLevel": "III_Urgent",
+      "state": "Confirmed",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T11:27:45.781Z",
+      "confirmedAt": "2026-10-05T11:27:48.620Z"
+    }
+  ],
+  "referrals": [],
+  "vouchers": [],
+  "specialties": [
+    {
+      "id": 1,
+      "key": "MedicinaInterna",
+      "name": "Medicina Interna",
+      "room": "MI-2",
+      "active": true,
+      "minAge": 0,
+      "waiting": 6
+    },
+    {
+      "id": 2,
+      "key": "CirugiaGeneral",
+      "name": "Cirugía General",
+      "room": "CG-1",
+      "active": true,
+      "minAge": 0,
+      "waiting": 2
+    },
+    {
+      "id": 3,
+      "key": "Traumatologia",
+      "name": "Traumatología",
+      "room": "TT-3",
+      "active": true,
+      "minAge": 0,
+      "waiting": 4
+    },
+    {
+      "id": 4,
+      "key": "Ginecologia",
+      "name": "Ginecología",
+      "room": "GI-1",
+      "active": true,
+      "minAge": 0,
+      "sex": "F",
+      "waiting": 1
+    },
+    {
+      "id": 5,
+      "key": "Cardiologia",
+      "name": "Cardiología",
+      "room": "CA-2",
+      "active": true,
+      "minAge": 0,
+      "waiting": 3
+    },
+    {
+      "id": 6,
+      "key": "Pediatria",
+      "name": "Pediatría",
+      "room": "PD-1",
+      "active": true,
+      "maxAge": 14,
+      "waiting": 3
+    },
+    {
+      "id": 7,
+      "key": "Neurologia",
+      "name": "Neurología",
+      "room": "NE-1",
+      "active": false,
+      "minAge": 0,
+      "waiting": 0
+    }
+  ],
+  "patients": [
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "10101010",
+      "names": "Elena",
+      "surnames": "Rojas Nunez",
+      "birth": "1988-05-05",
+      "sex": "F",
+      "phone": "",
+      "address": "",
+      "id": 1
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "20202020",
+      "names": "Marco",
+      "surnames": "Diaz Soto",
+      "birth": "1988-05-05",
+      "sex": "F",
+      "phone": "",
+      "address": "",
+      "id": 2
+    }
+  ],
+  "episodes": [
+    {
+      "id": "EP-261005-0001",
+      "key": "10101010",
+      "arrival": "2026-10-05T11:27:27.721Z",
+      "vitals": {
+        "pa": {
+          "value": "124/93",
+          "source": "auto",
+          "model": "Omron",
+          "time": "06:27"
+        },
+        "spo2": {
+          "value": "91",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "06:27"
+        },
+        "fc": {
+          "value": "119",
+          "source": "auto",
+          "model": "Polar",
+          "time": "06:27"
+        },
+        "temp": {
+          "value": "37.2",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "06:27"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T11:27:33.003Z"
+    },
+    {
+      "id": "EP-261005-0002",
+      "key": "20202020",
+      "arrival": "2026-10-05T11:27:38.887Z",
+      "vitals": {
+        "pa": {
+          "value": "154/66",
+          "source": "auto",
+          "model": "Omron",
+          "time": "06:27"
+        },
+        "spo2": {
+          "value": "95",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "06:27"
+        },
+        "fc": {
+          "value": "84",
+          "source": "auto",
+          "model": "Polar",
+          "time": "06:27"
+        },
+        "temp": {
+          "value": "36.1",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "06:27"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T11:27:45.269Z"
+    }
+  ],
+  "devices": [
+    {
+      "type": "pa",
+      "model": "Omron",
+      "online": true,
+      "lastUse": "",
+      "id": 1
+    },
+    {
+      "type": "spo2",
+      "model": "Nonin",
+      "online": true,
+      "lastUse": "",
+      "id": 2
+    },
+    {
+      "type": "fc",
+      "model": "Polar",
+      "online": true,
+      "lastUse": "",
+      "id": 3
+    },
+    {
+      "type": "temp",
+      "model": "Bosch",
+      "online": true,
+      "lastUse": "",
+      "id": 4
+    },
+    {
+      "type": "pa",
+      "model": "Omron",
+      "online": true,
+      "lastUse": "",
+      "id": 5
+    },
+    {
+      "type": "spo2",
+      "model": "Nonin",
+      "online": true,
+      "lastUse": "",
+      "id": 6
+    },
+    {
+      "type": "fc",
+      "model": "Polar",
+      "online": true,
+      "lastUse": "",
+      "id": 7
+    },
+    {
+      "type": "temp",
+      "model": "Bosch",
+      "online": true,
+      "lastUse": "",
+      "id": 8
+    }
+  ],
+  "symptoms": [
+    {
+      "id": "RFF10",
+      "es": "Dolor abdominal agudo",
+      "en": "Acute abdominal pain",
+      "specialty": "CirugiaGeneral"
+    },
+    {
+      "id": "RFF11",
+      "es": "Dolor abdominal crónico",
+      "en": "Chronic abdominal pain",
+      "specialty": "CirugiaGeneral"
+    },
+    {
+      "id": "TRAU-002",
+      "es": "Fractura de tobillo",
+      "en": "Ankle fracture",
+      "specialty": "Traumatologia"
+    },
+    {
+      "id": "TRAU-005",
+      "es": "Esguince de rodilla",
+      "en": "Knee sprain",
+      "specialty": "Traumatologia"
+    },
+    {
+      "id": "TRAU-009",
+      "es": "Traumatismo de cráneo",
+      "en": "Head injury",
+      "specialty": "Neurologia"
+    },
+    {
+      "id": "CARD-001",
+      "es": "Dolor torácico",
+      "en": "Chest pain",
+      "specialty": "Cardiologia"
+    },
+    {
+      "id": "CARD-004",
+      "es": "Palpitaciones",
+      "en": "Palpitations",
+      "specialty": "Cardiologia"
+    },
+    {
+      "id": "NEU-003",
+      "es": "Cefalea intensa",
+      "en": "Severe headache",
+      "specialty": "Neurologia"
+    },
+    {
+      "id": "NEU-007",
+      "es": "Convulsiones",
+      "en": "Seizures",
+      "specialty": "Neurologia"
+    },
+    {
+      "id": "GIN-001",
+      "es": "Dolor pélvico femenino",
+      "en": "Female pelvic pain",
+      "specialty": "Ginecologia"
+    },
+    {
+      "id": "GIN-004",
+      "es": "Sangrado vaginal anormal",
+      "en": "Abnormal vaginal bleeding",
+      "specialty": "Ginecologia"
+    },
+    {
+      "id": "PED-001",
+      "es": "Fiebre en niño",
+      "en": "Fever in child",
+      "specialty": "Pediatria"
+    },
+    {
+      "id": "PED-005",
+      "es": "Vómitos en lactante",
+      "en": "Vomiting in infant",
+      "specialty": "Pediatria"
+    },
+    {
+      "id": "MED-002",
+      "es": "Fiebre persistente en adulto",
+      "en": "Persistent fever in adult",
+      "specialty": "MedicinaInterna"
+    },
+    {
+      "id": "MED-006",
+      "es": "Deshidratación",
+      "en": "Dehydration",
+      "specialty": "MedicinaInterna"
+    },
+    {
+      "id": "MED-009",
+      "es": "Crisis asmática",
+      "en": "Asthma attack",
+      "specialty": "MedicinaInterna"
+    }
+  ],
+  "alerts": [
+    {
+      "id": 1,
+      "patientName": "Rojas Nunez, Elena",
+      "priority": "III",
+      "vitalSign": "SpO2",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "91 %",
+      "safeRange": "94-100 %",
+      "severity": "critical",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:33.004Z"
+    },
+    {
+      "id": 2,
+      "patientName": "Rojas Nunez, Elena",
+      "priority": "III",
+      "vitalSign": "Frecuencia cardíaca",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "119 lpm",
+      "safeRange": "60-100 lpm",
+      "severity": "warning",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:33.004Z"
+    },
+    {
+      "id": 3,
+      "patientName": "Rojas Nunez, Elena",
+      "priority": "III",
+      "vitalSign": "pad",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "93 mmHg",
+      "safeRange": "",
+      "severity": "warning",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:33.004Z"
+    },
+    {
+      "id": 4,
+      "patientName": "Rojas Nunez, Elena",
+      "priority": "II",
+      "vitalSign": "Clasificación de triaje",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "Prioridad II confirmada",
+      "safeRange": "Atención inmediata",
+      "severity": "critical",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:36.377Z"
+    },
+    {
+      "id": 5,
+      "patientName": "Diaz Soto, Marco",
+      "priority": "III",
+      "vitalSign": "pas",
+      "dni": "20202020",
+      "episode": "EP-261005-0002",
+      "time": "06:27",
+      "value": "154 mmHg",
+      "safeRange": "",
+      "severity": "warning",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:45.269Z"
+    }
+  ]
+}
