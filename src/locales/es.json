@@ -10,7 +10,7 @@
   "alerting.filterUnresolved": "Ocultar resueltas",
   "alerting.generated": "generada",
   "alerting.no": "Cancelar",
-  "alerting.nurse": "Enf.",
+  "alerting.nurse": "Enf. de turno",
   "alerting.resolved": "Resuelta",
   "alerting.safeRange": "rango seguro",
   "alerting.soundActive": "Alerta sonora activa",
@@ -303,5 +303,12 @@
   "vital.spo2.label": "SpO₂",
   "vital.temp.device": "Termómetro",
   "vital.temp.label": "Temperatura",
-  "yrs": "años"
+  "yrs": "años",
+  "alerting.auditFrom": "Desde",
+  "alerting.auditTo": "Hasta",
+  "alerting.generatedCount": "{n} alertas generadas por valores fuera de rango",
+  "devices.sub": "Gestiona y vincula dispositivos médicos para la toma de signos vitales en el expediente del paciente.",
+  "devices.catalog": "Catálogo de dispositivos disponibles",
+  "devices.link": "Vincular",
+  "devices.linked": "Vinculado"
 }

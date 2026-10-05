@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from 'primevue/useconfirm';
 import { AlertingService } from '../../infrastructure/alerting.service.js';
+import { session } from '../../../shared/application/demo-session.js';
 
 const { t } = useI18n();
 const confirm = useConfirm();
@@ -14,36 +15,41 @@ const router = useRouter();
 // Variable para controlar el filtro seleccionado por defecto
 const activeFilter = ref('all');
 
+// Auditoria cronologica por rango de fechas (US29)
+const auditFrom = ref('');
+const auditTo = ref('');
+
+// Notificacion sonora real (US26): bip de dos tonos via WebAudio.
+function playAlertSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.4);
+  } catch (e) { /* audio no disponible */ }
+}
+
+const nurseName = computed(() => session.name || t('alerting.nurse'));
+const nurseInitials = computed(() => (session.name || t('alerting.nurse'))
+  .split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase());
+
 onMounted(async () => {
   try {
     const response = await alertingService.getActiveAlerts();
     activeAlerts.value = response.data;
-
-    // PRUEBA DE ESTRÉS: Simular la llegada de un paciente crítico a los 3 segundos
-    setTimeout(() => {
-      console.log("¡Alerta entrante! Inyectando nuevo paciente crítico...");
-      const nuevaAlerta = {
-        id: 'new-999',
-        patientName: 'Mendoza Ruiz, Carlos',
-        priority: 'I',
-        vitalSign: 'SpO2',
-        dni: '44556677',
-        episode: 'EP-240911-0099',
-        time: '11:15',
-        value: '82 %',
-        safeRange: '94-100 %',
-        severity: 'critical'
-      };
-
-      activeAlerts.value.unshift(nuevaAlerta);
-    }, 3000);
-
+    if (activeAlerts.value.some(a => a.severity === 'critical')) playAlertSound();
   } catch (error) {
     console.error("Error al cargar alertas:", error);
   }
 });
 
-const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved').length);
+const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated').length);
 
 // Lógica combinada: Filtra primero, ordena después
 const displayAlerts = computed(() => {
@@ -55,16 +61,21 @@ const displayAlerts = computed(() => {
     filtered = filtered.filter(a => a.severity !== 'resolved');
   }
 
-  // 2. Ordenamiento inquebrantable (I > II > III y resueltas al fondo)
-  return filtered.sort((a, b) => {
-    if (a.severity === 'resolved' && b.severity !== 'resolved') return 1;
-    if (a.severity !== 'resolved' && b.severity === 'resolved') return -1;
+  // Auditoria: rango de fechas sobre la hora de creacion (US29)
+  if (auditFrom.value) filtered = filtered.filter(a => String(a.createdAt).slice(0, 10) >= auditFrom.value);
+  if (auditTo.value) filtered = filtered.filter(a => String(a.createdAt).slice(0, 10) <= auditTo.value);
+
+  // 2. Orden cronológico dentro de la severidad, severidades agrupadas al frente
+  return [...filtered].sort((a, b) => {
+    const group = { critical: 0, warning: 1, escalated: 2, resolved: 3 };
+    if (group[a.severity] !== group[b.severity]) return group[a.severity] - group[b.severity];
 
     const priorityWeight = { 'I': 3, 'II': 2, 'III': 1 };
     const weightA = priorityWeight[a.priority] || 0;
     const weightB = priorityWeight[b.priority] || 0;
+    if (weightA !== weightB) return weightB - weightA;
 
-    return weightB - weightA;
+    return String(a.createdAt).localeCompare(String(b.createdAt));
   });
 });
 
@@ -83,21 +94,30 @@ const acknowledgeAlert = (id) => {
       severity: 'danger',
       class: 'border-round-2xl px-4 py-2 border-none'
     },
-    accept: () => {
-      const alertIndex = activeAlerts.value.findIndex(a => a.id === id);
-      if (alertIndex !== -1) {
-        activeAlerts.value[alertIndex].severity = 'resolved';
-        if (!activeAlerts.value[alertIndex].value.includes(t('alerting.backToNormal'))) {
-          activeAlerts.value[alertIndex].value = `${t('alerting.backToNormal')} · ${activeAlerts.value[alertIndex].value}`;
+    accept: async () => {
+      const r = await alertingService.acknowledgeAlert(id, session.name || null);
+      if (r.ok) {
+        const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
+        if (i !== -1) {
+          activeAlerts.value[i] = r.data;
+          if (!r.data.value.includes(t('alerting.backToNormal'))) {
+            activeAlerts.value[i].value = `${t('alerting.backToNormal')} · ${r.data.value}`;
+          }
         }
       }
     }
   });
 };
 
-const escalateToEmergency = (id) => {
-  console.log(`Derivando alerta ${id} a Trauma Shock...`);
-  router.push('/reports');
+const escalateToEmergency = async (id) => {
+  const r = await alertingService.escalateAlert(id, {
+    userId: session.name || null,
+    to: 'Trauma Shock'
+  });
+  if (r.ok) {
+    const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
+    if (i !== -1) activeAlerts.value[i] = r.data;
+  }
 };
 </script>
 
@@ -127,6 +147,11 @@ const escalateToEmergency = (id) => {
             {{ $t('alerting.filterUnresolved') }}
           </button>
         </div>
+        <div class="flex gap-2 mt-2 align-items-center">
+          <input type="date" v-model="auditFrom" class="p-inputtext p-component text-xs px-2 py-1 border-round-lg" :aria-label="t('alerting.auditFrom')" />
+          <span class="text-xs text-gray-500">→</span>
+          <input type="date" v-model="auditTo" class="p-inputtext p-component text-xs px-2 py-1 border-round-lg" :aria-label="t('alerting.auditTo')" />
+        </div>
       </div>
 
       <div class="flex align-items-center gap-3">
@@ -135,9 +160,9 @@ const escalateToEmergency = (id) => {
         </span>
         <div class="flex align-items-center gap-2">
           <span class="bg-green-100 text-green-800 font-bold flex align-items-center justify-content-center border-circle text-xs" style="width: 30px; height: 30px;">
-            RP
+            {{ nurseInitials }}
           </span>
-          <span class="font-bold text-gray-800 text-sm">Enf. Rocío Paredes</span>
+          <span class="font-bold text-gray-800 text-sm">{{ nurseName }}</span>
         </div>
       </div>
     </div>
@@ -149,6 +174,7 @@ const escalateToEmergency = (id) => {
            :class="{
              'border-red-400': alert.severity === 'critical',
              'border-orange-400': alert.severity === 'warning',
+             'border-purple-400': alert.severity === 'escalated',
              'border-green-500': alert.severity === 'resolved'
            }">
 
