@@ -2,37 +2,24 @@ import { reactive } from 'vue'
 import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
 
 /**
- * Local reactive-cache state synced with the fake backend (json-server).
- * Every mutation is written through the API, and persisted collections
- * are loaded on app startup (see loadFromServer at the bottom).
+ * Patient Registration state: patients and care episodes, synced with the
+ * fake backend (json-server). Vital signs and devices live in the
+ * Vital Signs Capture bounded context.
  */
-// (handled by the header JSDoc)
-
 const api = new PatientRegistrationApi()
-export const store = reactive({ patients: [], episodes: [], devices: [], seq: 0, devSeq: 0, loaded: false })
+export const store = reactive({ patients: [], episodes: [], seq: 0, loaded: false })
 
-// serializes a reactive proxy into plain JSON for HTTP requests
 const plain = o => JSON.parse(JSON.stringify(o))
 const epResource = ep => {
   const copy = plain(ep)
-  delete copy.patient // the patient lives in its own collection
+  delete copy.patient
   return copy
 }
 
 const pad = n => String(n).padStart(2, '0')
-const rnd = (a, b) => Math.round(a + Math.random() * (b - a))
 
 export const fmtTime = iso => { const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}` }
 export const fmtDateTime = iso => { const d = new Date(iso); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${fmtTime(iso)}` }
-const nowTime = () => fmtTime(new Date().toISOString())
-
-export const vitalTypes = [
-  { key: 'pa', label: 'Presión arterial', device: 'Tensiómetro', unit: 'mmHg', ph: 'Sistólica', lim: [50, 260],
-    sample: () => { const s = rnd(95, 160); return `${s}/${rnd(60, Math.min(100, s - 15))}` } },
-  { key: 'spo2', label: 'SpO₂', device: 'Oxímetro', unit: '%', ph: '98', lim: [50, 100], sample: () => String(rnd(88, 100)) },
-  { key: 'fc', label: 'Frecuencia cardíaca', device: 'Pulsímetro', unit: 'lpm', ph: '72', lim: [20, 250], sample: () => String(rnd(55, 120)) },
-  { key: 'temp', label: 'Temperatura', device: 'Termómetro', unit: '°C', ph: '36.5', lim: [30, 45], sample: () => (35.5 + Math.random() * 3.4).toFixed(1) }
-]
 
 export function ageOf(birth) {
   const [y, m, d] = birth.split('-').map(Number)
@@ -67,7 +54,6 @@ export function registerEpisode(data) {
   }
 
   store.seq++
-  // The prefix changes daily; the sequence follows that day count (no collisions after reloads)
   const prefix = `EP-${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
   const todays = store.episodes.filter(e => String(e.id || '').startsWith(prefix))
   const next = todays.reduce((mx, e) => Math.max(mx, parseInt(String(e.id).split('-')[2]) || 0), 0) + 1
@@ -80,87 +66,10 @@ export function registerEpisode(data) {
 
 export const findEpisode = id => store.episodes.find(e => e.id === id)
 
-// TODO: replace with a backend query once the real database exists
 export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
 
 /**
- * Links a measurement device and persists it. The local temporary id is
- * replaced by the backend-assigned id once the create request resolves.
- * @param {string} type - Vital type the device measures (pa, spo2, fc, temp).
- * @param {string} model - Device brand and model.
- */
-export function addDevice(type, model) {
-  const device = { type, model, online: true, lastUse: '' }
-  store.devices.push(device)
-  api.createDevice(plain(device)).then(r => { device.id = r.data.id }).catch(console.error)
-}
-/**
- * Unlinks a measurement device and deletes it from the backend.
- * @param {string|number} id - Device id.
- */
-/**
- * Assigns a free device to an episode (patient monitoring session). While
- * assigned, the device cannot monitor another patient and its readings
- * only feed this episode.
- * @param {Object} ep - Target episode.
- * @param {string|number} deviceId - Device to assign.
- * @returns {{ok: boolean, error?: string, data?: Object}} Fails when the
- * device is already monitoring another episode.
- */
-export function linkDeviceToEpisode(ep, deviceId) {
-  const d = store.devices.find(x => String(x.id) === String(deviceId))
-  if (!d) return { ok: false, error: 'devices.err.notFound' }
-  if (d.linkedEpisode && d.linkedEpisode !== ep.id) {
-    return { ok: false, error: 'devices.err.busy' }
-  }
-  d.linkedEpisode = ep.id
-  d.linkedAt = new Date().toISOString()
-  if (!String(d.id).startsWith('tmp-')) api.updateDevice(d.id, plain(d)).catch(console.error)
-  return { ok: true, data: d }
-}
-
-/**
- * Releases a device from its episode: it goes back to the free inventory.
- * @param {Object} ep - Episode releasing the device.
- * @param {string|number} deviceId - Device to release.
- */
-export function unlinkDeviceFromEpisode(ep, deviceId) {
-  const d = store.devices.find(x => String(x.id) === String(deviceId))
-  if (!d || d.linkedEpisode !== ep.id) return
-  delete d.linkedEpisode
-  delete d.linkedAt
-  if (!String(d.id).startsWith('tmp-')) api.updateDevice(d.id, plain(d)).catch(console.error)
-}
-
-/**
- * Devices currently assigned to an episode.
- * @param {string} episodeId
- * @returns {Array<Object>} Linked devices.
- */
-export const linkedDevices = episodeId => store.devices.filter(d => d.linkedEpisode === episodeId)
-
-/**
- * Toggles (and persists) the online/offline state of a linked device.
- * @param {string|number} id - Device id.
- */
-export function setDeviceOnline(id, online) {
-  const d = store.devices.find(x => String(x.id) === String(id))
-  if (!d) return
-  d.online = online
-  if (!String(id).startsWith('tmp-')) {
-    api.updateDevice(id, plain(d)).catch(console.error)
-  }
-}
-
-export function removeDevice(id) {
-  store.devices = store.devices.filter(d => d.id !== id)
-  if (!String(id).startsWith('tmp-')) api.deleteDevice(id).catch(console.error)
-}
-
-// Simulation: there is no real hardware yet
-/**
- * Persists the current episode state (vitals, confirmation flags and any
- * classification metadata) to the fake backend.
+ * Persists the current episode state to the fake backend.
  * @param {Object} ep - Episode to persist.
  */
 export function saveEpisode(ep) {
@@ -168,64 +77,23 @@ export function saveEpisode(ep) {
 }
 
 /**
- * Produces a simulated automatic reading for the device type and stores it
- * in the episode vitals. The episode is persisted afterwards.
- * @param {Object} ep - Episode receiving the reading.
- * @param {Object} d - Linked device ({ type, model, online }).
- */
-export function readFromDevice(ep, d) {
-  if (ep.confirmed || !d.online) return
-  const t = vitalTypes.find(x => x.key === d.type)
-  const time = nowTime()
-  ep.vitals[d.type] = { value: t.sample(), source: 'auto', model: d.model, time }
-  d.lastUse = time
-}
-/**
- * Stores a manually entered vital sign value in the episode and persists it.
- * @param {Object} ep - Episode receiving the value.
- * @param {string} key - Vital type key (pa, spo2, fc, temp).
- * @param {string} value - Manually entered value.
- */
-export function setManual(ep, key, value) {
-  ep.vitals[key] = { value, source: 'manual', time: nowTime() }
-  saveEpisode(ep)
-}
-
-/**
- * Removes a vital sign reading from the episode and persists the change.
- * @param {Object} ep - Episode whose reading is removed.
- * @param {string} key - Vital type key to clear.
- */
-export function clearVital(ep, key) {
-  delete ep.vitals[key]
-  saveEpisode(ep)
-}
-
-/**
- * Loads patients, episodes and devices from the fake backend into the
- * reactive store before the app mounts, and re-links every episode with
- * its patient record (the episode resource does not duplicate patient data).
+ * Loads patients and episodes from the fake backend into the reactive
+ * store before the app mounts, and re-links every episode with its
+ * patient record.
  * @returns {Promise<void>}
  */
 export async function loadFromServer() {
   try {
-    const [pts, eps, devs] = await Promise.all([api.getPatients(), api.getEpisodes(), api.getDevices()])
+    const [pts, eps] = await Promise.all([api.getPatients(), api.getEpisodes()])
     store.patients = pts.data || []
     store.episodes = eps.data || []
-    store.devices = devs.data || []
-    // re-link each episode with its patient (the episode resource does not
-    // duplicate patient data)
     for (const e of store.episodes) {
       e.patient = store.patients.find(pt => String(pt.dni) === String(e.key))
         || store.patients.find(pt => String(pt.id) === String(e.key)) || e.patient
     }
-    store.devSeq = store.devices.reduce((mx, d) => {
-      const n = parseInt(String(d.id))
-      return String(d.id || '').startsWith('tmp-') || isNaN(n) ? mx : Math.max(mx, n)
-    }, 0)
     store.loaded = true
   } catch (e) {
-    console.error('No se pudo cargar la data persistida:', e)
+    console.error('Could not load persisted data:', e)
     store.loaded = true
   }
 }

@@ -1,6 +1,7 @@
 ﻿<script setup>
 import { ref } from 'vue'
-import { store, vitalTypes, addDevice, removeDevice, setDeviceOnline } from '../../../patient-registration/application/patient-store.js'
+import { deviceStore as store, addDevice, removeDevice, setDeviceOnline } from '../../application/device-store.js'
+import { DeviceType as vitalTypes } from '../../domain/model/device-type.js'
 import { t } from '../../../shared/application/i18n.js'
 import { notify } from '../../../shared/application/toast-store.js'
 
