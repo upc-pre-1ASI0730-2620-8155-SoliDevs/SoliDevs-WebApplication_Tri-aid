@@ -61,15 +61,15 @@ onMounted(async () => {
   } catch (e) { console.error(e) }
 })
 
-// El formulario de vinculacion se cierra al cambiar de pestaña
-watch(tab, () => closeForm())
-
 const tabs = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
   { id: 'data', label: t('pf.tab.data') },
   { id: 'history', label: t('pf.tab.history') }
 ])
 const tab = ref('vitals')
+
+// El formulario de vinculacion se cierra al cambiar de pestaña
+watch(tab, () => closeForm())
 
 const icons = {
   pa: '<circle cx="12" cy="12" r="9"/><path d="M12 12l4-3"/>',
@@ -83,6 +83,7 @@ const vLabel = k => t('vital.' + k + '.label')
 /* ---------- Dispositivos ---------- */
 // Vinculacion desde el inventario de la vista Devices (US12):
 // solo equipos libres; un instrumento apagado o sin senal falla (escenario 2).
+const showForm = ref(false)
 const freeDevices = computed(() => store.devices.filter(d => !d.linkedEpisode))
 const pickId = ref(null)
 const pickedDevice = computed(() => freeDevices.value.find(d => String(d.id) === String(pickId.value)) || null)
