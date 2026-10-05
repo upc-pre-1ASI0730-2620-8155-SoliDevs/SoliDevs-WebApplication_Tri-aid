@@ -24,10 +24,6 @@ const icons = {
 
 const getVitalInfo = (key) => vitalTypes.find(v => v.key === key) || {}
 
-function isLinked(model) {
-  return store.devices.some(d => d.model === model)
-}
-
 function handleAddCustom() {
   if (!newModel.value.trim()) {
     notify({ type: 'error', title: t('pf.errModel') })
@@ -36,12 +32,6 @@ function handleAddCustom() {
   addDevice(newType.value, newModel.value.trim())
   notify({ type: 'success', title: t('devices.toastLinked') })
   newModel.value = ''
-}
-
-function quickLink(template) {
-  if (isLinked(template.model)) return
-  addDevice(template.type, template.model)
-  notify({ type: 'success', title: t('devices.toastLinkedModel', { model: template.model }) })
 }
 
 function handleRemove(id) {
@@ -60,27 +50,6 @@ function toggleOnline(d) {
     <section class="ta-card fi-in" style="--d:0">
       <h3 class="ta-h">{{ t('nav.devices') }}</h3>
       <p class="ta-sub">{{ t('devices.sub') }}</p>
-    </section>
-
-    <!-- Catálogo de Dispositivos Recomendados / Predeterminados -->
-    <section class="ta-card fi-in" style="--d:1">
-      <h4 class="dev-subtitle">{{ t('devices.catalog') }}</h4>
-      <div class="dev-templates-grid">
-        <div v-for="item in defaultTemplates" :key="item.model" class="dev-template-card">
-          <div class="dev-ico"><svg viewBox="0 0 24 24" v-html="icons[item.type]"></svg></div>
-          <div class="dev-template-info">
-            <b>{{ getVitalInfo(item.type).device }}</b>
-            <small>{{ item.model }} ({{ getVitalInfo(item.type).unit }})</small>
-          </div>
-          <button
-              class="ta-btn ta-btn--sm"
-              :class="{ 'ta-btn--ghost': isLinked(item.model) }"
-              :disabled="isLinked(item.model)"
-              @click="quickLink(item)">
-            {{ isLinked(item.model) ? t('devices.linked') : t('devices.link') }}
-          </button>
-        </div>
-      </div>
     </section>
 
     <!-- Formulario para Vincular Dispositivo Personalizado -->
