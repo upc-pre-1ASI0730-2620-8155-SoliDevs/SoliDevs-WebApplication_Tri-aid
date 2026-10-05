@@ -354,5 +354,6 @@
   "pf.pickDevice": "Available devices to link",
   "pf.linkFail": "The instrument is off or without signal. Linking failed.",
   "pf.linkedOk": "Device linked to the episode",
-  "pf.noFreeDevices": "No free devices in the inventory. Link them from the Devices view."
+  "pf.noFreeDevices": "No free devices in the inventory. Link them from the Devices view.",
+  "pf.chooseDevice": "Choose a device…"
 }
