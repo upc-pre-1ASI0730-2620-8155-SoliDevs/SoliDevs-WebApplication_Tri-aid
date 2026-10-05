@@ -7,6 +7,8 @@ import { loadFromServer } from './patient-registration/application/patient-store
 
 import PrimeVue from 'primevue/config'
 import Material from '@primeuix/themes/material'
+import ConfirmationService from "primevue/confirmationservice";
+import ConfirmDialog from 'primevue/confirmdialog'
 import 'primeflex/primeflex.css'
 import 'primeicons/primeicons.css'
 
@@ -22,6 +24,9 @@ app.use(PrimeVue, {
         }
     }
 })
+
+app.use(ConfirmationService)
+app.component('ConfirmDialog', ConfirmDialog)
 
 router.isReady().then(async () => {
     await loadFromServer()
