@@ -81,15 +81,21 @@ const vLabel = k => t('vital.' + k + '.label')
 // Vinculacion desde el inventario de la vista Devices (US12):
 // solo equipos libres; un instrumento apagado o sin senal falla (escenario 2).
 const freeDevices = computed(() => store.devices.filter(d => !d.linkedEpisode))
+const pickId = ref(null)
+const pickedDevice = computed(() => freeDevices.value.find(d => String(d.id) === String(pickId.value)) || null)
 
 function link(d) {
+  if (!d) return
   if (d.linkedEpisode) return
   if (!d.online) {
     notify({ type: 'error', title: t('pf.linkFail') })
     return
   }
   const r = linkDeviceToEpisode(ep.value, d.id)
-  if (r.ok) notify({ type: 'success', title: t('pf.linkedOk') })
+  if (r.ok) {
+    pickId.value = null
+    notify({ type: 'success', title: t('pf.linkedOk') })
+  }
 }
 function closeForm() { showForm.value = false; dErr.value = false; dForm.model = '' }
 
@@ -204,23 +210,21 @@ function rejectReadings() {
               <div class="fd-info"><b>{{ devName(d.type) }} · {{ d.model }}</b><small>{{ d.lastUse ? t('pf.lastUse', { time: d.lastUse }) : t('pf.noReads') }}</small></div>
               <button class="fd-badge" :class="d.online ? 'on' : 'off'" :title="t('pf.toggleTitle')" @click="d.online = !d.online; setDeviceOnline(d.id, d.online)"><i></i>{{ d.online ? t('pf.connected') : t('pf.disconnected') }}</button>
               <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="!d.online || ep.confirmed" @click="readFromDevice(ep, d)">{{ t('pf.simulate') }}</button>
-              <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="ep.confirmed" @click="unlinkDeviceFromEpisode(ep.value, d.id); notify({ type: 'info', title: t('devices.toastUnlinked') })">{{ t('pf.unlink') }}</button>
+              <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="ep.confirmed" @click="unlinkDeviceFromEpisode(ep, d.id); notify({ type: 'info', title: t('devices.toastUnlinked') })">{{ t('pf.unlink') }}</button>
             </li>
           </TransitionGroup>
           <p v-if="ep && !linkedDevices(ep.id).length" class="fd-empty">{{ t('pf.noDevices') }}</p>
 
-          <template v-if="freeDevices.length">
-            <p class="fd-pick">{{ t('pf.pickDevice') }}</p>
-            <ul class="fd-picklist">
-              <li v-for="d in freeDevices" :key="d.id">
-                <span class="fd-ico"><svg viewBox="0 0 24 24" v-html="icons[d.type]"></svg></span>
-                <div class="fd-info"><b>{{ devName(d.type) }} · {{ d.model }}</b>
-                  <small>{{ d.online ? t('pf.connected') : t('pf.disconnected') }}</small>
-                </div>
-                <button class="ta-btn ta-btn--sm" @click="link(d)">{{ t('pf.linkBtn') }}</button>
-              </li>
-            </ul>
-          </template>
+          <div v-if="freeDevices.length" class="fd-form fd-pick">
+            <select class="ta-select" v-model="pickId" :aria-label="t('pf.pickDevice')">
+              <option v-for="d in freeDevices" :key="d.id" :value="d.id">
+                {{ devName(d.type) }} · {{ d.model }} ({{ d.online ? t('pf.connected') : t('pf.disconnected') }})
+              </option>
+            </select>
+            <button class="ta-btn ta-btn--sm" :disabled="!pickedDevice || !pickedDevice.online" @click="link(pickedDevice)">
+              <i class="pi pi-link"></i>{{ t('pf.linkBtn') }}
+            </button>
+          </div>
           <p v-else-if="!ep.confirmed" class="fd-empty">{{ t('pf.noFreeDevices') }}</p>
         </section>
 
@@ -342,10 +346,9 @@ function rejectReadings() {
 .fd-x{border:0;background:none;font-size:20px;line-height:1;color:var(--ta-muted);cursor:pointer;transition:color .2s}
 .fd-x:hover{color:var(--ta-danger)}
 .fd-empty{margin:16px 0 0;font-size:12px;color:var(--ta-muted);text-align:center}
-.fd-pick{margin:12px 0 0;font-size:11.5px;color:var(--ta-muted)}
-.fd-picklist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
-.fd-picklist li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px dashed var(--ta-line);border-radius:10px;background:#fff;flex-wrap:wrap}
-.fd-picklist .ta-btn{margin-left:auto}
+.fd-pick{display:flex;gap:10px;align-items:center;margin-top:14px}
+.fd-pick .ta-select{width:auto;min-width:280px;height:38px}
+.fd-pick .ta-btn{white-space:nowrap;height:38px}
 
 .fv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
 .fv-card{background:#fff;border:1px solid var(--ta-line);border-radius:12px;padding:14px;display:grid;gap:9px;align-content:start;animation:ta-rise .55s calc(var(--i)*.09s + .1s) both;transition:border-color .3s,background .3s}
