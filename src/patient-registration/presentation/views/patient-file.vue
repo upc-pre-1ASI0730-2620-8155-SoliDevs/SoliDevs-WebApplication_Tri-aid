@@ -215,17 +215,22 @@ function rejectReadings() {
           </TransitionGroup>
           <p v-if="ep && !linkedDevices(ep.id).length" class="fd-empty">{{ t('pf.noDevices') }}</p>
 
-          <div v-if="freeDevices.length" class="fd-form fd-pick">
-            <select class="ta-select" v-model="pickId" :aria-label="t('pf.pickDevice')">
-              <option v-for="d in freeDevices" :key="d.id" :value="d.id">
-                {{ devName(d.type) }} · {{ d.model }} ({{ d.online ? t('pf.connected') : t('pf.disconnected') }})
-              </option>
-            </select>
-            <button class="ta-btn ta-btn--sm" :disabled="!pickedDevice || !pickedDevice.online" @click="link(pickedDevice)">
-              <i class="pi pi-link"></i>{{ t('pf.linkBtn') }}
-            </button>
+          <div class="fd-form" :class="{ open: showForm }">
+            <div>
+              <div class="fd-form__in">
+                <select class="ta-select" v-model="pickId" :aria-label="t('pf.pickDevice')">
+                  <option :value="null" disabled>{{ t('pf.chooseDevice') }}</option>
+                  <option v-for="d in freeDevices" :key="d.id" :value="d.id">
+                    {{ devName(d.type) }} · {{ d.model }}
+                  </option>
+                </select>
+                <button class="ta-btn" @click="link">{{ t('pf.linkBtn') }}</button>
+                <button class="ta-btn ta-btn--ghost" @click="closeForm">{{ t('pf.cancel') }}</button>
+                <small v-if="linkErr" class="ta-err fd-err">{{ linkErr }}</small>
+              </div>
+            </div>
           </div>
-          <p v-else-if="!ep.confirmed" class="fd-empty">{{ t('pf.noFreeDevices') }}</p>
+          <p v-if="showForm && !freeDevices.length" class="fd-empty">{{ t('pf.noFreeDevices') }}</p>
         </section>
 
         <div class="fv-grid">
