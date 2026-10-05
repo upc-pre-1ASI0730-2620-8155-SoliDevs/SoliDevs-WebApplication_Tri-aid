@@ -1,6 +1,7 @@
 const soon = () => import('../shared/presentation/views/coming-soon.vue')
 import triageClassificationRoutes from '../triage-classification/presentation/triage-classification-routes.js'
 import specialtyAssignmentRoutes from '../specialty-assignment/presentation/specialty-assignment-routes.js'
+import reportsRoutes from '../reports/presentation/reports-routes.js'
 
 export default [
   { path: '/', redirect: '/login' },
@@ -13,7 +14,7 @@ export default [
   { path: '/triage-classification', name: 'triage-classification-bc', children: triageClassificationRoutes },
   { path: '/specialty-assignment', name: 'specialty-assignment-bc', children: specialtyAssignmentRoutes },
   { path: '/alerting', component: () => import('../alerting/presentation/views/alerting-center-view.vue'), meta: { titleKey: 'nav.alerts' } },
-  { path: '/reports', component: soon, meta: { titleKey: 'nav.reports' } },
+  { path: '/reports', name: 'reports-bc', children: reportsRoutes },
   { path: '/devices', component: () => import('../devices/presentation/views/devices-view.vue'), meta: { titleKey: 'nav.devices' } },
   { path: '/subscriptions', component: soon, meta: { titleKey: 'nav.subscription' } }
 ]
