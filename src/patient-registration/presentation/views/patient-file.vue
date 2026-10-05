@@ -8,6 +8,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital, saveEpisode } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
+import { nt158Engine } from '../../../triage-classification/domain/services/nt158-engine.js'
+import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
+import { alertStore } from '../../../alerting/application/alert-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 
 const route = useRoute()
@@ -126,13 +129,27 @@ function saveManual(vt) {
 
 /* ---------- Confirmar / rechazar ---------- */
 function say(m, bad = false) { notify({ type: bad ? 'error' : 'info', title: m }) }
-function confirmReadings() {
+async function confirmReadings() {
   const missing = vitalTypes.filter(x => !ep.value.vitals[x.key]).map(x => vLabel(x.key))
   if (missing.length) { say(t('pf.missing', { list: missing.join(', ') }), true); return }
   ep.value.confirmed = true
   ep.value.vitalsConfirmedAt = new Date().toISOString()
   saveEpisode(ep.value)
-  notify({ type: 'success', title: t('pf.confirmed'), detail: t('pf.confirmedDetail') })
+  // Los valores fuera del rango habitual generan alertas reales del episodio.
+  const alerting = new AlertingService()
+  const generated = await alerting.generateForEpisode({
+    episode: { id: ep.value.id, arrival: ep.value.arrival },
+    patient: p.value,
+    outOfRange: nt158Engine.outOfRange(ep.value.vitals)
+  })
+  for (const a of generated.data) alertStore.items.push({ ...a, read: false })
+  notify({
+    type: generated.data.length ? 'success' : 'success',
+    title: t('pf.confirmed'),
+    detail: generated.data.length
+      ? t('alerting.generatedCount', { n: generated.data.length })
+      : t('pf.confirmedDetail')
+  })
   // Once vital signs are confirmed the episode moves to priority classification.
   router.push(`/triage-classification/${ep.value.id}`)
 }

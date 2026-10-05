@@ -10,7 +10,7 @@
   "alerting.filterUnresolved": "Hide resolved",
   "alerting.generated": "generated",
   "alerting.no": "Cancel",
-  "alerting.nurse": "Nurse",
+  "alerting.nurse": "On-duty nurse",
   "alerting.resolved": "Resolved",
   "alerting.safeRange": "safe range",
   "alerting.soundActive": "Active sound alert",
@@ -303,5 +303,12 @@
   "vital.spo2.label": "SpO₂",
   "vital.temp.device": "Thermometer",
   "vital.temp.label": "Temperature",
-  "yrs": "years"
+  "yrs": "years",
+  "alerting.auditFrom": "From",
+  "alerting.auditTo": "To",
+  "alerting.generatedCount": "{n} alerts generated from out-of-range values",
+  "devices.sub": "Manage and link medical devices used to capture vital signs in the patient record.",
+  "devices.catalog": "Available device catalog",
+  "devices.link": "Link",
+  "devices.linked": "Linked"
 }

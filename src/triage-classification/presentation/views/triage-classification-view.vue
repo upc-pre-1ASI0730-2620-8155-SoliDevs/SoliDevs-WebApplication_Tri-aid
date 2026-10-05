@@ -6,6 +6,8 @@ import { docLabel } from '../../../patient-registration/application/document-typ
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { session } from '../../../shared/application/demo-session.js'
+import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
+import { alertStore } from '../../../alerting/application/alert-store.js'
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import PriorityBadge from '../components/priority-badge.vue'
 import TriageGuideModal from '../components/triage-guide-modal.vue'
@@ -132,6 +134,17 @@ async function confirmClassification() {
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
   classification.value = r.data
   syncEpisodeLevel()
+  // Prioridad I/II confirmada: alerta critica hacia el centro de alertas.
+  try {
+    const alerting = new AlertingService()
+    const generated = await alerting.generateForEpisode({
+      episode: { id: ep.value.id, arrival: ep.value.arrival },
+      patient: p.value,
+      outOfRange: [],
+      levelCode: levelDisplay(current.value)?.code
+    })
+    for (const a of generated.data) alertStore.items.push({ ...a, read: false })
+  } catch (e) { console.error(e) }
   const min = cycleMinutes(ep.value)
   notify({
     type: 'success',

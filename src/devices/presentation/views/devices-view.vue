@@ -1,6 +1,6 @@
 ﻿<script setup>
 import { ref } from 'vue'
-import { store, vitalTypes, addDevice, removeDevice } from '../../../patient-registration/application/patient-store.js'
+import { store, vitalTypes, addDevice, removeDevice, setDeviceOnline } from '../../../patient-registration/application/patient-store.js'
 import { t } from '../../../shared/application/i18n.js'
 import { notify } from '../../../shared/application/toast-store.js'
 
@@ -50,7 +50,7 @@ function handleRemove(id) {
 }
 
 function toggleOnline(d) {
-  d.online = !d.online
+  setDeviceOnline(d.id, !d.online)
 }
 </script>
 
@@ -59,12 +59,12 @@ function toggleOnline(d) {
     <!-- Encabezado del Módulo de Dispositivos -->
     <section class="ta-card fi-in" style="--d:0">
       <h3 class="ta-h">{{ t('nav.devices') }}</h3>
-      <p class="ta-sub">Gestiona y vincula dispositivos médicos para la toma de signos vitales en el expediente del paciente.</p>
+      <p class="ta-sub">{{ t('devices.sub') }}</p>
     </section>
 
     <!-- Catálogo de Dispositivos Recomendados / Predeterminados -->
     <section class="ta-card fi-in" style="--d:1">
-      <h4 class="dev-subtitle">Catálogo de Dispositivos Disponibles</h4>
+      <h4 class="dev-subtitle">{{ t('devices.catalog') }}</h4>
       <div class="dev-templates-grid">
         <div v-for="item in defaultTemplates" :key="item.model" class="dev-template-card">
           <div class="dev-ico"><svg viewBox="0 0 24 24" v-html="icons[item.type]"></svg></div>
@@ -77,7 +77,7 @@ function toggleOnline(d) {
               :class="{ 'ta-btn--ghost': isLinked(item.model) }"
               :disabled="isLinked(item.model)"
               @click="quickLink(item)">
-            {{ isLinked(item.model) ? 'Vinculado' : 'Vincular' }}
+            {{ isLinked(item.model) ? t('devices.linked') : t('devices.link') }}
           </button>
         </div>
       </div>

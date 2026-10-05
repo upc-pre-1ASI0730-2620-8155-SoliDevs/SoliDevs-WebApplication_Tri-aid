@@ -3,37 +3,28 @@
     {
       "id": 1,
       "episodeId": "EP-261004-0001",
-      "level": "III_Urgent",
-      "suggestedLevel": "III_Urgent",
-      "state": "Confirmed",
+      "level": "V_NonUrgent",
+      "suggestedLevel": "V_NonUrgent",
+      "state": "PendingConfirmation",
       "overriddenBy": null,
       "justification": null,
-      "suggestedAt": "2026-10-04T18:34:05.840Z",
-      "confirmedAt": "2026-10-04T18:34:08.897Z"
-    }
-  ],
-  "referrals": [
+      "suggestedAt": "2026-10-05T00:17:41.182Z",
+      "confirmedAt": null
+    },
     {
-      "id": 1,
-      "episodeId": "EP-261004-0001",
-      "specialty": "Traumatologia",
-      "room": "TT-3",
-      "queuePosition": 5,
-      "state": "Referred",
-      "changeReason": null,
-      "referredAt": "2026-10-04T18:34:14.655Z",
-      "symptom": "TRAU-002 — Ankle fracture"
+      "id": 2,
+      "episodeId": "EP-261004-0002",
+      "level": "II_Emergency",
+      "suggestedLevel": "II_Emergency",
+      "state": "PendingConfirmation",
+      "overriddenBy": null,
+      "justification": null,
+      "suggestedAt": "2026-10-05T00:18:07.566Z",
+      "confirmedAt": null
     }
   ],
-  "vouchers": [
-    {
-      "id": 1,
-      "referralId": 1,
-      "qrCode": "TRI-AID|EP-261004-0001|Traumatologia|TT-3|#5",
-      "channel": "QrPortal",
-      "sentAt": null
-    }
-  ],
+  "referrals": [],
+  "vouchers": [],
   "specialties": [
     {
       "id": 1,
@@ -104,53 +95,82 @@
     {
       "sinDni": false,
       "docType": "dni",
-      "dni": "55667788",
-      "names": "Diego",
-      "surnames": "Ramírez Torres",
-      "birth": "1998-01-15",
+      "dni": "10203040",
+      "names": "Alerta",
+      "surnames": "Test Flujo",
+      "birth": "1980-01-01",
       "sex": "F",
-      "phone": "987111222",
-      "address": "Av. Brasil 900",
+      "phone": "",
+      "address": "",
       "id": 1
     }
   ],
   "episodes": [
     {
       "id": "EP-261004-0001",
-      "key": "55667788",
-      "arrival": "2026-10-04T18:33:59.513Z",
+      "key": "10203040",
+      "arrival": "2026-10-05T00:17:34.872Z",
       "vitals": {
         "pa": {
-          "value": "150/94",
+          "value": "113/84",
           "source": "auto",
           "model": "Omron",
-          "time": "13:34"
+          "time": "19:17"
         },
         "spo2": {
-          "value": "94",
+          "value": "100",
           "source": "auto",
           "model": "Nonin",
-          "time": "13:34"
+          "time": "19:17"
         },
         "fc": {
-          "value": "55",
+          "value": "79",
           "source": "auto",
           "model": "Polar",
-          "time": "13:34"
+          "time": "19:17"
         },
         "temp": {
-          "value": "37.1",
+          "value": "38.0",
           "source": "auto",
           "model": "Bosch",
-          "time": "13:34"
+          "time": "19:17"
         }
       },
       "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-04T18:34:05.328Z",
-      "classifiedLevel": "III_Urgent",
-      "classifiedLevelCode": "III",
-      "classifiedLevelColor": "#ca8a04",
-      "referred": true
+      "vitalsConfirmedAt": "2026-10-05T00:17:40.670Z"
+    },
+    {
+      "id": "EP-261004-0002",
+      "key": "10203040",
+      "arrival": "2026-10-05T00:17:59.905Z",
+      "vitals": {
+        "pa": {
+          "value": "114/85",
+          "source": "auto",
+          "model": "Omron",
+          "time": "19:18"
+        },
+        "spo2": {
+          "value": "91",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "19:18"
+        },
+        "fc": {
+          "value": "116",
+          "source": "auto",
+          "model": "Polar",
+          "time": "19:18"
+        },
+        "temp": {
+          "value": "37.2",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "19:18"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T00:18:07.019Z"
     }
   ],
   "devices": [
@@ -181,6 +201,34 @@
       "online": true,
       "lastUse": "",
       "id": 4
+    },
+    {
+      "type": "pa",
+      "model": "Omron",
+      "online": true,
+      "lastUse": "",
+      "id": 5
+    },
+    {
+      "type": "spo2",
+      "model": "Nonin",
+      "online": true,
+      "lastUse": "",
+      "id": 6
+    },
+    {
+      "type": "fc",
+      "model": "Polar",
+      "online": true,
+      "lastUse": "",
+      "id": 7
+    },
+    {
+      "type": "temp",
+      "model": "Bosch",
+      "online": true,
+      "lastUse": "",
+      "id": 8
     }
   ],
   "symptoms": [
@@ -279,6 +327,40 @@
       "es": "Crisis asmática",
       "en": "Asthma attack",
       "specialty": "MedicinaInterna"
+    }
+  ],
+  "alerts": [
+    {
+      "id": 1,
+      "patientName": "Test Flujo, Alerta",
+      "priority": "III",
+      "vitalSign": "SpO2",
+      "dni": "10203040",
+      "episode": "EP-261004-0002",
+      "time": "00:18",
+      "value": "91 %",
+      "safeRange": "94-100 %",
+      "severity": "resolved",
+      "acknowledgedAt": "2026-10-05T00:18:14.344Z",
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T00:18:07.020Z"
+    },
+    {
+      "id": 2,
+      "patientName": "Test Flujo, Alerta",
+      "priority": "III",
+      "vitalSign": "Frecuencia cardíaca",
+      "dni": "10203040",
+      "episode": "EP-261004-0002",
+      "time": "00:18",
+      "value": "116 lpm",
+      "safeRange": "60-100 lpm",
+      "severity": "warning",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T00:18:07.020Z"
     }
   ]
 }
