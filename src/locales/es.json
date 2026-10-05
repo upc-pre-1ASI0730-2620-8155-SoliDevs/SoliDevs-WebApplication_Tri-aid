@@ -350,5 +350,9 @@
   "reports.thVital": "Signo",
   "reports.thValue": "Valor",
   "reports.thSeverity": "Severidad",
-  "reports.noAlerts": "Sin alertas en el rango seleccionado."
+  "reports.noAlerts": "Sin alertas en el rango seleccionado.",
+  "pf.pickDevice": "Dispositivos disponibles para vincular",
+  "pf.linkFail": "El instrumento está apagado o sin señal. La vinculación falló.",
+  "pf.linkedOk": "Dispositivo vinculado al episodio",
+  "pf.noFreeDevices": "No hay dispositivos libres en el inventario. Vincúlalos desde la vista Devices."
 }
