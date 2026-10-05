@@ -61,9 +61,10 @@ const displayAlerts = computed(() => {
     filtered = filtered.filter(a => a.severity !== 'resolved');
   }
 
-  // Auditoria: rango de fechas sobre la hora de creacion (US29)
-  if (auditFrom.value) filtered = filtered.filter(a => String(a.createdAt).slice(0, 10) >= auditFrom.value);
-  if (auditTo.value) filtered = filtered.filter(a => String(a.createdAt).slice(0, 10) <= auditTo.value);
+  // Auditoria: rango de fechas sobre la hora LOCAL de creacion (US29)
+  const localDay = a => new Date(a.createdAt).toLocaleDateString('en-CA');
+  if (auditFrom.value) filtered = filtered.filter(a => localDay(a) >= auditFrom.value);
+  if (auditTo.value) filtered = filtered.filter(a => localDay(a) <= auditTo.value);
 
   // 2. Orden cronológico dentro de la severidad, severidades agrupadas al frente
   return [...filtered].sort((a, b) => {
