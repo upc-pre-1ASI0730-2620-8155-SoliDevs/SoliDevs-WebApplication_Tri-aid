@@ -1,0 +1,12 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "referrals": {
+      ".indexOn": ["episodeId"]
+    },
+    "triage-classifications": {
+      ".indexOn": ["episodeId"]
+    }
+  }
+}
