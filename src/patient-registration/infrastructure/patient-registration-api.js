@@ -32,4 +32,5 @@ export class PatientRegistrationApi extends BaseApi {
     getDevices() { return this.#devicesEndpoint.getAll() }
     createDevice(resource) { return this.#devicesEndpoint.create(resource) }
     deleteDevice(id) { return this.#devicesEndpoint.delete(id) }
+    updateDevice(id, resource) { return this.#devicesEndpoint.update(id, resource) }
 }
