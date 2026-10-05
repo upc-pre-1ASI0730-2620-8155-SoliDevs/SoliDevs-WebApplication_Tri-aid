@@ -4,6 +4,7 @@ import App from './app.vue'
 import router from './router/index.js'
 import { i18n } from './shared/application/i18n.js'
 import { loadFromServer } from './patient-registration/application/patient-store.js'
+import { loadDevices } from './vital-signs-capture/application/device-store.js'
 
 import PrimeVue from 'primevue/config'
 import Material from '@primeuix/themes/material'
@@ -29,7 +30,7 @@ app.use(ConfirmationService)
 app.component('ConfirmDialog', ConfirmDialog)
 
 router.isReady().then(async () => {
-    await loadFromServer()
+    await Promise.all([loadFromServer(), loadDevices()])
     app.mount('#app')
 })
 
