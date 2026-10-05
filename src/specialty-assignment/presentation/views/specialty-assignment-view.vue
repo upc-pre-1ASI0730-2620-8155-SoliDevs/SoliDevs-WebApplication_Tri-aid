@@ -8,6 +8,8 @@ import { t } from '../../../shared/application/i18n.js'
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
+import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
+import { releaseEpisodeDevices } from '../../../vital-signs-capture/application/vitals-store.js'
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import SymptomAutocomplete from '../components/symptom-autocomplete.vue'
 import QueueChips from '../components/queue-chips.vue'
@@ -17,6 +19,7 @@ import { SpecialtyAssignmentService } from '../../infrastructure/specialty-assig
 const route = useRoute()
 const router = useRouter()
 const service = new SpecialtyAssignmentService()
+const alertingService = new AlertingService()
 const triageApi = new TriageApi()
 
 const id = route.params.episode
@@ -57,8 +60,8 @@ const specName = key => t('referral.spec.' + key)
 
 async function consult() {
   symptomErr.value = false; sugErr.value = ''
-  consulting.value = true
   if (!selectedSymptom.value) { symptomErr.value = true; return }
+  consulting.value = true
   const r = await service.suggestSpecialty({
     symptomId: selectedSymptom.value.id,
     symptom: selectedSymptom.value.es,
@@ -96,6 +99,11 @@ async function refer() {
   referral.value = r.data
   ep.value.referred = true
   saveEpisode(ep.value)
+  // Derivacion completada: alertas resueltas y dispositivos liberados
+  try {
+    await alertingService.resolveByEpisode(ep.value.id)
+    releaseEpisodeDevices(ep.value.id)
+  } catch (e) { console.error(e) }
   await loadQueues()
   await makeVoucher()
 }
