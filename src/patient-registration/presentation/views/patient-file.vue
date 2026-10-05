@@ -86,6 +86,7 @@ const vLabel = k => t('vital.' + k + '.label')
 const showForm = ref(false)
 const freeDevices = computed(() => store.devices.filter(d => !d.linkedEpisode))
 const pickId = ref(null)
+const linkErr = ref('')
 const pickedDevice = computed(() => freeDevices.value.find(d => String(d.id) === String(pickId.value)) || null)
 
 function link(d) {
@@ -98,10 +99,11 @@ function link(d) {
   const r = linkDeviceToEpisode(ep.value, d.id)
   if (r.ok) {
     pickId.value = null
+    showForm.value = false
     notify({ type: 'success', title: t('pf.linkedOk') })
   }
 }
-function closeForm() { showForm.value = false; dErr.value = false; dForm.model = '' }
+function closeForm() { showForm.value = false; pickId.value = null; linkErr.value = '' }
 
 /* ---------- Signos vitales ---------- */
 const dev = k => store.devices.find(d => d.type === k && d.online) || store.devices.find(d => d.type === k)
@@ -221,16 +223,23 @@ function rejectReadings() {
 
           <div class="fd-form" :class="{ open: showForm }">
             <div>
-              <div class="fd-form__in">
+              <div class="fd-form__in fd-form__pickrow">
                 <select class="ta-select" v-model="pickId" :aria-label="t('pf.pickDevice')">
                   <option :value="null" disabled>{{ t('pf.chooseDevice') }}</option>
                   <option v-for="d in freeDevices" :key="d.id" :value="d.id">
                     {{ devName(d.type) }} · {{ d.model }}
                   </option>
                 </select>
-                <button class="ta-btn" @click="link">{{ t('pf.linkBtn') }}</button>
-                <button class="ta-btn ta-btn--ghost" @click="closeForm">{{ t('pf.cancel') }}</button>
+                <button class="ta-btn ta-btn--sm" :disabled="!pickedDevice || !pickedDevice.online" @click="link">{{ t('pf.linkBtn') }}</button>
+                <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="closeForm">{{ t('pf.cancel') }}</button>
                 <small v-if="linkErr" class="ta-err fd-err">{{ linkErr }}</small>
+                <small v-else-if="pickedDevice && !pickedDevice.online" class="fd-status">
+                  <i class="pi pi-circle-fill" style="color:var(--ta-danger)"></i>
+                  {{ t('pf.disconnected') }}
+                  <button class="fd-conn" @click="pickedDevice.online = true; setDeviceOnline(pickedDevice.id, true)">
+                    <i class="pi pi-power-off"></i>{{ t('pf.turnOn') }}
+                  </button>
+                </small>
               </div>
             </div>
           </div>
@@ -340,6 +349,8 @@ function rejectReadings() {
 .fd-form.open{grid-template-rows:1fr}
 .fd-form>div{overflow:hidden;min-height:0}
 .fd-form__in{display:grid;grid-template-columns:190px 1fr auto auto;gap:10px;align-items:start;padding:4px 4px 16px}
+.fd-form__pickrow{grid-template-columns:1fr auto auto;align-items:center}
+.fd-form__pickrow .ta-select{height:38px}
 .fd-err{grid-column:1/-1}
 .fd-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--ta-line)}
 .fd-list li{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--ta-line);flex-wrap:wrap}

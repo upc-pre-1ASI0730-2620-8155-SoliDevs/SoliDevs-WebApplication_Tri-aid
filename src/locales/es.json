@@ -355,5 +355,6 @@
   "pf.linkFail": "El instrumento está apagado o sin señal. La vinculación falló.",
   "pf.linkedOk": "Dispositivo vinculado al episodio",
   "pf.noFreeDevices": "No hay dispositivos libres en el inventario. Vincúlalos desde la vista Devices.",
-  "pf.chooseDevice": "Elegir dispositivo…"
+  "pf.chooseDevice": "Elegir dispositivo…",
+  "pf.turnOn": "Encender"
 }
