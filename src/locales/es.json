@@ -310,5 +310,18 @@
   "devices.sub": "Gestiona y vincula dispositivos médicos para la toma de signos vitales en el expediente del paciente.",
   "devices.catalog": "Catálogo de dispositivos disponibles",
   "devices.link": "Vincular",
-  "devices.linked": "Vinculado"
+  "devices.linked": "Vinculado",
+  "devices.sync": "Dispositivos sincronizados",
+  "devices.manual": "Vincular dispositivo manual",
+  "devices.linkDevice": "Vincular dispositivo",
+  "devices.modelPh": "Ej. Omron X7 Smart",
+  "devices.online": "En línea",
+  "devices.offline": "Desconectado",
+  "devices.unlink": "Desvincular",
+  "devices.empty": "No hay dispositivos vinculados actualmente.",
+  "devices.lastUse": "Última lectura: {time}",
+  "devices.noReads": "Sin lecturas recientes",
+  "devices.toastLinked": "Dispositivo vinculado con éxito",
+  "devices.toastLinkedModel": "Dispositivo {model} vinculado",
+  "devices.toastUnlinked": "Dispositivo desvinculado"
 }

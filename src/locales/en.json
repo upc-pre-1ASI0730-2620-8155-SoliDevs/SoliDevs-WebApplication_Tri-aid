@@ -310,5 +310,18 @@
   "devices.sub": "Manage and link medical devices used to capture vital signs in the patient record.",
   "devices.catalog": "Available device catalog",
   "devices.link": "Link",
-  "devices.linked": "Linked"
+  "devices.linked": "Linked",
+  "devices.sync": "Synced devices",
+  "devices.manual": "Link manual device",
+  "devices.linkDevice": "Link device",
+  "devices.modelPh": "E.g. Omron X7 Smart",
+  "devices.online": "Online",
+  "devices.offline": "Offline",
+  "devices.unlink": "Unlink",
+  "devices.empty": "No devices linked yet.",
+  "devices.lastUse": "Last reading: {time}",
+  "devices.noReads": "No recent readings",
+  "devices.toastLinked": "Device linked successfully",
+  "devices.toastLinkedModel": "Device {model} linked",
+  "devices.toastUnlinked": "Device unlinked"
 }
