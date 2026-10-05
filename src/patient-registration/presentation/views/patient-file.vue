@@ -5,7 +5,7 @@ import { ClassificationAssembler } from '../../../triage-classification/infrastr
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { useRoute, useRouter } from 'vue-router'
-import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, addDevice, removeDevice, readFromDevice, setManual, clearVital, saveEpisode } from '../../application/patient-store.js'
+import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, readFromDevice, setManual, clearVital, saveEpisode, linkDeviceToEpisode, unlinkDeviceFromEpisode, linkedDevices } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { nt158Engine } from '../../../triage-classification/domain/services/nt158-engine.js'
@@ -78,13 +78,18 @@ const devName = k => t('vital.' + k + '.device')
 const vLabel = k => t('vital.' + k + '.label')
 
 /* ---------- Dispositivos ---------- */
-const showForm = ref(false)
-const dForm = reactive({ type: 'pa', model: '' })
-const dErr = ref(false)
-function link() {
-  if (!dForm.model.trim()) { dErr.value = true; return }
-  addDevice(dForm.type, dForm.model.trim())
-  dForm.model = ''; dErr.value = false; showForm.value = false
+// Vinculacion desde el inventario de la vista Devices (US12):
+// solo equipos libres; un instrumento apagado o sin senal falla (escenario 2).
+const freeDevices = computed(() => store.devices.filter(d => !d.linkedEpisode))
+
+function link(d) {
+  if (d.linkedEpisode) return
+  if (!d.online) {
+    notify({ type: 'error', title: t('pf.linkFail') })
+    return
+  }
+  const r = linkDeviceToEpisode(ep.value, d.id)
+  if (r.ok) notify({ type: 'success', title: t('pf.linkedOk') })
 }
 function closeForm() { showForm.value = false; dErr.value = false; dForm.model = '' }
 
@@ -193,30 +198,29 @@ function rejectReadings() {
             <button class="ta-btn ta-btn--ghost" @click="showForm ? closeForm() : (showForm = true)"><i class="pi pi-sync"></i>{{ t('pf.link') }}</button>
           </div>
 
-          <div class="fd-form" :class="{ open: showForm }">
-            <div>
-              <div class="fd-form__in">
-                <select class="ta-select" v-model="dForm.type" :aria-label="t('pf.devTypeAria')">
-                  <option v-for="vt in vitalTypes" :key="vt.key" :value="vt.key">{{ devName(vt.key) }}</option>
-                </select>
-                <input class="ta-input" v-model="dForm.model" :placeholder="t('pf.brandModelPh')" :aria-label="t('pf.brandModel')" @keyup.enter="link" />
-                <button class="ta-btn" @click="link">{{ t('pf.linkBtn') }}</button>
-                <button class="ta-btn ta-btn--ghost" @click="closeForm">{{ t('pf.cancel') }}</button>
-                <small v-if="dErr" class="ta-err fd-err">{{ t('pf.errModel') }}</small>
-              </div>
-            </div>
-          </div>
-
           <TransitionGroup name="list" tag="ul" class="fd-list">
-            <li v-for="d in store.devices" :key="d.id">
+            <li v-for="d in (ep ? linkedDevices(ep.id) : [])" :key="d.id">
               <span class="fd-ico"><svg viewBox="0 0 24 24" v-html="icons[d.type]"></svg></span>
               <div class="fd-info"><b>{{ devName(d.type) }} · {{ d.model }}</b><small>{{ d.lastUse ? t('pf.lastUse', { time: d.lastUse }) : t('pf.noReads') }}</small></div>
               <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="!d.online || ep.confirmed" @click="readFromDevice(ep, d)">{{ t('pf.simulate') }}</button>
-              <button class="fd-badge" :class="d.online ? 'on' : 'off'" :title="t('pf.toggleTitle')" @click="d.online = !d.online"><i></i>{{ d.online ? t('pf.connected') : t('pf.disconnected') }}</button>
-              <button class="fd-x" :aria-label="t('pf.unlink')" @click="removeDevice(d.id)">×</button>
+              <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="ep.confirmed" @click="unlinkDeviceFromEpisode(ep.value, d.id); notify({ type: 'info', title: t('devices.toastUnlinked') })">{{ t('pf.unlink') }}</button>
             </li>
           </TransitionGroup>
-          <p v-if="!store.devices.length" class="fd-empty">{{ t('pf.noDevices') }}</p>
+          <p v-if="ep && !linkedDevices(ep.id).length" class="fd-empty">{{ t('pf.noDevices') }}</p>
+
+          <template v-if="freeDevices.length">
+            <p class="fd-pick">{{ t('pf.pickDevice') }}</p>
+            <ul class="fd-picklist">
+              <li v-for="d in freeDevices" :key="d.id">
+                <span class="fd-ico"><svg viewBox="0 0 24 24" v-html="icons[d.type]"></svg></span>
+                <div class="fd-info"><b>{{ devName(d.type) }} · {{ d.model }}</b>
+                  <small>{{ d.online ? t('pf.connected') : t('pf.disconnected') }}</small>
+                </div>
+                <button class="ta-btn ta-btn--sm" @click="link(d)">{{ t('pf.linkBtn') }}</button>
+              </li>
+            </ul>
+          </template>
+          <p v-else-if="!ep.confirmed" class="fd-empty">{{ t('pf.noFreeDevices') }}</p>
         </section>
 
         <div class="fv-grid">
@@ -337,6 +341,10 @@ function rejectReadings() {
 .fd-x{border:0;background:none;font-size:20px;line-height:1;color:var(--ta-muted);cursor:pointer;transition:color .2s}
 .fd-x:hover{color:var(--ta-danger)}
 .fd-empty{margin:16px 0 0;font-size:12px;color:var(--ta-muted);text-align:center}
+.fd-pick{margin:12px 0 0;font-size:11.5px;color:var(--ta-muted)}
+.fd-picklist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.fd-picklist li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px dashed var(--ta-line);border-radius:10px;background:#fff;flex-wrap:wrap}
+.fd-picklist .ta-btn{margin-left:auto}
 
 .fv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
 .fv-card{background:#fff;border:1px solid var(--ta-line);border-radius:12px;padding:14px;display:grid;gap:9px;align-content:start;animation:ta-rise .55s calc(var(--i)*.09s + .1s) both;transition:border-color .3s,background .3s}
