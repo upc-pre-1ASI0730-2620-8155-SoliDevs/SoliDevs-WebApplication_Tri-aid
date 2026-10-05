@@ -40,7 +40,7 @@ export class AlertingService {
         const patientName = `${patient.surnames}, ${patient.names}`
         const safeRanges = { spo2: '94-100 %', fc: '60-100 lpm', pa: '100-140 mmHg', temp: '36-38 °C' }
         const labels = { spo2: 'SpO2', fc: 'Frecuencia cardíaca', pa: 'Presión arterial', temp: 'Temperatura' }
-        const time = new Date().toISOString().slice(11, 16)
+        const time = new Date().toTimeString().slice(0, 5)
 
         for (const o of outOfRange) {
             // SpO2 baja se trata como critica; el resto como advertencia.
