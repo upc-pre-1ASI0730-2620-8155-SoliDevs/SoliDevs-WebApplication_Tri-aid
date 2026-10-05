@@ -2,25 +2,25 @@
   "triage-classifications": [
     {
       "id": 1,
-      "episodeId": "EP-261004-0001",
-      "level": "V_NonUrgent",
-      "suggestedLevel": "V_NonUrgent",
-      "state": "PendingConfirmation",
+      "episodeId": "EP-261005-0001",
+      "level": "II_Emergency",
+      "suggestedLevel": "II_Emergency",
+      "state": "Confirmed",
       "overriddenBy": null,
       "justification": null,
-      "suggestedAt": "2026-10-05T00:17:41.182Z",
-      "confirmedAt": null
+      "suggestedAt": "2026-10-05T11:27:33.551Z",
+      "confirmedAt": "2026-10-05T11:27:36.371Z"
     },
     {
       "id": 2,
-      "episodeId": "EP-261004-0002",
-      "level": "II_Emergency",
-      "suggestedLevel": "II_Emergency",
-      "state": "PendingConfirmation",
+      "episodeId": "EP-261005-0002",
+      "level": "III_Urgent",
+      "suggestedLevel": "III_Urgent",
+      "state": "Confirmed",
       "overriddenBy": null,
       "justification": null,
-      "suggestedAt": "2026-10-05T00:18:07.566Z",
-      "confirmedAt": null
+      "suggestedAt": "2026-10-05T11:27:45.781Z",
+      "confirmedAt": "2026-10-05T11:27:48.620Z"
     }
   ],
   "referrals": [],
@@ -95,82 +95,94 @@
     {
       "sinDni": false,
       "docType": "dni",
-      "dni": "10203040",
-      "names": "Alerta",
-      "surnames": "Test Flujo",
-      "birth": "1980-01-01",
+      "dni": "10101010",
+      "names": "Elena",
+      "surnames": "Rojas Nunez",
+      "birth": "1988-05-05",
       "sex": "F",
       "phone": "",
       "address": "",
       "id": 1
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "20202020",
+      "names": "Marco",
+      "surnames": "Diaz Soto",
+      "birth": "1988-05-05",
+      "sex": "F",
+      "phone": "",
+      "address": "",
+      "id": 2
     }
   ],
   "episodes": [
     {
-      "id": "EP-261004-0001",
-      "key": "10203040",
-      "arrival": "2026-10-05T00:17:34.872Z",
+      "id": "EP-261005-0001",
+      "key": "10101010",
+      "arrival": "2026-10-05T11:27:27.721Z",
       "vitals": {
         "pa": {
-          "value": "113/84",
+          "value": "124/93",
           "source": "auto",
           "model": "Omron",
-          "time": "19:17"
-        },
-        "spo2": {
-          "value": "100",
-          "source": "auto",
-          "model": "Nonin",
-          "time": "19:17"
-        },
-        "fc": {
-          "value": "79",
-          "source": "auto",
-          "model": "Polar",
-          "time": "19:17"
-        },
-        "temp": {
-          "value": "38.0",
-          "source": "auto",
-          "model": "Bosch",
-          "time": "19:17"
-        }
-      },
-      "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-05T00:17:40.670Z"
-    },
-    {
-      "id": "EP-261004-0002",
-      "key": "10203040",
-      "arrival": "2026-10-05T00:17:59.905Z",
-      "vitals": {
-        "pa": {
-          "value": "114/85",
-          "source": "auto",
-          "model": "Omron",
-          "time": "19:18"
+          "time": "06:27"
         },
         "spo2": {
           "value": "91",
           "source": "auto",
           "model": "Nonin",
-          "time": "19:18"
+          "time": "06:27"
         },
         "fc": {
-          "value": "116",
+          "value": "119",
           "source": "auto",
           "model": "Polar",
-          "time": "19:18"
+          "time": "06:27"
         },
         "temp": {
           "value": "37.2",
           "source": "auto",
           "model": "Bosch",
-          "time": "19:18"
+          "time": "06:27"
         }
       },
       "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-05T00:18:07.019Z"
+      "vitalsConfirmedAt": "2026-10-05T11:27:33.003Z"
+    },
+    {
+      "id": "EP-261005-0002",
+      "key": "20202020",
+      "arrival": "2026-10-05T11:27:38.887Z",
+      "vitals": {
+        "pa": {
+          "value": "154/66",
+          "source": "auto",
+          "model": "Omron",
+          "time": "06:27"
+        },
+        "spo2": {
+          "value": "95",
+          "source": "auto",
+          "model": "Nonin",
+          "time": "06:27"
+        },
+        "fc": {
+          "value": "84",
+          "source": "auto",
+          "model": "Polar",
+          "time": "06:27"
+        },
+        "temp": {
+          "value": "36.1",
+          "source": "auto",
+          "model": "Bosch",
+          "time": "06:27"
+        }
+      },
+      "confirmed": true,
+      "vitalsConfirmedAt": "2026-10-05T11:27:45.269Z"
     }
   ],
   "devices": [
@@ -332,35 +344,83 @@
   "alerts": [
     {
       "id": 1,
-      "patientName": "Test Flujo, Alerta",
+      "patientName": "Rojas Nunez, Elena",
       "priority": "III",
       "vitalSign": "SpO2",
-      "dni": "10203040",
-      "episode": "EP-261004-0002",
-      "time": "00:18",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
       "value": "91 %",
       "safeRange": "94-100 %",
-      "severity": "resolved",
-      "acknowledgedAt": "2026-10-05T00:18:14.344Z",
+      "severity": "critical",
+      "acknowledgedAt": null,
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T00:18:07.020Z"
+      "createdAt": "2026-10-05T11:27:33.004Z"
     },
     {
       "id": 2,
-      "patientName": "Test Flujo, Alerta",
+      "patientName": "Rojas Nunez, Elena",
       "priority": "III",
       "vitalSign": "Frecuencia cardíaca",
-      "dni": "10203040",
-      "episode": "EP-261004-0002",
-      "time": "00:18",
-      "value": "116 lpm",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "119 lpm",
       "safeRange": "60-100 lpm",
       "severity": "warning",
       "acknowledgedAt": null,
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T00:18:07.020Z"
+      "createdAt": "2026-10-05T11:27:33.004Z"
+    },
+    {
+      "id": 3,
+      "patientName": "Rojas Nunez, Elena",
+      "priority": "III",
+      "vitalSign": "pad",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "93 mmHg",
+      "safeRange": "",
+      "severity": "warning",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:33.004Z"
+    },
+    {
+      "id": 4,
+      "patientName": "Rojas Nunez, Elena",
+      "priority": "II",
+      "vitalSign": "Clasificación de triaje",
+      "dni": "10101010",
+      "episode": "EP-261005-0001",
+      "time": "06:27",
+      "value": "Prioridad II confirmada",
+      "safeRange": "Atención inmediata",
+      "severity": "critical",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:36.377Z"
+    },
+    {
+      "id": 5,
+      "patientName": "Diaz Soto, Marco",
+      "priority": "III",
+      "vitalSign": "pas",
+      "dni": "20202020",
+      "episode": "EP-261005-0002",
+      "time": "06:27",
+      "value": "154 mmHg",
+      "safeRange": "",
+      "severity": "warning",
+      "acknowledgedAt": null,
+      "escalatedAt": null,
+      "escalatedTo": null,
+      "createdAt": "2026-10-05T11:27:45.269Z"
     }
   ]
 }
