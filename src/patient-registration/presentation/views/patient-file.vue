@@ -5,7 +5,7 @@ import { ClassificationAssembler } from '../../../triage-classification/infrastr
 import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { useRoute, useRouter } from 'vue-router'
-import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, readFromDevice, setManual, clearVital, saveEpisode, linkDeviceToEpisode, unlinkDeviceFromEpisode, linkedDevices } from '../../application/patient-store.js'
+import { store, findEpisode, ageOf, fmtTime, fmtDateTime, vitalTypes, readFromDevice, setManual, clearVital, saveEpisode, linkDeviceToEpisode, unlinkDeviceFromEpisode, linkedDevices, setDeviceOnline } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { nt158Engine } from '../../../triage-classification/domain/services/nt158-engine.js'
@@ -202,6 +202,7 @@ function rejectReadings() {
             <li v-for="d in (ep ? linkedDevices(ep.id) : [])" :key="d.id">
               <span class="fd-ico"><svg viewBox="0 0 24 24" v-html="icons[d.type]"></svg></span>
               <div class="fd-info"><b>{{ devName(d.type) }} · {{ d.model }}</b><small>{{ d.lastUse ? t('pf.lastUse', { time: d.lastUse }) : t('pf.noReads') }}</small></div>
+              <button class="fd-badge" :class="d.online ? 'on' : 'off'" :title="t('pf.toggleTitle')" @click="d.online = !d.online; setDeviceOnline(d.id, d.online)"><i></i>{{ d.online ? t('pf.connected') : t('pf.disconnected') }}</button>
               <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="!d.online || ep.confirmed" @click="readFromDevice(ep, d)">{{ t('pf.simulate') }}</button>
               <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="ep.confirmed" @click="unlinkDeviceFromEpisode(ep.value, d.id); notify({ type: 'info', title: t('devices.toastUnlinked') })">{{ t('pf.unlink') }}</button>
             </li>
