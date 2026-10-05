@@ -64,6 +64,7 @@ const blocks = computed(() => {
 .vd-qr span.on{background:var(--ta-ink)}
 .vd-code{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-text);background:#f2f6f4;border:1px solid var(--ta-line);border-radius:8px;padding:6px 10px;word-break:break-all;text-decoration:none}
 .vd-dl{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin:4px 0 0}
+@media(max-width:600px){.vd-dl{grid-template-columns:1fr}}
 .vd-dl div{display:grid;gap:3px}
 .vd-dl dt{font-size:11px;color:var(--ta-muted)}
 .vd-dl dd{margin:0;font-size:13px;font-weight:500}

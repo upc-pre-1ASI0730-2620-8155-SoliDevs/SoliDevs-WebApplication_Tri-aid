@@ -29,7 +29,14 @@ export class SpecialtyAssignmentApi extends BaseApi {
     }
 
     getReferralsByEpisode(episodeId) {
-        return this.http.get(`${this.#referralsEndpoint.endpointPath}?episodeId=${episodeId}`)
+        const params = this.isRtdb
+            ? { orderBy: '"episodeId"', equalTo: episodeId }
+            : { episodeId }
+        return this.http.get(`${this.#referralsEndpoint.endpointPath}${this.#referralsEndpoint.suffix}`, { params }).then(r => {
+            if (Array.isArray(r.data)) return r
+            r.data = Object.entries(r.data || {}).filter(([, v]) => v !== null).map(([k, v]) => ({ id: v.id !== undefined ? v.id : k, ...v }))
+            return r
+        })
     }
 
     createReferral(resource) {
