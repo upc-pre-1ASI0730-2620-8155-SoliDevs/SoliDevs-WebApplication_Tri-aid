@@ -98,6 +98,19 @@ export function addDevice(type, model) {
  * Unlinks a measurement device and deletes it from the backend.
  * @param {string|number} id - Device id.
  */
+/**
+ * Toggles (and persists) the online/offline state of a linked device.
+ * @param {string|number} id - Device id.
+ */
+export function setDeviceOnline(id, online) {
+  const d = store.devices.find(x => String(x.id) === String(id))
+  if (!d) return
+  d.online = online
+  if (!String(id).startsWith('tmp-')) {
+    api.updateDevice(id, plain(d)).catch(console.error)
+  }
+}
+
 export function removeDevice(id) {
   store.devices = store.devices.filter(d => d.id !== id)
   if (!String(id).startsWith('tmp-')) api.deleteDevice(id).catch(console.error)
