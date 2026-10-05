@@ -230,7 +230,7 @@ function rejectReadings() {
                     {{ devName(d.type) }} · {{ d.model }}
                   </option>
                 </select>
-                <button class="ta-btn ta-btn--sm" :disabled="!pickedDevice || !pickedDevice.online" @click="link">{{ t('pf.linkBtn') }}</button>
+                <button class="ta-btn ta-btn--sm" :disabled="!pickedDevice || !pickedDevice.online" @click="link(pickedDevice)">{{ t('pf.linkBtn') }}</button>
                 <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="closeForm">{{ t('pf.cancel') }}</button>
                 <small v-if="linkErr" class="ta-err fd-err">{{ linkErr }}</small>
                 <small v-else-if="pickedDevice && !pickedDevice.online" class="fd-status">
