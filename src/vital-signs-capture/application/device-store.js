@@ -56,3 +56,27 @@ export function setDeviceOnline(id, online) {
  * @returns {Array<Object>} Linked devices.
  */
 export const linkedDevices = episodeId => deviceStore.devices.filter(d => d.linkedEpisode === episodeId)
+
+/**
+ * Links a device to a triage episode (US12), persisting the change.
+ * @param {Object} episode - Episode entity.
+ * @param {string|number} deviceId - Device id to link.
+ */
+export function linkDeviceToEpisode(episode, deviceId) {
+    const d = deviceStore.devices.find(x => String(x.id) === String(deviceId))
+    if (!d) return
+    d.linkedEpisode = episode.id
+    if (!String(d.id).startsWith('tmp-')) api.updateDevice(d.id, plain(d)).catch(console.error)
+}
+
+/**
+ * Unlinks a device from its triage episode, persisting the change.
+ * @param {Object} episode - Episode entity.
+ * @param {string|number} deviceId - Device id to unlink.
+ */
+export function unlinkDeviceFromEpisode(episode, deviceId) {
+    const d = deviceStore.devices.find(x => String(x.id) === String(deviceId))
+    if (!d) return
+    d.linkedEpisode = null
+    if (!String(d.id).startsWith('tmp-')) api.updateDevice(d.id, plain(d)).catch(console.error)
+}

@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from 'vue'
 import { t } from '../../../shared/application/i18n.js'
 import { notify } from '../../../shared/application/toast-store.js'
-import { deviceStore, linkedDevices } from '../../application/device-store.js'
+import { deviceStore, linkedDevices, linkDeviceToEpisode, unlinkDeviceFromEpisode } from '../../application/device-store.js'
 import { readFromDevice, setManual, clearVital, confirmReadings, rejectReadings } from '../../application/vitals-store.js'
 import { DeviceType } from '../../domain/model/device-type.js'
 
@@ -47,7 +47,7 @@ function unlink(d) {
 }
 
 /* ---------- Lecturas por tipo ---------- */
-const dev = k => linkedDevices(props.episode.id).find(d => d.type === k && d.online) || linkedDevices(props.episode.id).find(d => d.type === k)
+const dev = k => { const linked = linkedDevices(props.episode.id); return linked.find(d => d.type === k && d.online) || linked.find(d => d.type === k) }
 function state(k) {
   const v = props.episode.vitals[k]
   if (v) return v.source
@@ -63,9 +63,21 @@ function metaLine(k) {
   const d = dev(k)
   return d ? t('pf.waiting', { device: devName(k).toLowerCase(), model: d.model }) : ''
 }
-const canManual = k => !props.episode.confirmed && !editing[k] && ['none', 'lost', 'waiting'].includes(state(k))
+const canManual = k => !props.episode.confirmed && !editing[k] && manualMode[k] && ['none', 'lost', 'waiting'].includes(state(k))
+const showManualBtn = k => !props.episode.confirmed && !editing[k] && !manualMode[k] && ['none', 'lost', 'waiting'].includes(state(k))
+const startManual = k => { manualMode[k] = true }
+
+/* Badge de estado de la tarjeta: manual / en linea / desconectado */
+const badge = k => {
+  const v = props.episode.vitals[k]
+  if (!v) return null
+  if (v.source === 'manual') return { cls: 'manual', label: t('pf.meta.manualShort') }
+  const d = dev(k)
+  return d?.online ? { cls: '', label: t('devices.online') } : { cls: 'manual', label: t('devices.offline') }
+}
 
 const editing = reactive({ pa: false, spo2: false, fc: false, temp: false })
+const manualMode = reactive({ pa: false, spo2: false, fc: false, temp: false })
 const draft = reactive({ pa: { a: '', b: '' }, spo2: { a: '' }, fc: { a: '' }, temp: { a: '' } })
 const mErr = reactive({ pa: '', spo2: '', fc: '', temp: '' })
 function saveManual(vt) {
@@ -80,7 +92,7 @@ function saveManual(vt) {
     value = `${a}/${b}`
   }
   setManual(props.episode, k, value)
-  mErr[k] = ''; editing[k] = false; draft[k].a = ''
+  mErr[k] = ''; editing[k] = false; manualMode[k] = false; draft[k].a = ''
   if (k === 'pa') draft.pa.b = ''
 }
 
@@ -135,19 +147,24 @@ function onReject() {
         <button class="ta-btn ta-btn--ghost ta-btn--sm" :disabled="episode.confirmed" @click="unlink(d)">{{ t('pf.unlink') }}</button>
       </li>
     </TransitionGroup>
-    <p v-if="!linkedDevices(props.episode.id).length" class="fd-empty">{{ t('pf.noDevices') }}</p>
+    <div v-if="!linkedDevices(props.episode.id).length" class="fd-empty">
+      <span class="fd-empty__ico"><i class="pi pi-box"></i></span>
+      <b>{{ t('pf.noDevices') }}</b>
+      <small>{{ t('pf.devices.sub') }}</small>
+    </div>
 
     <div class="fv-grid">
       <article v-for="(vt, i) in DeviceType" :key="vt.key" class="fv-card" :class="{ bad: isBad(vt.key) }" :style="{ '--i': i }">
         <header>
           <span class="fv-t"><svg viewBox="0 0 24 24" v-html="icons[vt.key]"></svg>{{ vLabel(vt.key) }}</span>
-          <span v-if="props.episode.vitals[vt.key]" class="fv-badge" :class="{ manual: props.episode.vitals[vt.key].source === 'manual' }">
-            <i></i>{{ props.episode.vitals[vt.key].source === 'manual' ? t('pf.meta.manualShort') : t('devices.online') }}
+          <span v-if="badge(vt.key)" class="fv-badge" :class="badge(vt.key).cls">
+            <i></i>{{ badge(vt.key).label }}
           </span>
         </header>
         <div class="fv-val"><b>{{ props.episode.vitals[vt.key]?.value ?? '—' }}</b> <span>{{ vt.unit }}</span></div>
         <p class="fv-meta">{{ metaLine(vt.key) }}</p>
         <p v-if="isBad(vt.key)" class="fv-warn"><i class="pi pi-exclamation-triangle"></i>{{ warn(vt.key) }}</p>
+        <button v-if="showManualBtn(vt.key)" class="ta-btn ta-btn--ghost ta-btn--sm fv-manual-btn" @click="startManual(vt.key)"><i class="pi pi-pencil"></i>{{ t('pf.manualEntry') }}</button>
         <div v-if="canManual(vt.key)" class="fv-manual">
           <template v-if="vt.key === 'pa'">
             <div class="fv-row">
@@ -191,18 +208,39 @@ function onReject() {
 .fd-badge i{width:6px;height:6px;border-radius:50%;background:currentColor}
 .fd-badge.on{background:#e3f3ea;color:var(--ta-brand)}
 .fd-badge.off{background:#eef0f2;color:var(--ta-muted)}
+.fd-empty{margin:14px 0;padding:22px 16px;border:1.5px dashed var(--ta-line);border-radius:12px;background:linear-gradient(180deg,#f6faf7,#fafbfc);text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.fd-empty__ico{width:38px;height:38px;border-radius:50%;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;margin-bottom:6px}
+.fd-empty__ico .pi{font-size:16px}
+.fd-empty b{font-size:12.5px;font-weight:600;color:var(--ta-muted)}
+.fd-empty small{font-size:11px;color:var(--ta-muted);opacity:.8;max-width:320px}
 
-.fv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.fv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:18px}
 .fv-card{background:#fff;border:1px solid var(--ta-line);border-radius:12px;padding:14px;display:grid;gap:9px;align-content:start;transition:border-color .3s,background .3s}
 .fv-card.bad{border-color:var(--ta-danger-line);background:var(--ta-danger-bg)}
 .fv-card header{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .fv-t{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ta-muted)}
+.fv-t svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.fv-badge{display:inline-flex;align-items:center;align-self:flex-start;gap:6px;height:20px;line-height:1;font-size:10.5px;font-weight:500;padding:0 10px;border-radius:999px;background:#e3f3ea;color:var(--ta-brand);flex:none;white-space:nowrap}
+.fv-badge i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.fv-badge.manual{background:#fdf3e3;color:#b9822a}
 .fv-val{display:flex;align-items:baseline;gap:5px}
 .fv-val b{font-size:24px;font-weight:600}
 .fv-val span{font-size:11px;color:var(--ta-muted)}
 .fv-meta{margin:0;font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
 .fv-warn{margin:0;font-size:11px;color:var(--ta-danger);display:flex;gap:6px;align-items:flex-start}
 .fv-manual{display:grid;gap:8px}
+.fv-manual-btn{justify-self:start}
+.fv-manual-btn .pi{font-size:11px}
 .fv-row{display:flex;gap:8px}
-.fi-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
+.fi-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px;padding-top:16px;border-top:1px solid var(--ta-line)}
+
+@media(max-width:760px){
+  .fd-top{flex-direction:column;align-items:stretch}
+  .fd-top .ta-btn{align-self:flex-start}
+  .fd-form__in{grid-template-columns:1fr;padding-bottom:12px}
+  .fd-form__pick{flex-direction:column;align-items:stretch}
+  .fd-form__pick .ta-select{width:100%}
+  .fd-list li{gap:8px;padding:10px 2px}
+  .fd-info{min-width:120px}
+}
 </style>
