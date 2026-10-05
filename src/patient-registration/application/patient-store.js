@@ -99,6 +99,47 @@ export function addDevice(type, model) {
  * @param {string|number} id - Device id.
  */
 /**
+ * Assigns a free device to an episode (patient monitoring session). While
+ * assigned, the device cannot monitor another patient and its readings
+ * only feed this episode.
+ * @param {Object} ep - Target episode.
+ * @param {string|number} deviceId - Device to assign.
+ * @returns {{ok: boolean, error?: string, data?: Object}} Fails when the
+ * device is already monitoring another episode.
+ */
+export function linkDeviceToEpisode(ep, deviceId) {
+  const d = store.devices.find(x => String(x.id) === String(deviceId))
+  if (!d) return { ok: false, error: 'devices.err.notFound' }
+  if (d.linkedEpisode && d.linkedEpisode !== ep.id) {
+    return { ok: false, error: 'devices.err.busy' }
+  }
+  d.linkedEpisode = ep.id
+  d.linkedAt = new Date().toISOString()
+  if (!String(d.id).startsWith('tmp-')) api.updateDevice(d.id, plain(d)).catch(console.error)
+  return { ok: true, data: d }
+}
+
+/**
+ * Releases a device from its episode: it goes back to the free inventory.
+ * @param {Object} ep - Episode releasing the device.
+ * @param {string|number} deviceId - Device to release.
+ */
+export function unlinkDeviceFromEpisode(ep, deviceId) {
+  const d = store.devices.find(x => String(x.id) === String(deviceId))
+  if (!d || d.linkedEpisode !== ep.id) return
+  delete d.linkedEpisode
+  delete d.linkedAt
+  if (!String(d.id).startsWith('tmp-')) api.updateDevice(d.id, plain(d)).catch(console.error)
+}
+
+/**
+ * Devices currently assigned to an episode.
+ * @param {string} episodeId
+ * @returns {Array<Object>} Linked devices.
+ */
+export const linkedDevices = episodeId => store.devices.filter(d => d.linkedEpisode === episodeId)
+
+/**
  * Toggles (and persists) the online/offline state of a linked device.
  * @param {string|number} id - Device id.
  */
