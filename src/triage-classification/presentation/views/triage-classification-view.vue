@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { findEpisode, ageOf, fmtTime, vitalTypes } from '../../../patient-registration/application/patient-store.js'
+import { findEpisode, ageOf, fmtTime } from '../../../patient-registration/application/patient-store.js'
+import { DeviceType as vitalTypes } from '../../../vital-signs-capture/domain/model/device-type.js'
 import { docLabel } from '../../../patient-registration/application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
