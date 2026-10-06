@@ -157,9 +157,7 @@ function onReject() {
       <article v-for="(vt, i) in DeviceType" :key="vt.key" class="fv-card" :class="{ bad: isBad(vt.key) }" :style="{ '--i': i }">
         <header>
           <span class="fv-t"><svg viewBox="0 0 24 24" v-html="icons[vt.key]"></svg>{{ vLabel(vt.key) }}</span>
-          <span v-if="badge(vt.key)" class="fv-badge" :class="badge(vt.key).cls">
-            <i></i>{{ badge(vt.key).label }}
-          </span>
+          <span v-if="badge(vt.key)" class="fv-badge" :class="badge(vt.key).cls">{{ badge(vt.key).label }}</span>
         </header>
         <div class="fv-val"><b>{{ props.episode.vitals[vt.key]?.value ?? '—' }}</b> <span>{{ vt.unit }}</span></div>
         <p class="fv-meta">{{ metaLine(vt.key) }}</p>
@@ -221,7 +219,6 @@ function onReject() {
 .fv-t{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ta-muted)}
 .fv-t svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .fv-badge{display:inline-flex;align-items:center;align-self:flex-start;gap:6px;height:20px;line-height:1;font-size:10.5px;font-weight:500;padding:0 10px;border-radius:999px;background:#e3f3ea;color:var(--ta-brand);flex:none;white-space:nowrap}
-.fv-badge i{width:6px;height:6px;border-radius:50%;background:currentColor}
 .fv-badge.manual{background:#fdf3e3;color:#b9822a}
 .fv-val{display:flex;align-items:baseline;gap:5px}
 .fv-val b{font-size:24px;font-weight:600}

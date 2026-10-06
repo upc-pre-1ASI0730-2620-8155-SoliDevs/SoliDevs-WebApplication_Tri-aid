@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { gsap } from 'gsap'
-import { alertStore, unreadCount } from '../../application/alert-store.js'
+import { alertStore, unreadCount, pushAlerts } from '../../application/alert-store.js'
+import { AlertingService } from '../../infrastructure/alerting.service.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const open = ref(false)
@@ -54,7 +55,17 @@ function onKey(e) { if (e.key === 'Escape') open.value = false }
 onMounted(() => {
   document.addEventListener('pointerdown', onDoc)
   document.addEventListener('keydown', onKey)
+  loadPersisted()
 })
+
+/** Loads persisted active alerts once so the badge matches the Alerting center. */
+async function loadPersisted() {
+  if (alertStore.items.length) return
+  try {
+    const { data } = await new AlertingService().getActiveAlerts()
+    pushAlerts((data || []).filter(a => a.severity !== 'resolved'))
+  } catch (e) { console.error(e) }
+}
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', onDoc)
   document.removeEventListener('keydown', onKey)
