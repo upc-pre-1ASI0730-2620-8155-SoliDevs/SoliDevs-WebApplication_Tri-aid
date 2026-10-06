@@ -2,7 +2,7 @@
  * Aggregate Root of the Triage Classification bounded context.
  * Mirrors the Classification class from the report class diagram.
  */
-import { TriageLevel, levelByKey } from './triage-level.js'
+import { TriageLevel, levelByKey } from '../../../shared/domain/shared-kernel/triage-level.js'
 
 export const ClassificationState = {
   PendingConfirmation: 'PendingConfirmation',

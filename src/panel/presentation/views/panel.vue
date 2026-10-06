@@ -5,7 +5,7 @@ import { docLabel } from '../../../patient-registration/application/document-typ
 import { t } from '../../../shared/application/i18n.js'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
-import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
+import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 
 const triageApi = new TriageApi()
