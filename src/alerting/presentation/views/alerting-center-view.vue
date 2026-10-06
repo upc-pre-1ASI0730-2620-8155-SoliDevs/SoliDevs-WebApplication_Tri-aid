@@ -41,10 +41,6 @@ function playAlertSound() {
   } catch (e) { /* audio no disponible */ }
 }
 
-const nurseName = computed(() => session.name || t('alerting.nurse'));
-const nurseInitials = computed(() => (session.name || t('alerting.nurse'))
-  .split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase());
-
 onMounted(async () => {
   try {
     const response = await alertingService.getActiveAlerts();
@@ -233,10 +229,8 @@ const onDoneEnter = (el, done) => {
         </div>
       </div>
 
-      <div class="al-nurse">
+      <div class="al-status">
         <span class="al-count" :class="{ crit: criticalCount > 0 }">{{ criticalCount }} {{ t('alerting.active') }}</span>
-        <span class="al-av">{{ nurseInitials }}</span>
-        <span class="al-nname">{{ nurseName }}</span>
       </div>
     </section>
 
@@ -321,11 +315,9 @@ const onDoneEnter = (el, done) => {
 .al-audit{display:flex;align-items:center;gap:8px}
 .al-date{height:32px;font-size:11.5px;width:auto;padding:0 8px}
 .al-audit-arrow{color:var(--ta-muted);font-size:11px}
-.al-nurse{display:flex;align-items:center;gap:10px}
+.al-status{display:flex;align-items:center;gap:10px}
 .al-count{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
 .al-count.crit{background:var(--ta-danger-bg);color:var(--ta-danger)}
-.al-av{width:30px;height:30px;border-radius:50%;background:#e3f3ea;color:var(--ta-brand);display:grid;place-items:center;font-size:10.5px;font-weight:700}
-.al-nname{font-size:12.5px;font-weight:600;color:var(--ta-text)}
 .al-stack{display:grid;gap:12px}
 .al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line);position:relative;overflow:hidden}
 .al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
