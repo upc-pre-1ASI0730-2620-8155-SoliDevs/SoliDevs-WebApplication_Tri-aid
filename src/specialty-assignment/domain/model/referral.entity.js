@@ -2,7 +2,7 @@
  * Aggregate Root of the Specialty Assignment bounded context.
  * Mirrors the Referral class from the report class diagram.
  */
-import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
+import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
 
 export const ReferralState = {
   Referred: 'Referred',
