@@ -8,7 +8,7 @@ import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { session } from '../../../shared/application/demo-session.js'
 import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
-import { alertStore } from '../../../alerting/application/alert-store.js'
+import { pushAlerts } from '../../../alerting/application/alert-store.js'
 import { findOutOfRangeVitals } from '../../../alerting/domain/services/vital-range-rules.js'
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import PriorityBadge from '../components/priority-badge.vue'
@@ -145,7 +145,7 @@ async function confirmClassification() {
       outOfRange: findOutOfRangeVitals(ep.value.vitals),
       levelCode: levelDisplay(current.value)?.code
     })
-    for (const a of generated.data) alertStore.items.push({ ...a, read: false })
+    pushAlerts(generated.data)
   } catch (e) { console.error(e) }
   const min = cycleMinutes(ep.value)
   notify({
@@ -200,7 +200,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
       </section>
 
       <section class="ta-card tc-in tc-suggest" style="--d:2">
-        <span class="tc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
+        <span class="tc-tag">{{ t('triage.suggested') }}</span>
 
         <template v-if="current">
           <PriorityBadge :level="levelDisplay(current)" />
