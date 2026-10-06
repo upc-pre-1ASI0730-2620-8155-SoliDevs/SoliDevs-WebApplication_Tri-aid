@@ -82,11 +82,8 @@ function onVitalsConfirmed() {
         <div class="fi-name">{{ fullName }}</div>
         <div class="fi-meta">{{ meta }}</div>
       </div>
-      <span class="fi-pill" :class="{ done: classified }">
-        <template v-if="classified">
-          <i class="fi-dot" :style="{ background: classified.color }"></i>
-          {{ classified.code }} · {{ classified.name }}
-        </template>
+      <span class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
+        <template v-if="classified">{{ classified.code }} · {{ classified.name }}</template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>
     </section>
@@ -127,8 +124,7 @@ function onVitalsConfirmed() {
 .fi-name{font-size:15px;font-weight:600}
 .fi-meta{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted);margin-top:3px}
 .fi-pill{margin-left:auto;font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted);white-space:nowrap}
-.fi-pill.done{background:#e3f3ea;color:var(--ta-brand);border:1.5px solid}
-.fi-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.fi-pill.done{border:1.5px solid}
 .fi-tabs{display:flex;gap:22px;padding:0 4px}
 .fi-tabs button{position:relative;border:0;background:none;font:inherit;font-size:12.5px;color:var(--ta-muted);padding:10px 0;cursor:pointer;transition:color .2s}
 .fi-tabs button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ta-brand);transform:scaleX(0);transform-origin:left;transition:transform .3s}
