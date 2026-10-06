@@ -84,7 +84,7 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-search i{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ta-muted);pointer-events:none}
 .pl-search .ta-input{padding-left:36px}
 .pl-list{display:grid;gap:8px}
-.pl-row{display:grid;grid-template-columns:36px minmax(0,1.6fr) minmax(0,1fr) auto auto 14px;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff;text-decoration:none;color:var(--ta-text);transition:border-color .2s,transform .2s,box-shadow .2s}
+.pl-row{display:grid;grid-template-columns:36px minmax(0,1.5fr) 150px 60px 120px 14px;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff;text-decoration:none;color:var(--ta-text);transition:border-color .2s,transform .2s,box-shadow .2s}
 .pl-row:hover{border-color:var(--ta-brand);transform:translateY(-1px);box-shadow:0 8px 20px -10px rgba(10,107,56,.35)}
 .pl-row:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
 .pl-av{width:36px;height:36px;border-radius:10px;background:#d6eedd;color:var(--ta-brand);display:grid;place-items:center;font-size:12px;font-weight:600}
@@ -93,8 +93,8 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-who small,.pl-ep small{font-size:11px;color:var(--ta-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pl-ep span{font-family:var(--ta-mono);font-size:11.5px}
 .pl-ep small{font-family:var(--ta-mono);font-size:10px}
-.pl-visits{font-size:11px;color:var(--ta-muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.pl-meta{display:flex;align-items:center;gap:8px;justify-self:end;min-width:0}
+.pl-visits{font-size:11px;color:var(--ta-muted);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;justify-self:start}
+.pl-meta{display:flex;align-items:center;gap:8px;justify-self:end;min-width:0;max-width:100%}
 .pl-st{font-size:11px;padding:3px 10px;border-radius:999px;background:#eef0f2;color:var(--ta-muted);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
 .pl-st.warn{background:#fff4e5;color:#b45309}
 .pl-lv{color:#fff;font-weight:700;font-size:10.5px;border-radius:999px;padding:3px 9px}
