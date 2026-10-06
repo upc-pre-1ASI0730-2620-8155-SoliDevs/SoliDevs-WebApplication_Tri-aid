@@ -5,7 +5,7 @@ import { findEpisode, ageOf, fmtTime, saveEpisode } from '../../../patient-regis
 import { docLabel } from '../../../patient-registration/application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
-import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
+import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
 import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
