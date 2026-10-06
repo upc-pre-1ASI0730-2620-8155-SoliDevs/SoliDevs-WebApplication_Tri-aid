@@ -2,7 +2,7 @@
 /**
  * Health Technical Standard No. 158-MINSA guide: parameters overlaid on the view.
  */
-import { TRIAGE_LEVELS } from '../../domain/model/triage-level.js'
+import { TRIAGE_LEVELS } from '../../../shared/domain/shared-kernel/triage-level.js'
 import { t } from '../../../shared/application/i18n.js'
 
 defineProps({ title: String, sub: String, closeLabel: String })

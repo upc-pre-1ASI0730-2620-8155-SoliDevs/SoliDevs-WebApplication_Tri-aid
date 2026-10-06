@@ -13,7 +13,7 @@ import { findOutOfRangeVitals } from '../../../alerting/domain/services/vital-ra
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import PriorityBadge from '../components/priority-badge.vue'
 import TriageGuideModal from '../components/triage-guide-modal.vue'
-import { TRIAGE_LEVELS, levelByKey, levelByCode } from '../../domain/model/triage-level.js'
+import { TRIAGE_LEVELS, levelByKey, levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
 import { ClassificationState } from '../../domain/model/classification.entity.js'
 import { TriageClassificationService } from '../../infrastructure/triage-classification.service.js'
 import { nt158Engine } from '../../domain/services/nt158-engine.js'

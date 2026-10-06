@@ -5,7 +5,7 @@
  * class from the report class diagram (CalculatePriority and MissingMetrics
  * methods), adapted to the frontend.
  */
-import { TRIAGE_LEVELS, levelByCode, mostUrgent } from '../model/triage-level.js'
+import { TRIAGE_LEVELS, levelByCode, mostUrgent } from '../../../shared/domain/shared-kernel/triage-level.js'
 
 // Mandatory metrics to classify
 // suggestion and reporting which metric is missing).

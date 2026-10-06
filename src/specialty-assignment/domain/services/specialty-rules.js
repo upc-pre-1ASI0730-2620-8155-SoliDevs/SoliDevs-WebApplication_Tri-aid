@@ -2,7 +2,7 @@
  * Domain Service: clinical rules for specialty recommendation
  * and demographic restrictions.
  */
-import { levelByCode } from '../../../triage-classification/domain/model/triage-level.js'
+import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
 
 // Main symptom keywords -> specialty.
 const SYMPTOM_RULES = [
