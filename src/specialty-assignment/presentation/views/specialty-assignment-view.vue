@@ -37,11 +37,11 @@ const meta = computed(() => [
   ep.value.id
 ].join(' · '))
 
-/* ---------- Prioridad clasificada (del BC Triage Classification) ---------- */
+/** Prioridad clasificada (del BC Triage Classification) */
 const level = ref(null)
 const confirmedAt = ref(null)
 
-/* ---------- Sintoma codificado y sugerencia ---------- */
+/** Sintoma codificado y sugerencia */
 const selectedSymptom = ref(null)
 const symptomErr = ref(false)
 const suggestion = ref(null)
@@ -74,14 +74,14 @@ async function consult() {
   consulted.value = true
 }
 
-/* ---------- Colas por especialidad ---------- */
+/** Colas por especialidad */
 const queues = ref([])
 async function loadQueues() {
   const r = await service.getSpecialties()
   if (r.ok) { queues.value = r.data; specialties.value = r.data }
 }
 
-/* ---------- Derivar ---------- */
+/** Derivar */
 const referring = ref(false)
 const alreadyReferred = ref(false)
 const referral = ref(null)
@@ -108,7 +108,7 @@ async function refer() {
   await makeVoucher()
 }
 
-/* ---------- Comprobante ---------- */
+/** Comprobante */
 const voucher = ref(null)
 const showVoucher = ref(false)
 

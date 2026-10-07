@@ -53,7 +53,7 @@ onMounted(async () => {
 
 const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated').length);
 
-// Lógica combinada: Filtra primero, ordena después
+/** Lógica combinada: filtra primero y ordena después. */
 const displayAlerts = computed(() => {
   // 1. Filtrado dinámico
   let filtered = activeAlerts.value;
@@ -144,7 +144,7 @@ const confirmAcknowledge = async () => {
   setTimeout(() => { if (String(doneId.value) === String(id)) doneId.value = null; }, 400);
 };
 
-/* ---- Animaciones GSAP (repositorio gsap-alert-animation) ---- */
+/** Animaciones GSAP de entrada/salida (basadas en el repositorio gsap-alert-animation). */
 const onCardEnter = (el, done) => {
   if (reduce()) { done(); return; }
   gsap.fromTo(el, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', clearProps: 'transform,opacity', onComplete: done });
@@ -355,7 +355,7 @@ const onDoneEnter = (el, done) => {
 .al-enter-from,.al-leave-to{opacity:0;transform:translateY(8px)}
 .al-move{transition:transform .3s ease}
 
-/* --- Animación de confirmación (GSAP) --- */
+/** Animación de confirmación (GSAP) */
 .al-done{position:absolute;inset:-1px;z-index:2;border-radius:inherit;display:grid;align-content:center;justify-items:center;gap:8px;color:#fff;background:radial-gradient(120% 170% at 50% 0%,var(--ta-brand),var(--ta-ink));clip-path:circle(0% at 14% 88%)}
 .al-done__svg{width:72px;height:72px;overflow:visible}
 .al-done__disc{fill:#fff}

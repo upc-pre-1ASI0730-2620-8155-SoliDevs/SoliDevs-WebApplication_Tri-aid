@@ -18,7 +18,7 @@ const icons = {
 const devName = k => t('vital.' + k + '.device')
 const vLabel = k => t('vital.' + k + '.label')
 
-/* ---------- Vinculacion desde el inventario (US12) ---------- */
+/** Vinculacion desde el inventario (US12) */
 const freeDevices = computed(() => deviceStore.devices.filter(d => !d.linkedEpisode))
 const showForm = ref(false)
 const pickId = ref(null)
@@ -46,7 +46,7 @@ function unlink(d) {
   notify({ type: 'info', title: t('devices.toastUnlinked') })
 }
 
-/* ---------- Lecturas por tipo ---------- */
+/** Lecturas por tipo */
 const dev = k => { const linked = linkedDevices(props.episode.id); return linked.find(d => d.type === k && d.online) || linked.find(d => d.type === k) }
 function state(k) {
   const v = props.episode.vitals[k]
@@ -96,7 +96,7 @@ function saveManual(vt) {
   if (k === 'pa') draft.pa.b = ''
 }
 
-/* ---------- Confirmar / rechazar (US18) ---------- */
+/** Confirmar / rechazar (US18) */
 async function onConfirm() {
   const missing = DeviceType.filter(x => !props.episode.vitals[x.key]).map(x => vLabel(x.key))
   if (missing.length) { notify({ type: 'error', title: t('pf.missing', { list: missing.join(', ') }) }); return }
