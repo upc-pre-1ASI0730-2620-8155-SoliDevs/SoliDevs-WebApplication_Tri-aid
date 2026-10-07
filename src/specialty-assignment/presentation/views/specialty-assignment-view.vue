@@ -37,11 +37,11 @@ const meta = computed(() => [
   ep.value.id
 ].join(' · '))
 
-/** Prioridad clasificada (del BC Triage Classification) */
+/** Classified priority (from the Triage Classification BC) */
 const level = ref(null)
 const confirmedAt = ref(null)
 
-/** Sintoma codificado y sugerencia */
+/** Coded symptom and suggestion */
 const selectedSymptom = ref(null)
 const symptomErr = ref(false)
 const suggestion = ref(null)
@@ -81,7 +81,7 @@ async function loadQueues() {
   if (r.ok) { queues.value = r.data; specialties.value = r.data }
 }
 
-/** Derivar */
+/** Refer */
 const referring = ref(false)
 const alreadyReferred = ref(false)
 const referral = ref(null)
@@ -108,7 +108,7 @@ async function refer() {
   await makeVoucher()
 }
 
-/** Comprobante */
+/** Voucher */
 const voucher = ref(null)
 const showVoucher = ref(false)
 

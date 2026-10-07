@@ -5,7 +5,7 @@ import { DeviceType as vitalTypes } from '../../domain/model/device-type.js'
 import { t } from '../../../shared/application/i18n.js'
 import { notify } from '../../../shared/application/toast-store.js'
 
-/** Dispositivos precargados para facilitar la vinculación automática. */
+/** Preloaded devices to ease automatic linking. */
 const defaultTemplates = [
   { type: 'pa', model: 'Omron Hem-7120' },
   { type: 'spo2', model: 'Contec CMS50D' },

@@ -3,7 +3,7 @@ import en from '../../locales/en.json'
 import es from '../../locales/es.json'
 
 /**
- * Idioma por defecto: inglés. La elección del usuario se recuerda en
+ * Default language: English. The user's choice is persisted in
  * localStorage.
  */
 const KEY = 'triaid.locale'
