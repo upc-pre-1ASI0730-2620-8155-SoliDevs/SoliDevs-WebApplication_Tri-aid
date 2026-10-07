@@ -55,7 +55,7 @@ const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !
 
 /** Combined logic: filter first, sort afterwards. */
 const displayAlerts = computed(() => {
-  // 1. Filtrado dinámico
+  // 1. Dynamic filtering
   let filtered = activeAlerts.value;
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
@@ -68,7 +68,7 @@ const displayAlerts = computed(() => {
   if (auditFrom.value) filtered = filtered.filter(a => localDay(a) >= auditFrom.value);
   if (auditTo.value) filtered = filtered.filter(a => localDay(a) <= auditTo.value);
 
-  // 2. Orden cronológico dentro de la severidad, severidades agrupadas al frente
+  // 2. Chronological order within severity, severities grouped first
   return [...filtered].sort((a, b) => {
     const group = { critical: 0, warning: 1, escalated: 2, resolved: 3 };
     if (group[a.severity] !== group[b.severity]) return group[a.severity] - group[b.severity];
