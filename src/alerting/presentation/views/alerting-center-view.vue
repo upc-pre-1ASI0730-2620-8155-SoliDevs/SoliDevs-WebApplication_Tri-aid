@@ -18,10 +18,8 @@ const doneId = ref(null);
 const pendingId = ref(null);
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Currently selected filter. */
 const activeFilter = ref('all');
 
-/** Audit date range over the local creation timestamp. */
 const auditFrom = ref('');
 const auditTo = ref('');
 
