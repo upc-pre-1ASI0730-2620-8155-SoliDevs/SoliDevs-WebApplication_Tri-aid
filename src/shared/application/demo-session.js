@@ -1,5 +1,8 @@
 import { reactive } from 'vue'
 
-// Sin sesión activa hasta conectar IAM (login). No hay usuario de demostración.
+/**
+ * Sesión demo del usuario activo. Sin sesión hasta conectar IAM (login);
+ * no existe un usuario de demostración por defecto.
+ */
 // Cuando exista el login real, rellenar estos campos con el usuario autenticado.
 export const session = reactive({ name: '', initials: '', unit: '', shift: '' })
