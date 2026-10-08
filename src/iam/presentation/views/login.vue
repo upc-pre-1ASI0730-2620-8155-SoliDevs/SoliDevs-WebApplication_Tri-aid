@@ -16,7 +16,6 @@ const features = computed(() => [
 
 async function submit() {
   loading.value = true
-  // TODO IAM: validar credenciales con el API. Por ahora entra directo.
   await new Promise(r => setTimeout(r, 400))
   router.push('/panel')
 }

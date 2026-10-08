@@ -88,7 +88,6 @@ export async function loadFromServer() {
     store.patients = pts.data || []
     store.episodes = eps.data || []
     for (const e of store.episodes) {
-      // RTDB removes empty objects: guarantee the vitals map always exists.
       if (!e.vitals || typeof e.vitals !== 'object') e.vitals = {}
       e.patient = store.patients.find(pt => String(pt.dni) === String(e.key))
         || store.patients.find(pt => String(pt.id) === String(e.key)) || e.patient

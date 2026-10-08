@@ -136,7 +136,6 @@ async function confirmClassification() {
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
   classification.value = r.data
   syncEpisodeLevel()
-  // Alertas de la clasificacion confirmada y de lecturas fuera de rango
   try {
     const alerting = new AlertingService()
     const generated = await alerting.generateForEpisode({

@@ -58,7 +58,7 @@ const items = [
 .sb__out{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;color:#f2997b;text-decoration:none;font-size:12.5px;transition:background .2s}
 .sb__out:hover{background:rgba(255,255,255,.05)}
 
-/* Tablet/móvil: drawer deslizante (se abre con la hamburguesa del topbar) */
+/* Tablet/mobile: sliding drawer (opened from the topbar hamburger) */
 @media(max-width:900px){
   .sb{position:fixed;top:0;left:0;bottom:0;z-index:60;width:262px;padding:22px 14px 16px;transform:translateX(-105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 40px rgba(6,20,14,.35);visibility:hidden}
   .sb.sb--open{transform:translateX(0);visibility:visible}
