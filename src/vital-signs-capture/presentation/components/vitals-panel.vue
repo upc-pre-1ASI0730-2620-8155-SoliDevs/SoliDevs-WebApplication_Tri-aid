@@ -27,11 +27,14 @@ const pickedDevice = computed(() => freeDevices.value.find(d => String(d.id) ===
 
 function closeForm() { showForm.value = false; pickId.value = null; linkErr.value = '' }
 
+  /**
+   * Links the picked free device to the current episode after validating
+   * that it exists and is online.
+   */
 function link() {
   linkErr.value = ''
   if (!pickedDevice.value) { linkErr.value = t('pf.chooseDevice'); return }
   if (!pickedDevice.value.online) {
-    // US12 escenario 2: instrumento apagado o sin senal
     linkErr.value = t('pf.linkFail')
     return
   }
@@ -41,6 +44,10 @@ function link() {
   notify({ type: 'success', title: t('pf.linkedOk') })
 }
 
+  /**
+   * Unlinks a device from the current episode.
+   * @param {Object} d - Linked device.
+   */
 function unlink(d) {
   unlinkDeviceFromEpisode(props.episode, d.id)
   notify({ type: 'info', title: t('devices.toastUnlinked') })
@@ -67,7 +74,12 @@ const canManual = k => !props.episode.confirmed && !editing[k] && manualMode[k] 
 const showManualBtn = k => !props.episode.confirmed && !editing[k] && !manualMode[k] && ['none', 'lost', 'waiting'].includes(state(k))
 const startManual = k => { manualMode[k] = true }
 
-/* Badge de estado de la tarjeta: manual / en linea / desconectado */
+  /**
+   * Builds the status badge of a vital sign card.
+   * @param {string} k - Vital sign key.
+   * @returns {Object|null} Badge label and style class, or null.
+   */
+/* Vital card status badge: manual / online / disconnected */
 const badge = k => {
   const v = props.episode.vitals[k]
   if (!v) return null
@@ -80,6 +92,12 @@ const editing = reactive({ pa: false, spo2: false, fc: false, temp: false })
 const manualMode = reactive({ pa: false, spo2: false, fc: false, temp: false })
 const draft = reactive({ pa: { a: '', b: '' }, spo2: { a: '' }, fc: { a: '' }, temp: { a: '' } })
 const mErr = reactive({ pa: '', spo2: '', fc: '', temp: '' })
+  /**
+   * Stores a manually entered vital sign value after range validation.
+   * @param {Object} vt - Device type descriptor of the vital sign.
+   * @param {string} vt.key - Vital sign key (pa, spo2, fc, temp).
+   * @param {number[]} vt.lim - Minimum and maximum accepted values.
+   */
 function saveManual(vt) {
   const k = vt.key
   const [lo, hi] = vt.lim
@@ -96,6 +114,10 @@ function saveManual(vt) {
   if (k === 'pa') draft.pa.b = ''
 }
 
+  /**
+   * Confirms the readings: validates that every vital sign has a value
+   * and seals the episode evaluation.
+   */
 /** Confirmar / rechazar (US18) */
 async function onConfirm() {
   const missing = DeviceType.filter(x => !props.episode.vitals[x.key]).map(x => vLabel(x.key))
@@ -103,6 +125,9 @@ async function onConfirm() {
   confirmReadings(props.episode)
   emit('confirmed')
 }
+  /**
+   * Rejects the current readings and re-enables a new capture round.
+   */
 function onReject() {
   rejectReadings(props.episode)
   notify({ type: 'info', title: t('pf.rejected') })
