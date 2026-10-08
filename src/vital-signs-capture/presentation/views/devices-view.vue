@@ -25,6 +25,9 @@ const icons = {
 
 const getVitalInfo = (key) => vitalTypes.find(v => v.key === key) || {}
 
+  /**
+   * Adds a custom device to the inventory after validating the model.
+   */
 function handleAddCustom() {
   if (!newModel.value.trim()) {
     notify({ type: 'error', title: t('pf.errModel') })
@@ -35,11 +38,19 @@ function handleAddCustom() {
   newModel.value = ''
 }
 
+  /**
+   * Removes a device from the platform inventory.
+   * @param {string|number} id - Device identifier.
+   */
 function handleRemove(id) {
   removeDevice(id)
   notify({ type: 'info', title: t('devices.toastUnlinked') })
 }
 
+  /**
+   * Toggles the online/offline state of a device.
+   * @param {Object} d - Device to toggle.
+   */
 function toggleOnline(d) {
   setDeviceOnline(d.id, !d.online)
 }

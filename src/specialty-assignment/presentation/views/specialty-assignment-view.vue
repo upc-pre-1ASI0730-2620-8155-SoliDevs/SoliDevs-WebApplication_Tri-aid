@@ -99,7 +99,6 @@ async function refer() {
   referral.value = r.data
   ep.value.referred = true
   saveEpisode(ep.value)
-  // Derivacion completada: alertas resueltas y dispositivos liberados
   try {
     await alertingService.resolveByEpisode(ep.value.id)
     releaseEpisodeDevices(ep.value.id)
@@ -120,6 +119,10 @@ async function makeVoucher() {
   showVoucher.value = true
 }
 
+  /**
+   * Sends the referral voucher through the given channel.
+   * @param {string} channel - Delivery channel (Qr, Sms, ...).
+   */
 async function sendVoucher(channel) {
   if (!voucher.value) return
   const r = await service.sendVoucher(voucher.value, channel)
@@ -142,7 +145,6 @@ onMounted(async () => {
     level.value = l ? { ...l, name: t('triage.level.' + l.code + '.name') } : null
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
   }
-  // if the episode was already referred, restore its context
   const existing = await service.findByEpisode(id)
   if (existing) {
     referral.value = existing

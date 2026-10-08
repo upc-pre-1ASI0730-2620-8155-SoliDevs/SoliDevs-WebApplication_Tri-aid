@@ -17,7 +17,6 @@ async function submit() {
   error.value = false
   if (!/^\S+@\S+\.\S+$/.test(email.value)) { error.value = true; return }
   loading.value = true
-  // TODO: reemplazar por la llamada real al API de IAM
   await new Promise(r => setTimeout(r, 700))
   loading.value = false
   sent.value = true

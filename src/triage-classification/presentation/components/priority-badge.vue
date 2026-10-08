@@ -3,7 +3,7 @@
  * Visual badge of the priority level: circle with the code, name and description.
  */
 defineProps({
-    level: { type: Object, required: true } // { code, name, desc }
+    level: { type: Object, required: true }
 })
 </script>
 
