@@ -82,7 +82,7 @@ body { margin: 0; }
 .content::-webkit-scrollbar{width:8px}
 .content::-webkit-scrollbar-thumb{background:var(--ta-brand);border-radius:8px}
 
-/* Responsive: topbar compacta en móvil */
+/* Responsive: compact topbar on mobile */
 .tb__left{display:flex;align-items:center;gap:12px;min-width:0}
 .tb__burger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--ta-line);border-radius:9px;background:var(--ta-surface);color:var(--ta-text);font-size:15px;cursor:pointer;transition:background .2s,border-color .2s;flex:none}
 .tb__burger:hover{border-color:var(--ta-brand);color:var(--ta-brand);background:#f2f8f4}

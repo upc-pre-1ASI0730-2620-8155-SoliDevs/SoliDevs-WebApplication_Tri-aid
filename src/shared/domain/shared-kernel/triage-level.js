@@ -11,7 +11,6 @@ export const TriageLevel = {
   V_NonUrgent: 'V_NonUrgent'
 }
 
-// Clinical order: I is the most critical.
 export const TRIAGE_LEVELS = [
   { code: 'I',   key: TriageLevel.I_Resuscitation, order: 1, tone: 'critical', color: '#b42318' },
   { code: 'II',  key: TriageLevel.II_Emergency,   order: 2, tone: 'emergency', color: '#d97706' },

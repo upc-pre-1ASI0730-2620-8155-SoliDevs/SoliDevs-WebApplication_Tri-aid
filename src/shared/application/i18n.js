@@ -9,7 +9,6 @@ import es from '../../locales/es.json'
 const KEY = 'triaid.locale'
 const read = () => { try { return localStorage.getItem(KEY) === 'es' ? 'es' : 'en' } catch { return 'en' } }
 
-// Las claves son planas con puntos ("nav.panel"): se buscan por nombre exacto, sin anidar.
 export const i18n = createI18n({
   legacy: false,
   locale: read(),
@@ -25,12 +24,16 @@ document.documentElement.lang = locale.value
 
 export function setLocale(l) {
   locale.value = l === 'es' ? 'es' : 'en'
-  try { localStorage.setItem(KEY, locale.value) } catch { /* sin storage */ }
+  try { localStorage.setItem(KEY, locale.value) } catch { }
   document.documentElement.lang = locale.value
 }
 
-// t('clave') o t('clave', { n: 3 }) para los {marcadores}
+/**
+ * Translates a key. Supports placeholders, e.g. t('key', { n: 3 }).
+ */
 export const t = (key, p) => (p ? i18n.global.t(key, p) : i18n.global.t(key))
 
-// "M"/"F" -> texto traducido; valores antiguos se muestran tal cual
+/**
+ * Maps "M"/"F" to its translated label; unknown values are returned as-is.
+ */
 export const sexLabel = v => { const k = 'sex.' + v; const s = t(k); return s === k ? v : s }

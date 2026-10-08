@@ -26,6 +26,11 @@ const meta = computed(() => [
   ep.value.id
 ].join(' · '))
 
+  /**
+   * Formats an ISO date (YYYY-MM-DD) as DD/MM/YYYY.
+   * @param {string} s2 - ISO date string.
+   * @returns {string} Formatted date.
+   */
 const dmy = s2 => s2.split('-').reverse().join('/')
 const rows = computed(() => [
   [t('pf.r.document'), docLabel(p.value)],

@@ -43,7 +43,6 @@ export class AlertingService {
         const time = new Date().toTimeString().slice(0, 5)
 
         for (const o of outOfRange) {
-            // SpO2 baja se trata como critica; el resto como advertencia.
             const severity = o.metric === 'spo2' ? 'critical' : 'warning'
             created.push(new Alert({
                 id: null,
@@ -60,7 +59,6 @@ export class AlertingService {
             }))
         }
 
-        // Paciente clasificado I/II: alerta critica de atencion inmediata.
         if (levelCode === 'I' || levelCode === 'II') {
             created.push(new Alert({
                 id: null,

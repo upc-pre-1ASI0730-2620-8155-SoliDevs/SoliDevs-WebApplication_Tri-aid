@@ -4,15 +4,14 @@ import { computed } from 'vue'
 import { t } from '../../../shared/application/i18n.js'
 
 const props = defineProps({
-    voucher: { type: Object, required: true },   // { qrCode, channel, sentAt }
-    referral: { type: Object, required: true },  // { specialty, room, queuePosition }
+    voucher: { type: Object, required: true },
+    referral: { type: Object, required: true }
     patientName: { type: String, required: true },
     episodeId: { type: String, required: true },
-    level: { type: Object, default: null }       // { code, name }
+    level: { type: Object, default: null }
 })
 defineEmits(['close', 'send'])
 
-// deterministic pseudo-QR generated from the voucher code (demo)
 const blocks = computed(() => {
     let seed = 0
     for (const ch of props.voucher.qrCode) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0

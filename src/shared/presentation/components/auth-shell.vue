@@ -3,7 +3,6 @@ import logo from '../../../assets/tri-aid-logo.png'
 import { t } from '../../application/i18n.js'
 defineProps({ title: String, lead: String, features: { type: Array, default: () => [] } })
 
-// 10 latidos de 120 unidades cada uno (1200 de ancho); el CSS desplaza un latido en bucle
 const ecgPath = 'M0 24' + ' h20 q5 -8 10 0 h6 l3 4 l5 -24 l5 28 l3 -8 h10 q10 -16 20 0 h38'.repeat(10)
 </script>
 

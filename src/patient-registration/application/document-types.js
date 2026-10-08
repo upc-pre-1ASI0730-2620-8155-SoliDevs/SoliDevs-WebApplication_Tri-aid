@@ -1,6 +1,5 @@
 import { t } from '../../shared/application/i18n.js'
 
-// Textos (label, ayuda, error) viven en locales/*.json bajo doc.<key>.*
 export const docTypes = [
   { key: 'dni', ph: '12345678', max: 8, numeric: true, pattern: /^\d{8}$/ },
   { key: 'ce', ph: '001234567', max: 12, numeric: false, pattern: /^[A-Z0-9]{9,12}$/ },

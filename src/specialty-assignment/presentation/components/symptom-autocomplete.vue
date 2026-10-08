@@ -8,7 +8,7 @@ import { SpecialtyAssignmentApi } from '../../infrastructure/specialty-assignmen
 import { t } from '../../../shared/application/i18n.js'
 
 const props = defineProps({
-    modelValue: { type: Object, default: null }, // selected symptom {id, es, en, specialty}
+    modelValue: { type: Object, default: null }
     error: { type: Boolean, default: false }
 })
 const emit = defineEmits(['update:modelValue'])
