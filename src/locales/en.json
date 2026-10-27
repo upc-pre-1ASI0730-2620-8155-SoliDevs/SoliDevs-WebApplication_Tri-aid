@@ -411,5 +411,14 @@
   "subscription.toastRejected": "The payment was rejected. The subscription remains pending.",
   "subscription.toastError": "The operation could not be completed. Please try again.",
   "subscription.title": "Subscription",
-  "subscription.sub": "Manage your institution's plan and review the payment history"
+  "subscription.sub": "Manage your institution's plan and review the payment history",
+  "login.error": "Wrong username or password.",
+  "login.errorApi": "Could not reach the service. Please try again.",
+  "suspended.title": "Access suspended",
+  "suspended.lead": "{institution}'s subscription is overdue. Your team's access is suspended until the payment is regularized.",
+  "suspended.point1": "Triage and vital signs cannot be recorded",
+  "suspended.point2": "Reports and alerts are frozen",
+  "suspended.regularize": "Regularize payment",
+  "suspended.note": "Access is restored automatically once the payment is confirmed.",
+  "sub.bannerPending": "Your subscription has a pending payment. Regularize it before {date} to avoid access suspension."
 }
