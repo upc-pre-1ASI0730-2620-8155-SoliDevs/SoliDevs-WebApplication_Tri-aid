@@ -44,6 +44,35 @@ export class IamService {
     }
 
     /**
+     * Registers a staff account under the administrator's institution
+     * (US55): the new user always inherits the admin's institution.
+     * @param {Object} input - { username, password, names, surnames, role, unit, shift, institution }
+     * @returns {Promise<{ok: true, data: User}>}
+     */
+    async createStaffUser(input) {
+        await delay()
+        const response = await this.api.createUser(input)
+        return { ok: true, data: new User(response.data) }
+    }
+
+    /**
+     * Updates a staff account (US55): profile, email, role, shift and
+     * optionally the password. The institution cannot be changed here.
+     * @param {string|number} id - User identifier.
+     * @param {Object} input - Editable user fields.
+     * @returns {Promise<{ok: true, data: User}>}
+     */
+    async updateStaffUser(id, input) {
+        await delay()
+        // PUT replaces the whole record: merge with the stored user so
+        // fields not sent (like an untouched password) survive.
+        const existing = await this.api.getUserById(id)
+        const merged = { ...existing.data, ...input }
+        const response = await this.api.updateUser(id, merged)
+        return { ok: true, data: new User(response.data) }
+    }
+
+    /**
      * Restores the session of a previously signed-in user (page reload).
      * Returns null when there is no open session.
      */
