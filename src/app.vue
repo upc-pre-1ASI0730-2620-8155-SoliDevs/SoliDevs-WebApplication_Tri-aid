@@ -67,7 +67,6 @@ watch(() => route.fullPath, () => {
         <div class="tb__right">
           <LangSwitch />
           <NotificationBell />
-          <div v-if="session.name" class="tb__user"><span class="tb__av">{{ session.initials }}</span><span>{{ session.name }}</span></div>
         </div>
         <div class="tb__bar"><span :style="{ transform: `scaleX(${progress})` }"></span></div>
       </header>
