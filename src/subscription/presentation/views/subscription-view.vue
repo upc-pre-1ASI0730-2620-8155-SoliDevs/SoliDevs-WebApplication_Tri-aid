@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { gsap } from 'gsap'
 import { subscriptionStore } from '../../application/subscription-store.js'
 import { Plan } from '../../domain/model/plan.entity.js'
 import { notify } from '../../../shared/application/toast-store.js'
@@ -13,10 +14,13 @@ const cycle = ref('monthly')
 
 // Modal de pago (US51).
 const checkout = ref(null)        // { plan }
+const backdrop = ref(null)        // fondo del modal (animacion)
+const modalCard = ref(null)       // tarjeta del modal (animacion)
 const institution = ref('')
 const cardNumber = ref('')
 const simulateReject = ref(false)
 const lastOperation = ref(null)   // feedback bajo el card de estado
+const closing = ref(false)        // bloquea interaccion durante el cierre animado
 
 const state = computed(() => subscriptionStore.subscription?.state ?? null)
 const subscription = computed(() => subscriptionStore.subscription)
@@ -36,11 +40,42 @@ onMounted(() => { subscriptionStore.load() })
 function openCheckout(plan) {
     checkout.value = { plan: new Plan(plan) }
     simulateReject.value = false
+    lastOperation.value = null
+    // Entrada: el fondo se oscurece y la tarjeta sube con un rebote suave.
+    nextTick(() => {
+        gsap.fromTo(backdrop.value, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' })
+        gsap.fromTo(modalCard.value,
+            { y: 34, scale: 0.94, opacity: 0 },
+            { y: 0, scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(1.6)' })
+    })
 }
 
 function closeCheckout() {
-    checkout.value = null
-    cardNumber.value = ''
+    if (closing.value) return
+    closing.value = true
+    // Salida: la tarjeta cae y el fondo se aclara antes de desmontar.
+    gsap.to(modalCard.value, { y: 20, scale: 0.96, opacity: 0, duration: 0.22, ease: 'power2.in' })
+    gsap.to(backdrop.value, {
+        opacity: 0, duration: 0.25, ease: 'power2.in',
+        onComplete: () => { checkout.value = null; closing.value = false; cardNumber.value = '' }
+    })
+}
+
+/** Shake cuando el gateway rechaza el pago. */
+function animateReject() {
+    gsap.fromTo(modalCard.value, { x: 0 },
+        { keyframes: [{ x: -12 }, { x: 10 }, { x: -7 }, { x: 4 }, { x: 0 }], duration: 0.5, ease: 'power1.out' })
+    gsap.fromTo(modalCard.value, { boxShadow: '0 0 0 3px rgba(200, 55, 45, 0.55)' },
+        { boxShadow: '0 0 0 3px rgba(200, 55, 45, 0)', duration: 0.9, ease: 'power2.out' })
+}
+
+/** Pulso de confirmacion cuando el pago se aprueba. */
+function animateSuccess() {
+    gsap.timeline()
+        .fromTo(modalCard.value, { scale: 1 }, { scale: 1.03, duration: 0.16, ease: 'power2.out' })
+        .to(modalCard.value, { scale: 1, duration: 0.22, ease: 'power2.inOut' })
+    gsap.fromTo(modalCard.value, { boxShadow: '0 0 0 3px rgba(52, 210, 123, 0.55)' },
+        { boxShadow: '0 0 0 3px rgba(52, 210, 123, 0)', duration: 1, ease: 'power2.out' })
 }
 
 async function run(action) {
@@ -51,6 +86,9 @@ async function run(action) {
         lastOperation.value = result.rejected ? 'rejected' : 'confirmed'
         notify({ type: result.rejected ? 'error' : 'success',
                  message: t(result.rejected ? 'subscription.toastRejected' : 'subscription.toastConfirmed') })
+        // Animar el veredicto del gateway antes de cerrar el modal.
+        if (result.rejected) animateReject(); else animateSuccess()
+        await new Promise(r => setTimeout(r, 750))
         closeCheckout()
     } catch (e) {
         console.error('Subscription operation failed:', e)
@@ -182,8 +220,8 @@ function maskedCard() {
     </section>
 
     <!-- Modal de pago simulado (US51) -->
-    <div v-if="checkout" class="sub-modal" @click.self="!busy && closeCheckout()">
-      <div class="ta-card sub-modal__card">
+    <div v-if="checkout" ref="backdrop" class="sub-modal" @click.self="!busy && !closing && closeCheckout()">
+      <div ref="modalCard" class="ta-card sub-modal__card">
         <h3 class="ta-h">{{ t('subscription.checkoutTitle', { plan: checkout.plan.name }) }}</h3>
         <p class="ta-sub">{{ t('subscription.checkoutSub', { amount: money(checkout.plan.priceFor(cycle)) }) }}</p>
 
@@ -256,8 +294,8 @@ function maskedCard() {
 .sub-pill{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600}
 .sub-pill--ok{background:#e3f6ea;color:var(--ta-brand)}
 .sub-pill--bad{background:var(--ta-danger-bg);color:var(--ta-danger)}
-.sub-modal{position:fixed;inset:0;background:rgba(10,33,24,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px}
-.sub-modal__card{width:min(430px,100%);display:flex;flex-direction:column;gap:14px}
+.sub-modal{position:fixed;inset:0;background:rgba(10,33,24,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;opacity:0}
+.sub-modal__card{width:min(430px,100%);display:flex;flex-direction:column;gap:14px;will-change:transform,opacity}
 .sub-field{display:flex;flex-direction:column;gap:6px}
 .sub-field span{font-size:.8rem;color:var(--ta-muted);font-weight:600}
 .sub-reject{display:flex;gap:8px;align-items:center;font-size:.82rem;color:var(--ta-muted);cursor:pointer}
