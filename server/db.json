@@ -825,5 +825,78 @@
       "escalatedTo": null,
       "createdAt": "2026-10-05T20:48:48.611Z"
     }
+  ],
+  "plans": [
+    {
+      "id": "plan-esencial",
+      "name": "Esencial",
+      "monthlyPrice": 49,
+      "annualPrice": 470,
+      "maxUsers": 5,
+      "features": [
+        "Hasta 5 usuarios",
+        "Triaje y signos vitales",
+        "Reportes básicos",
+        "Soporte por correo"
+      ]
+    },
+    {
+      "id": "plan-institucional",
+      "name": "Institucional",
+      "monthlyPrice": 129,
+      "annualPrice": 1238,
+      "maxUsers": 25,
+      "features": [
+        "Hasta 25 usuarios",
+        "Alertas y escalamiento",
+        "Derivación entre especialidades",
+        "Reportes auditables",
+        "Soporte prioritario"
+      ]
+    },
+    {
+      "id": "plan-red",
+      "name": "Red Hospitalaria",
+      "monthlyPrice": 299,
+      "annualPrice": 2870,
+      "maxUsers": 100,
+      "features": [
+        "Hasta 100 usuarios",
+        "Multi-sede",
+        "Integración con dispositivos",
+        "Reportes ejecutivos",
+        "Gestor de cuenta dedicado"
+      ]
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "sub-1",
+      "institution": "Hospital Central de Lima",
+      "planId": "plan-institucional",
+      "billingCycle": "monthly",
+      "status": "pending",
+      "startedAt": "2026-08-01T09:00:00.000Z",
+      "renewalDate": "2026-09-25",
+      "graceDays": 7,
+      "payments": [
+        {
+          "id": "pay-1",
+          "amount": 129,
+          "currency": "PEN",
+          "paidAt": "2026-08-01T09:05:00.000Z",
+          "status": "paid",
+          "method": "Visa •••• 4242"
+        },
+        {
+          "id": "pay-2",
+          "amount": 129,
+          "currency": "PEN",
+          "paidAt": "2026-09-01T08:40:00.000Z",
+          "status": "rejected",
+          "method": "Visa •••• 4242"
+        }
+      ]
+    }
   ]
 }
