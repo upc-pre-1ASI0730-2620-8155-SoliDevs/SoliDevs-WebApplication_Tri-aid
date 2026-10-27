@@ -3,6 +3,7 @@ import triageClassificationRoutes from '../triage-classification/presentation/tr
 import specialtyAssignmentRoutes from '../specialty-assignment/presentation/specialty-assignment-routes.js'
 import reportsRoutes from '../reports/presentation/reports-routes.js'
 import vitalSignsRoutes from '../vital-signs-capture/presentation/vital-signs-routes.js'
+import subscriptionRoutes from '../subscription/presentation/subscription-routes.js'
 
 export default [
   { path: '/', redirect: '/login' },
@@ -18,5 +19,5 @@ export default [
   { path: '/reports', name: 'reports-bc', children: reportsRoutes },
   { path: '/vital-signs-capture', name: 'vital-signs-bc', children: vitalSignsRoutes },
   { path: '/devices', redirect: '/vital-signs-capture/devices' },
-  { path: '/subscriptions', component: soon, meta: { titleKey: 'nav.subscription' } }
+  { path: '/subscriptions', name: 'subscription-bc', children: subscriptionRoutes }
 ]
