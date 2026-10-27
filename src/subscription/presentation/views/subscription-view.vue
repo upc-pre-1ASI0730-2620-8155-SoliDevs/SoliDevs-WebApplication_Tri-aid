@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
 import { subscriptionStore } from '../../application/subscription-store.js'
@@ -11,6 +11,20 @@ const busy = ref(false)
 
 // Ciclo de facturacion seleccionado (US04 - Escenario 2).
 const cycle = ref('monthly')
+const plansGrid = ref(null)
+
+// Transicion de precios al alternar mensual/anual: los valores salen hacia
+// arriba y entran los nuevos con un pequeño stagger por tarjeta.
+watch(cycle, async () => {
+    await nextTick()
+    const cards = plansGrid.value?.querySelectorAll('.sub-plan__price')
+    if (!cards?.length) return
+    gsap.fromTo(cards,
+        { y: 14, opacity: 0, scale: 0.97 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.4)', stagger: 0.06 })
+    const saves = plansGrid.value?.querySelectorAll('.sub-plan__save')
+    if (saves?.length) gsap.fromTo(saves, { opacity: 0 }, { opacity: 1, duration: 0.4, delay: 0.15 })
+})
 
 // Modal de pago (US51).
 const checkout = ref(null)        // { plan }
@@ -184,7 +198,7 @@ function maskedCard() {
     </section>
 
     <!-- Planes (US04) -->
-    <section class="sub-plans">
+    <section class="sub-plans" ref="plansGrid">
       <article v-for="p in subscriptionStore.plans" :key="p.id" class="ta-card sub-plan"
                :class="{ 'sub-plan--current': subscription?.planId === p.id && subscription?.status === 'active' }">
         <header>
