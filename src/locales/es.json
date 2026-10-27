@@ -411,5 +411,14 @@
   "subscription.toastRejected": "El pago fue rechazado. La suscripción quedó pendiente.",
   "subscription.toastError": "No se pudo completar la operación. Inténtalo de nuevo.",
   "subscription.title": "Suscripción",
-  "subscription.sub": "Gestiona el plan de tu institución y revisa el historial de pagos"
+  "subscription.sub": "Gestiona el plan de tu institución y revisa el historial de pagos",
+  "login.error": "Usuario o contraseña incorrectos.",
+  "login.errorApi": "No se pudo conectar con el servicio. Inténtalo de nuevo.",
+  "suspended.title": "Acceso suspendido",
+  "suspended.lead": "La suscripción de {institution} está vencida. El acceso de tu equipo a la plataforma quedó suspendido hasta regularizar el pago.",
+  "suspended.point1": "El triaje y los signos vitales no se pueden registrar",
+  "suspended.point2": "Los reportes y alertas quedan congelados",
+  "suspended.regularize": "Regularizar pago",
+  "suspended.note": "El acceso se restablece automáticamente al confirmarse el pago.",
+  "sub.bannerPending": "Tu suscripción tiene un pago pendiente. Regularízalo antes del {date} para evitar la suspensión del acceso."
 }

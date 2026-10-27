@@ -3,6 +3,12 @@ import logo from '../../../assets/tri-aid-logo.png'
 import { session } from '../../application/demo-session.js'
 import { unreadCount } from '../../../alerting/application/alert-store.js'
 import { t } from '../../application/i18n.js'
+import { iamStore } from '../../../iam/application/iam-store.js'
+
+async function signOut() {
+  await iamStore.signOut()
+  location.href = '/login'
+}
 
 const items = [
   { key: 'nav.panel', icon: 'pi pi-home', to: '/panel' },
@@ -33,7 +39,7 @@ const items = [
         <span class="sb__av">{{ session.initials }}</span>
         <div><b>{{ session.name }}</b><small>{{ session.unit }}</small></div>
       </div>
-      <router-link to="/login" class="sb__out"><i class="pi pi-sign-out"></i><span>{{ t('nav.signOut') }}</span></router-link>
+      <a href="/login" class="sb__out" @click.prevent="signOut"><i class="pi pi-sign-out"></i><span>{{ t('nav.signOut') }}</span></a>
     </footer>
   </aside>
 </template>
