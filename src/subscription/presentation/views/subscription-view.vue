@@ -5,6 +5,7 @@ import { gsap } from 'gsap'
 import { subscriptionStore } from '../../application/subscription-store.js'
 import { Plan } from '../../domain/model/plan.entity.js'
 import { notify } from '../../../shared/application/toast-store.js'
+import { session } from '../../../shared/application/demo-session.js'
 
 const { t, locale } = useI18n()
 const busy = ref(false)
@@ -30,7 +31,8 @@ watch(cycle, async () => {
 const checkout = ref(null)        // { plan }
 const backdrop = ref(null)        // fondo del modal (animacion)
 const modalCard = ref(null)       // tarjeta del modal (animacion)
-const institution = ref('')
+// Institution of the signed-in user: the subscription always belongs to their hospital.
+const institution = ref(session.institution || '')
 const cardNumber = ref('')
 const simulateReject = ref(false)
 const lastOperation = ref(null)   // feedback bajo el card de estado
@@ -115,14 +117,14 @@ async function run(action) {
         subscriptionStore.setSubscription(result.data)
         lastOperation.value = result.rejected ? 'rejected' : 'confirmed'
         notify({ type: result.rejected ? 'error' : 'success',
-                 message: t(result.rejected ? 'subscription.toastRejected' : 'subscription.toastConfirmed') })
+                 title: t(result.rejected ? 'subscription.toastRejected' : 'subscription.toastConfirmed') })
         // Animar el veredicto del gateway antes de cerrar el modal.
         if (result.rejected) animateReject(); else animateSuccess()
         await new Promise(r => setTimeout(r, 750))
         closeCheckout()
     } catch (e) {
         console.error('Subscription operation failed:', e)
-        notify({ type: 'error', message: t('subscription.toastError') })
+        notify({ type: 'error', title: t('subscription.toastError') })
     } finally {
         busy.value = false
     }
@@ -257,7 +259,7 @@ function maskedCard() {
 
         <label class="sub-field">
           <span>{{ t('subscription.institution') }}</span>
-          <input v-model="institution" class="ta-input" :placeholder="t('subscription.defaultInstitution')" />
+          <input v-model="institution" class="ta-input" readonly :placeholder="t('subscription.defaultInstitution')" />
         </label>
         <label class="sub-field">
           <span>{{ t('subscription.card') }}</span>

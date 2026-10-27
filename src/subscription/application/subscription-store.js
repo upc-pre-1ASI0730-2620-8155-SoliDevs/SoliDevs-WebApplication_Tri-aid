@@ -1,5 +1,6 @@
 import { reactive, markRaw } from 'vue'
 import { SubscriptionService } from '../infrastructure/subscription.service.js'
+import { session } from '../../shared/application/demo-session.js'
 
 /**
  * Reactive state of the Subscription bounded context. Centralizes the
@@ -20,7 +21,7 @@ export const subscriptionStore = reactive({
         try {
             const [plans, subscription] = await Promise.all([
                 this.service.getPlans(),
-                this.service.getSubscription()
+                this.service.getSubscription(session.institution)
             ])
             this.plans = plans.data
             this.subscription = subscription.data
