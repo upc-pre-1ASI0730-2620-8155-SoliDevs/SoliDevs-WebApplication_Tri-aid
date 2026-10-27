@@ -43,19 +43,31 @@ function openCheckout(plan) {
     lastOperation.value = null
     // Entrada: el fondo se oscurece y la tarjeta sube con un rebote suave.
     nextTick(() => {
-        gsap.fromTo(backdrop.value, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' })
-        gsap.fromTo(modalCard.value,
+        const { bd, card } = modalEls()
+        if (!bd || !card) return
+        gsap.fromTo(bd, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' })
+        gsap.fromTo(card,
             { y: 34, scale: 0.94, opacity: 0 },
             { y: 0, scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(1.6)' })
     })
 }
 
+/** Resuelve los elementos del modal via template ref o querySelector. */
+function modalEls() {
+    return {
+        bd: backdrop.value || document.querySelector('.sub-modal'),
+        card: modalCard.value || document.querySelector('.sub-modal__card')
+    }
+}
+
 function closeCheckout() {
     if (closing.value) return
     closing.value = true
+    const { bd, card } = modalEls()
+    if (!card || !bd) { checkout.value = null; closing.value = false; cardNumber.value = ''; return }
     // Salida: la tarjeta cae y el fondo se aclara antes de desmontar.
-    gsap.to(modalCard.value, { y: 20, scale: 0.96, opacity: 0, duration: 0.22, ease: 'power2.in' })
-    gsap.to(backdrop.value, {
+    gsap.to(card, { y: 20, scale: 0.96, opacity: 0, duration: 0.22, ease: 'power2.in' })
+    gsap.to(bd, {
         opacity: 0, duration: 0.25, ease: 'power2.in',
         onComplete: () => { checkout.value = null; closing.value = false; cardNumber.value = '' }
     })
@@ -63,18 +75,22 @@ function closeCheckout() {
 
 /** Shake cuando el gateway rechaza el pago. */
 function animateReject() {
-    gsap.fromTo(modalCard.value, { x: 0 },
+    const { card } = modalEls()
+    if (!card) return
+    gsap.fromTo(card, { x: 0 },
         { keyframes: [{ x: -12 }, { x: 10 }, { x: -7 }, { x: 4 }, { x: 0 }], duration: 0.5, ease: 'power1.out' })
-    gsap.fromTo(modalCard.value, { boxShadow: '0 0 0 3px rgba(200, 55, 45, 0.55)' },
+    gsap.fromTo(card, { boxShadow: '0 0 0 3px rgba(200, 55, 45, 0.55)' },
         { boxShadow: '0 0 0 3px rgba(200, 55, 45, 0)', duration: 0.9, ease: 'power2.out' })
 }
 
 /** Pulso de confirmacion cuando el pago se aprueba. */
 function animateSuccess() {
+    const { card } = modalEls()
+    if (!card) return
     gsap.timeline()
-        .fromTo(modalCard.value, { scale: 1 }, { scale: 1.03, duration: 0.16, ease: 'power2.out' })
-        .to(modalCard.value, { scale: 1, duration: 0.22, ease: 'power2.inOut' })
-    gsap.fromTo(modalCard.value, { boxShadow: '0 0 0 3px rgba(52, 210, 123, 0.55)' },
+        .fromTo(card, { scale: 1 }, { scale: 1.03, duration: 0.16, ease: 'power2.out' })
+        .to(card, { scale: 1, duration: 0.22, ease: 'power2.inOut' })
+    gsap.fromTo(card, { boxShadow: '0 0 0 3px rgba(52, 210, 123, 0.55)' },
         { boxShadow: '0 0 0 3px rgba(52, 210, 123, 0)', duration: 1, ease: 'power2.out' })
 }
 
