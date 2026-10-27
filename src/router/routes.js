@@ -21,7 +21,9 @@ export default [
   { path: '/reports', name: 'reports-bc', children: reportsRoutes },
   { path: '/vital-signs-capture', name: 'vital-signs-bc', children: vitalSignsRoutes },
   { path: '/devices', redirect: '/vital-signs-capture/devices' },
-  { path: '/subscriptions', name: 'subscription-bc', children: subscriptionRoutes }
+  { path: '/subscriptions', name: 'subscription-bc', children: subscriptionRoutes },
+  { path: '/users', component: () => import('../iam/presentation/views/users-view.vue'), meta: { titleKey: 'nav.users' } },
+  { path: '/profile', component: () => import('../iam/presentation/views/profile-view.vue'), meta: { titleKey: 'nav.profile' } }
 ]
 
 /** Access control: session + subscription state decide each navigation. */
