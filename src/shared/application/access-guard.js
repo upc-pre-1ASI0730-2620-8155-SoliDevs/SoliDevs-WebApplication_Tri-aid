@@ -32,6 +32,10 @@ export async function accessGuard(to) {
     // Solo si hay sesion interesa el estado de la suscripcion.
     await subscriptionStore.load()
 
+    // RBAC: la gestion de usuarios y la suscripcion son del administrador.
+    const adminOnlyPaths = ['/subscriptions', '/users']
+    if (adminOnlyPaths.includes(path) && !iamStore.isAdmin) return '/panel'
+
     if (subscriptionStore.subscription?.state === 'overdue') {
         const allowedWhenOverdue = ['/subscriptions', '/acceso-suspendido']
         if (!allowedWhenOverdue.includes(path)) return '/acceso-suspendido'
