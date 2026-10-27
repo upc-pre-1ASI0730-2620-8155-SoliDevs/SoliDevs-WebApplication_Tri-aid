@@ -898,5 +898,44 @@
         }
       ]
     }
-  ]
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "triaid123",
+      "names": "Ana",
+      "surnames": "Torres Vega",
+      "role": "Triage Administrator",
+      "unit": "Emergency Department",
+      "shift": "Morning",
+      "institution": "Hospital Central de Lima",
+      "email": "ana.torres@hcentral.pe"
+    },
+    {
+      "id": 2,
+      "username": "enfermera.lucia",
+      "password": "triaid123",
+      "names": "Lucia",
+      "surnames": "Ramos Diaz",
+      "role": "Triage Nurse",
+      "unit": "Emergency Department",
+      "shift": "Night",
+      "institution": "Hospital Central de Lima",
+      "email": "lucia.ramos@hcentral.pe"
+    },
+    {
+      "id": 3,
+      "username": "dr.martinez",
+      "password": "triaid123",
+      "names": "Carlos",
+      "surnames": "Martinez Rojas",
+      "role": "Emergency Physician",
+      "unit": "Trauma Shock Room",
+      "shift": "Evening",
+      "institution": "Hospital Central de Lima",
+      "email": "carlos.martinez@hcentral.pe"
+    }
+  ],
+  "sessions": []
 }
