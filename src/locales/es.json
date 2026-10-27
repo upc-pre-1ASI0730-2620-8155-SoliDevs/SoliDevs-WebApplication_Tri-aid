@@ -409,5 +409,7 @@
   "subscription.processing": "Procesando...",
   "subscription.toastConfirmed": "Pago confirmado. La suscripción está activa.",
   "subscription.toastRejected": "El pago fue rechazado. La suscripción quedó pendiente.",
-  "subscription.toastError": "No se pudo completar la operación. Inténtalo de nuevo."
+  "subscription.toastError": "No se pudo completar la operación. Inténtalo de nuevo.",
+  "subscription.title": "Suscripción",
+  "subscription.sub": "Gestiona el plan de tu institución y revisa el historial de pagos"
 }

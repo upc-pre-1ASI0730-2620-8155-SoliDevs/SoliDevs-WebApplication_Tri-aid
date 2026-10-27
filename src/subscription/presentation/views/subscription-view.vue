@@ -78,6 +78,21 @@ function maskedCard() {
 
 <template>
   <div class="ta-page sub">
+    <!-- Cabecera de la seccion: titulo + ciclo de facturacion -->
+    <section class="ta-card sub-head">
+      <div>
+        <h3 class="ta-h">{{ t('subscription.title') }}</h3>
+        <p class="ta-sub">{{ t('subscription.sub') }}</p>
+      </div>
+      <div class="sub-cycle" role="tablist">
+        <button :class="{ on: cycle === 'monthly' }" @click="cycle = 'monthly'">{{ t('subscription.cycle_monthly') }}</button>
+        <button :class="{ on: cycle === 'annual' }" @click="cycle = 'annual'">
+          {{ t('subscription.cycle_annual') }}
+          <em>{{ t('subscription.annualSaving') }}</em>
+        </button>
+      </div>
+    </section>
+
     <!-- Mi suscripcion (US51 / US52) -->
     <section class="ta-card sub-status" :class="`sub-status--${state ?? 'none'}`">
       <div class="sub-status__info">
@@ -115,17 +130,6 @@ function maskedCard() {
     </section>
 
     <!-- Planes (US04) -->
-    <section class="sub-plans-head">
-      <h3 class="ta-h">{{ t('subscription.plans') }}</h3>
-      <div class="sub-cycle" role="tablist">
-        <button :class="{ on: cycle === 'monthly' }" @click="cycle = 'monthly'">{{ t('subscription.cycle_monthly') }}</button>
-        <button :class="{ on: cycle === 'annual' }" @click="cycle = 'annual'">
-          {{ t('subscription.cycle_annual') }}
-          <em>{{ t('subscription.annualSaving') }}</em>
-        </button>
-      </div>
-    </section>
-
     <section class="sub-plans">
       <article v-for="p in subscriptionStore.plans" :key="p.id" class="ta-card sub-plan"
                :class="{ 'sub-plan--current': subscription?.planId === p.id && subscription?.status === 'active' }">
@@ -210,6 +214,12 @@ function maskedCard() {
 
 <style scoped>
 .sub{display:flex;flex-direction:column;gap:18px}
+.sub-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.sub-cycle{display:flex;border:1px solid var(--ta-line);border-radius:10px;overflow:hidden;background:var(--ta-surface)}
+.sub-cycle button{border:0;background:transparent;padding:9px 18px;cursor:pointer;font:inherit;font-size:.85rem;color:var(--ta-muted);display:flex;gap:8px;align-items:center}
+.sub-cycle button.on{background:var(--ta-brand);color:#fff}
+.sub-cycle em{font-style:normal;font-size:.68rem;background:#e3f6ea;color:var(--ta-brand);border-radius:999px;padding:2px 8px}
+.sub-cycle button.on em{background:rgba(255,255,255,.2);color:#fff}
 .sub-status{display:flex;justify-content:space-between;gap:24px;border-left:4px solid var(--ta-line)}
 .sub-status--active{border-left-color:var(--ta-accent)}
 .sub-status--pending{border-left-color:#e0a83c}
@@ -225,12 +235,6 @@ function maskedCard() {
 .sub-badge--pending{background:#fdf4e0;color:#9a6d10}
 .sub-badge--overdue{background:var(--ta-danger-bg);color:var(--ta-danger)}
 .sub-overdue-note,.sub-pending-note{font-size:.78rem;color:var(--ta-muted);max-width:230px;text-align:right}
-.sub-plans-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.sub-cycle{display:flex;border:1px solid var(--ta-line);border-radius:10px;overflow:hidden;background:var(--ta-surface)}
-.sub-cycle button{border:0;background:transparent;padding:9px 18px;cursor:pointer;font:inherit;font-size:.85rem;color:var(--ta-muted);display:flex;gap:8px;align-items:center}
-.sub-cycle button.on{background:var(--ta-brand);color:#fff}
-.sub-cycle em{font-style:normal;font-size:.68rem;background:#e3f6ea;color:var(--ta-brand);border-radius:999px;padding:2px 8px}
-.sub-cycle button.on em{background:rgba(255,255,255,.2);color:#fff}
 .sub-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
 .sub-plan{display:flex;flex-direction:column;gap:10px;padding:22px}
 .sub-plan--current{outline:2px solid var(--ta-accent)}
