@@ -76,7 +76,11 @@ export class SubscriptionService {
         const sub = new Subscription({ ...subscription })
         const amount = sub.payments.length ? sub.payments[sub.payments.length - 1].amount : 0
         sub.addPayment({ amount, status: simulateReject ? 'rejected' : 'paid', method: method || 'Visa •••• 4242' })
-        if (!simulateReject) sub.status = 'active'
+        if (!simulateReject) {
+            sub.status = 'active'
+            // El reintento regulariza el ciclo vencido: la renovacion avanza.
+            sub.renewalDate = sub.nextRenewalDate
+        }
         const response = await this.api.updateSubscription(sub.id, { ...sub })
         return { ok: true, rejected: simulateReject, data: new Subscription(response.data) }
     }
