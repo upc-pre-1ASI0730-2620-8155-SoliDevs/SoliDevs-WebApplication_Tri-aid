@@ -10,6 +10,7 @@ export class User {
         password = '',
         names = '',
         surnames = '',
+        email = '',
         role = '',
         unit = '',
         shift = '',
@@ -20,6 +21,7 @@ export class User {
         this.password = password
         this.names = names
         this.surnames = surnames
+        this.email = email
         this.role = role
         this.unit = unit
         this.shift = shift
