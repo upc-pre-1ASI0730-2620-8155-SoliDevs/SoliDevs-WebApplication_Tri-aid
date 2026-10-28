@@ -31,7 +31,7 @@ function link() {
   linkErr.value = ''
   if (!pickedDevice.value) { linkErr.value = t('pf.chooseDevice'); return }
   if (!pickedDevice.value.online) {
-    // US12 escenario 2: instrumento apagado o sin senal
+    // Device is off or out of signal: linking fails.
     linkErr.value = t('pf.linkFail')
     return
   }

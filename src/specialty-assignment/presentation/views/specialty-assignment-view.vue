@@ -99,7 +99,6 @@ async function refer() {
   referral.value = r.data
   ep.value.referred = true
   saveEpisode(ep.value)
-  // Derivacion completada: alertas resueltas y dispositivos liberados
   try {
     await alertingService.resolveByEpisode(ep.value.id)
     releaseEpisodeDevices(ep.value.id)
