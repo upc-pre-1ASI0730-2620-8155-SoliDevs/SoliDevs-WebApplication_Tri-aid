@@ -1,5 +1,4 @@
 import { reactive } from 'vue'
 
-// Sin sesión activa hasta conectar IAM (login). No hay usuario de demostración.
-// Cuando exista el login real, rellenar estos campos con el usuario autenticado.
+/** Session fields mirror the signed-in IAM user for the app shell. */
 export const session = reactive({ name: '', initials: '', unit: '', shift: '', institution: '' })
