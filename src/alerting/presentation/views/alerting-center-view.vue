@@ -18,14 +18,14 @@ const doneId = ref(null);
 const pendingId = ref(null);
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Variable para controlar el filtro seleccionado por defecto
+/** Currently selected filter. */
 const activeFilter = ref('all');
 
-// Auditoria cronologica por rango de fechas (US29)
+/** Audit date range over the local creation timestamp. */
 const auditFrom = ref('');
 const auditTo = ref('');
 
-// Notificacion sonora real (US26): bip de dos tonos via WebAudio.
+/** Real sound notification: two-tone beep played via WebAudio. */
 function playAlertSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -63,7 +63,6 @@ const displayAlerts = computed(() => {
     filtered = filtered.filter(a => a.severity !== 'resolved');
   }
 
-  // Auditoria: rango de fechas sobre la hora LOCAL de creacion (US29)
   const localDay = a => new Date(a.createdAt).toLocaleDateString('en-CA');
   if (auditFrom.value) filtered = filtered.filter(a => localDay(a) >= auditFrom.value);
   if (auditTo.value) filtered = filtered.filter(a => localDay(a) <= auditTo.value);

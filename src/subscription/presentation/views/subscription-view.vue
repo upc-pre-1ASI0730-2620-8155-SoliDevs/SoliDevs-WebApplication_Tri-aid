@@ -10,7 +10,7 @@ import { session } from '../../../shared/application/demo-session.js'
 const { t, locale } = useI18n()
 const busy = ref(false)
 
-// Ciclo de facturacion seleccionado (US04 - Escenario 2).
+/** Selected billing cycle. */
 const cycle = ref('monthly')
 const plansGrid = ref(null)
 
@@ -27,7 +27,7 @@ watch(cycle, async () => {
     if (saves?.length) gsap.fromTo(saves, { opacity: 0 }, { opacity: 1, duration: 0.4, delay: 0.15 })
 })
 
-// Modal de pago (US51).
+/** Payment checkout modal state. */
 const checkout = ref(null)        // { plan }
 const backdrop = ref(null)        // fondo del modal (animacion)
 const modalCard = ref(null)       // tarjeta del modal (animacion)
