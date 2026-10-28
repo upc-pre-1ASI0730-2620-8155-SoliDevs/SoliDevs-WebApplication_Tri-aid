@@ -18,12 +18,14 @@ const doneId = ref(null);
 const pendingId = ref(null);
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Variable para controlar el filtro seleccionado por defecto
 const activeFilter = ref('all');
 
+// Auditoria cronologica por rango de fechas (US29)
 const auditFrom = ref('');
 const auditTo = ref('');
 
-/** Real sound notification: two-tone beep played via WebAudio. */
+// Notificacion sonora real (US26): bip de dos tonos via WebAudio.
 function playAlertSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -36,7 +38,7 @@ function playAlertSound() {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     osc.connect(gain).connect(ctx.destination);
     osc.start(); osc.stop(ctx.currentTime + 0.4);
-  } catch (e) { }
+  } catch (e) { /* audio no disponible */ }
 }
 
 onMounted(async () => {
@@ -51,8 +53,9 @@ onMounted(async () => {
 
 const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated').length);
 
-/** Combined logic: filter first, sort afterwards. */
+// Lógica combinada: Filtra primero, ordena después
 const displayAlerts = computed(() => {
+  // 1. Filtrado dinámico
   let filtered = activeAlerts.value;
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
@@ -60,10 +63,12 @@ const displayAlerts = computed(() => {
     filtered = filtered.filter(a => a.severity !== 'resolved');
   }
 
+  // Auditoria: rango de fechas sobre la hora LOCAL de creacion (US29)
   const localDay = a => new Date(a.createdAt).toLocaleDateString('en-CA');
   if (auditFrom.value) filtered = filtered.filter(a => localDay(a) >= auditFrom.value);
   if (auditTo.value) filtered = filtered.filter(a => localDay(a) <= auditTo.value);
 
+  // 2. Orden cronológico dentro de la severidad, severidades agrupadas al frente
   return [...filtered].sort((a, b) => {
     const group = { critical: 0, warning: 1, escalated: 2, resolved: 3 };
     if (group[a.severity] !== group[b.severity]) return group[a.severity] - group[b.severity];
@@ -77,33 +82,21 @@ const displayAlerts = computed(() => {
   });
 });
 
-  /**
-   * Opens the acknowledgement confirmation dialog for an alert.
-   * @param {string|number} id - Alert identifier.
-   */
 const acknowledgeAlert = (id) => {
   pendingId.value = id;
 };
 
 const pendingEsc = ref(null);
-  /**
-   * Opens the escalation confirmation dialog for an alert.
-   * @param {string|number} id - Alert identifier.
-   */
 const escalateAlertPrompt = (id) => { pendingEsc.value = id; };
 const cancelEscalate = () => { pendingEsc.value = null; };
 const specialtyService = new SpecialtyAssignmentService();
 
-  /**
-   * Confirms the emergency escalation: creates the direct referral to
-   * Trauma Shock, seals the alert as escalated, closes the remaining
-   * episode alerts and releases the linked devices.
-   */
 const confirmEscalate = async () => {
   const alert = activeAlerts.value.find(a => String(a.id) === String(pendingEsc.value));
   pendingEsc.value = null;
   if (!alert) return;
   try {
+    // Direct emergency referral to the Trauma Shock critical care room
     const specs = await specialtyService.getSpecialties();
     const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
     if (trauma) {
@@ -115,6 +108,7 @@ const confirmEscalate = async () => {
       const ep = findEpisode(alert.episode);
       if (ep) { ep.referred = true; saveEpisode(ep); }
     }
+    // Seal this alert as escalated and close the remaining ones
     const up = await alertingService.escalateAlert(alert.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
       const i = activeAlerts.value.findIndex(a => String(a.id) === String(alert.id));
@@ -128,17 +122,15 @@ const confirmEscalate = async () => {
 
 const cancelAcknowledge = () => { pendingId.value = null; };
 
-  /**
-   * Confirms the acknowledgement: celebrates first and then persists the
-   * resolved state of the alert.
-   */
 const confirmAcknowledge = async () => {
   const id = pendingId.value;
   pendingId.value = null;
 
+  // 1) Celebrar primero, con la tarjeta en su posicion actual
   doneId.value = id;
   await new Promise(r => setTimeout(r, 1500));
 
+  // 2) Recien entonces actualizar el estado (la tarjeta se mueve/desaparece)
   const r = await alertingService.acknowledgeAlert(id, session.name || null);
   if (r.ok) {
     const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
@@ -152,17 +144,12 @@ const confirmAcknowledge = async () => {
   setTimeout(() => { if (String(doneId.value) === String(id)) doneId.value = null; }, 400);
 };
 
-/** GSAP enter/leave animations (based on the gsap-alert-animation repository). */
+/* ---- Animaciones GSAP (repositorio gsap-alert-animation) ---- */
 const onCardEnter = (el, done) => {
   if (reduce()) { done(); return; }
   gsap.fromTo(el, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', clearProps: 'transform,opacity', onComplete: done });
 };
 
-  /**
-   * JS animation hook: slides a card out and collapses its height.
-   * @param {HTMLElement} el - Card element.
-   * @param {Function} done - Call when the animation finishes.
-   */
 const onCardLeave = (el, done) => {
   if (reduce()) { done(); return; }
   gsap.set(el, { overflow: 'hidden' });
@@ -171,11 +158,6 @@ const onCardLeave = (el, done) => {
     .to(el, { height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: 0, borderWidth: 0, duration: 0.35, ease: 'power2.inOut' }, '-=0.1');
 };
 
-  /**
-   * JS animation hook: fades and pops the confirmation dialog in.
-   * @param {HTMLElement} el - Modal root element.
-   * @param {Function} done - Call when the animation finishes.
-   */
 const onModalEnter = (el, done) => {
   const box = el.querySelector('.al-dialog');
   const ico = el.querySelector('.al-dialog__ico');
@@ -188,11 +170,6 @@ const onModalEnter = (el, done) => {
     .fromTo(rows, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.06, ease: 'power3.out' }, 0.18);
 };
 
-  /**
-   * JS animation hook: shrinks and fades the confirmation dialog out.
-   * @param {HTMLElement} el - Modal root element.
-   * @param {Function} done - Call when the animation finishes.
-   */
 const onModalLeave = (el, done) => {
   if (reduce()) { done(); return; }
   const box = el.querySelector('.al-dialog');
@@ -201,11 +178,6 @@ const onModalLeave = (el, done) => {
     .to(el, { opacity: 0, duration: 0.2, ease: 'power1.in' }, 0.05);
 };
 
-  /**
-   * JS animation hook: plays the resolved-check celebration overlay.
-   * @param {HTMLElement} el - Celebration overlay element.
-   * @param {Function} done - Call when the animation finishes.
-   */
 const onDoneEnter = (el, done) => {
   const svg = el.querySelector('.al-done__svg');
   const disc = el.querySelector('.al-done__disc');
@@ -383,7 +355,7 @@ const onDoneEnter = (el, done) => {
 .al-enter-from,.al-leave-to{opacity:0;transform:translateY(8px)}
 .al-move{transition:transform .3s ease}
 
-/** GSAP confirmation animations */
+/* --- Animación de confirmación (GSAP) --- */
 .al-done{position:absolute;inset:-1px;z-index:2;border-radius:inherit;display:grid;align-content:center;justify-items:center;gap:8px;color:#fff;background:radial-gradient(120% 170% at 50% 0%,var(--ta-brand),var(--ta-ink));clip-path:circle(0% at 14% 88%)}
 .al-done__svg{width:72px;height:72px;overflow:visible}
 .al-done__disc{fill:#fff}

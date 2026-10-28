@@ -26,11 +26,6 @@ const meta = computed(() => [
   ep.value.id
 ].join(' · '))
 
-  /**
-   * Formats an ISO date (YYYY-MM-DD) as DD/MM/YYYY.
-   * @param {string} s2 - ISO date string.
-   * @returns {string} Formatted date.
-   */
 const dmy = s2 => s2.split('-').reverse().join('/')
 const rows = computed(() => [
   [t('pf.r.document'), docLabel(p.value)],
@@ -43,6 +38,7 @@ const rows = computed(() => [
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 
+/* ---------- Pestañas ---------- */
 const tab = ref('vitals')
 const tabsDef = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
@@ -50,6 +46,7 @@ const tabsDef = computed(() => [
   { id: 'history', label: t('pf.tab.history') }
 ])
 
+/* ---------- Estado del flujo: clasificacion + derivacion ---------- */
 const classified = ref(null)
 const classifiedConfirmed = ref(false)
 const referred = ref(false)
@@ -71,7 +68,7 @@ async function loadFlowState() {
 
 onMounted(() => loadFlowState())
 
-/** Next step after confirming readings */
+/* ---------- Siguiente paso al confirmar lecturas ---------- */
 function onVitalsConfirmed() {
   router.push(`/triage-classification/${id}`)
 }

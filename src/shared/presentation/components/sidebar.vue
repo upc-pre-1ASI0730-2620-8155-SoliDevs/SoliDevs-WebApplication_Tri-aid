@@ -1,17 +1,28 @@
 <script setup>
+import { computed } from 'vue'
 import logo from '../../../assets/tri-aid-logo.png'
 import { session } from '../../application/demo-session.js'
 import { unreadCount } from '../../../alerting/application/alert-store.js'
 import { t } from '../../application/i18n.js'
+import { iamStore } from '../../../iam/application/iam-store.js'
 
-const items = [
+async function signOut() {
+  await iamStore.signOut()
+  location.href = '/login'
+}
+
+// Navigation items. 'Users' and 'Subscription' are admin-only (RBAC).
+const allItems = [
   { key: 'nav.panel', icon: 'pi pi-home', to: '/panel' },
   { key: 'nav.patients', icon: 'pi pi-users', to: '/patient-registration' },
   { key: 'nav.alerts', icon: 'pi pi-bell', to: '/alerting', alerts: true },
   { key: 'nav.reports', icon: 'pi pi-file', to: '/reports' },
   { key: 'nav.devices', icon: 'pi pi-desktop', to: '/devices' },
-  { key: 'nav.subscription', icon: 'pi pi-shield', to: '/subscriptions' }
+  { key: 'nav.profile', icon: 'pi pi-user', to: '/profile' },
+  { key: 'nav.users', icon: 'pi pi-user-plus', to: '/users', adminOnly: true },
+  { key: 'nav.subscription', icon: 'pi pi-shield', to: '/subscriptions', adminOnly: true }
 ]
+const items = computed(() => allItems.filter(it => !it.adminOnly || iamStore.isAdmin))
 </script>
 
 <template>
@@ -29,11 +40,11 @@ const items = [
     </nav>
 
     <footer v-if="session.name" class="sb__foot">
-      <div class="sb__user">
+      <router-link to="/profile" class="sb__user" :title="t('nav.profile')">
         <span class="sb__av">{{ session.initials }}</span>
         <div><b>{{ session.name }}</b><small>{{ session.unit }}</small></div>
-      </div>
-      <router-link to="/login" class="sb__out"><i class="pi pi-sign-out"></i><span>{{ t('nav.signOut') }}</span></router-link>
+      </router-link>
+      <a href="/login" class="sb__out" @click.prevent="signOut"><i class="pi pi-sign-out"></i><span>{{ t('nav.signOut') }}</span></a>
     </footer>
   </aside>
 </template>
@@ -51,14 +62,15 @@ const items = [
 .sb__link.router-link-active{background:#12382a;color:var(--ta-accent)}
 .sb__badge{margin-left:auto;background:var(--ta-danger);color:#fff;font-size:10px;font-weight:600;min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:grid;place-items:center;box-sizing:border-box}
 .sb__foot{border-top:1px solid rgba(255,255,255,.08);padding-top:14px;display:grid;gap:10px}
-.sb__user{display:flex;align-items:center;gap:10px;padding:0 8px}
+.sb__user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;text-decoration:none;color:inherit;transition:background .2s}
+.sb__user:hover{background:rgba(255,255,255,.06)}
 .sb__av{width:26px;height:26px;border-radius:7px;background:#12382a;color:var(--ta-accent);display:grid;place-items:center;font-size:9px;font-weight:600;flex:none}
 .sb__user b{display:block;font-size:12px;font-weight:600;color:#fff}
 .sb__user small{display:block;font-size:10.5px;color:#7fa392}
 .sb__out{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;color:#f2997b;text-decoration:none;font-size:12.5px;transition:background .2s}
 .sb__out:hover{background:rgba(255,255,255,.05)}
 
-/* Tablet/mobile: sliding drawer (opened from the topbar hamburger) */
+/* Tablet/móvil: drawer deslizante (se abre con la hamburguesa del topbar) */
 @media(max-width:900px){
   .sb{position:fixed;top:0;left:0;bottom:0;z-index:60;width:262px;padding:22px 14px 16px;transform:translateX(-105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 40px rgba(6,20,14,.35);visibility:hidden}
   .sb.sb--open{transform:translateX(0);visibility:visible}
