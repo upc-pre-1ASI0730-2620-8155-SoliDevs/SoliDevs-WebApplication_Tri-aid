@@ -5,7 +5,7 @@ import { DeviceType as vitalTypes } from '../../domain/model/device-type.js'
 import { t } from '../../../shared/application/i18n.js'
 import { notify } from '../../../shared/application/toast-store.js'
 
-/** Preloaded devices to ease automatic linking. */
+// Dispositivos precargados para facilitar la vinculación automatica
 const defaultTemplates = [
   { type: 'pa', model: 'Omron Hem-7120' },
   { type: 'spo2', model: 'Contec CMS50D' },
@@ -25,9 +25,6 @@ const icons = {
 
 const getVitalInfo = (key) => vitalTypes.find(v => v.key === key) || {}
 
-  /**
-   * Adds a custom device to the inventory after validating the model.
-   */
 function handleAddCustom() {
   if (!newModel.value.trim()) {
     notify({ type: 'error', title: t('pf.errModel') })
@@ -38,19 +35,11 @@ function handleAddCustom() {
   newModel.value = ''
 }
 
-  /**
-   * Removes a device from the platform inventory.
-   * @param {string|number} id - Device identifier.
-   */
 function handleRemove(id) {
   removeDevice(id)
   notify({ type: 'info', title: t('devices.toastUnlinked') })
 }
 
-  /**
-   * Toggles the online/offline state of a device.
-   * @param {Object} d - Device to toggle.
-   */
 function toggleOnline(d) {
   setDeviceOnline(d.id, !d.online)
 }

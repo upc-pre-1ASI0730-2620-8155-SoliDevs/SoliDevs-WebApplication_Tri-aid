@@ -31,10 +31,6 @@ function lookup() {
   notify({ type: 'success', title: t('toast.found'), detail: t('toast.loaded') })
 }
 
-  /**
-   * Switches the selected document type and clears the number field.
-   * @param {string} key - Document type key (dni, ce, pasaporte-pe, ...).
-   */
 function pick(key) {
   if (f.sinDni) return
   f.docType = key
@@ -42,10 +38,6 @@ function pick(key) {
   f.dni = ''
   delete err.dni
 }
-  /**
-   * Normalizes the document number input and runs the patient lookup.
-   * @param {Event} e - Input event.
-   */
 function onDoc(e) {
   const v = e.target.value
   f.dni = doc.value.numeric ? v.replace(/\D/g, '') : v.toUpperCase().replace(/[^A-Z0-9]/g, '')
@@ -201,7 +193,7 @@ function reset() {
 .rg-titlebox .ta-sub{margin-bottom:0}
 .rg-clearbtn{flex:none}
 
-/* Mobile: back on top (icon only), clear on top right, register on bottom */
+/* Móvil: volver arriba (solo icono), limpiar arriba derecha, registrar abajo */
 @media(max-width:760px){
   .rg-head{flex-wrap:wrap;gap:10px}
   .rg-titlebox{flex:1 1 calc(100% - 100px)}

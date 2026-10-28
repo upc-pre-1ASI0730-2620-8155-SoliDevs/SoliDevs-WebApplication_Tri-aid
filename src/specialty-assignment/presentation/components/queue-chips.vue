@@ -2,7 +2,7 @@
 /** Patients waiting per specialty. */
 defineProps({
     queues: { type: Array, default: () => [] },
-    label: { type: Function, required: true }
+    label: { type: Function, required: true } // translates a specialty key into its display name
 })
 </script>
 

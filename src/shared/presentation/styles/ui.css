@@ -43,3 +43,5 @@
   .fi-actions{flex-direction:column-reverse;align-items:stretch}
   .fi-actions .ta-btn{width:100%}
 }
+/* Login: mensaje de credenciales invalidas. */
+.auth .err{margin:0;padding:9px 12px;border-radius:8px;background:var(--ta-danger-bg);border:1px solid var(--ta-danger-line);color:var(--ta-danger);font-size:.84rem}

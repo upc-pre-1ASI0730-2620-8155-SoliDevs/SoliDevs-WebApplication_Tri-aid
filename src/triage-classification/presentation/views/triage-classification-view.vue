@@ -36,7 +36,7 @@ const meta = computed(() => [
   ep.value.id
 ].join(' · '))
 
-/** Signos vitales y motor NT-158 */
+/* ---------- Signos vitales y motor NT-158 ---------- */
 const vLabel = k => t('vital.' + k + '.label')
 const vitalsRows = computed(() => vitalTypes.map(vt => ({
   key: vt.key,
@@ -49,6 +49,7 @@ const outOfRange = computed(() => nt158Engine.outOfRange(ep.value.vitals))
 const missing = computed(() => nt158Engine.missingMetrics(ep.value.vitals))
 const hasAllVitals = computed(() => !missing.value.length)
 
+/* ---------- Clasificacion ---------- */
 const classification = ref(null)
 const reasons = ref([])
 const loading = ref(false)
@@ -96,6 +97,7 @@ async function resetSuggestion() {
   if (r.ok) { classification.value = r.data; syncEpisodeLevel(); notify({ type: 'info', title: t('triage.toast.reset') }) }
 }
 
+/* ---------- Change level ---------- */
 const showModify = ref(false)
 const modLevel = ref('')
 const modReason = ref('')
@@ -119,9 +121,10 @@ async function saveModify() {
   notify({ type: 'info', title: t('triage.toast.overridden', { level: level.code }) })
 }
 
+/* ---------- Guia NT-158 ---------- */
 const showGuide = ref(false)
 
-/** Confirm classification */
+/* ---------- Confirm classification ---------- */
 const cycleMinutes = episode => {
   const c = classification.value
   if (!c?.confirmedAt || !episode?.arrival) return null
@@ -133,6 +136,7 @@ async function confirmClassification() {
   if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return }
   classification.value = r.data
   syncEpisodeLevel()
+  // Alertas de la clasificacion confirmada y de lecturas fuera de rango
   try {
     const alerting = new AlertingService()
     const generated = await alerting.generateForEpisode({
@@ -152,7 +156,7 @@ async function confirmClassification() {
   router.push(`/specialty-assignment/${ep.value.id}`)
 }
 
-/** Sincroniza el nivel con el episodio (ficha del paciente) */
+/* ---------- Sincroniza el nivel con el episodio (ficha del paciente) ---------- */
 const syncEpisodeLevel = () => {
   if (ep.value && classification.value) {
     const l = levelByKey(classification.value.level)

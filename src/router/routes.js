@@ -3,11 +3,14 @@ import triageClassificationRoutes from '../triage-classification/presentation/tr
 import specialtyAssignmentRoutes from '../specialty-assignment/presentation/specialty-assignment-routes.js'
 import reportsRoutes from '../reports/presentation/reports-routes.js'
 import vitalSignsRoutes from '../vital-signs-capture/presentation/vital-signs-routes.js'
+import subscriptionRoutes from '../subscription/presentation/subscription-routes.js'
+import { accessGuard } from '../shared/application/access-guard.js'
 
 export default [
   { path: '/', redirect: '/login' },
   { path: '/login', component: () => import('../iam/presentation/views/login.vue'), meta: { layout: 'auth' } },
   { path: '/recuperar', component: () => import('../iam/presentation/views/forgot-password.vue'), meta: { layout: 'auth' } },
+  { path: '/acceso-suspendido', component: () => import('../iam/presentation/views/account-suspended.vue'), meta: { layout: 'auth' } },
   { path: '/panel', component: () => import('../panel/presentation/views/panel.vue'), meta: { titleKey: 'nav.panel' } },
   { path: '/patient-registration', component: () => import('../patient-registration/presentation/views/patient-list.vue'), meta: { titleKey: 'nav.patients' } },
   { path: '/patient-registration/new', component: () => import('../patient-registration/presentation/views/registration.vue'), meta: { titleKey: 'rg.title' } },
@@ -18,5 +21,15 @@ export default [
   { path: '/reports', name: 'reports-bc', children: reportsRoutes },
   { path: '/vital-signs-capture', name: 'vital-signs-bc', children: vitalSignsRoutes },
   { path: '/devices', redirect: '/vital-signs-capture/devices' },
-  { path: '/subscriptions', component: soon, meta: { titleKey: 'nav.subscription' } }
+  { path: '/subscriptions', name: 'subscription-bc', children: subscriptionRoutes },
+  { path: '/users', component: () => import('../iam/presentation/views/users-view.vue'), meta: { titleKey: 'nav.users' } },
+  { path: '/profile', component: () => import('../iam/presentation/views/profile-view.vue'), meta: { titleKey: 'nav.profile' } }
 ]
+
+/** Access control: session + subscription state decide each navigation. */
+export function installGuard(router) {
+  router.beforeEach(async to => {
+    const redirect = await accessGuard(to)
+    return redirect ? { path: redirect } : true
+  })
+}

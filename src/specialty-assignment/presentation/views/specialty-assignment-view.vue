@@ -37,9 +37,11 @@ const meta = computed(() => [
   ep.value.id
 ].join(' · '))
 
+/* ---------- Prioridad clasificada (del BC Triage Classification) ---------- */
 const level = ref(null)
 const confirmedAt = ref(null)
 
+/* ---------- Sintoma codificado y sugerencia ---------- */
 const selectedSymptom = ref(null)
 const symptomErr = ref(false)
 const suggestion = ref(null)
@@ -72,12 +74,14 @@ async function consult() {
   consulted.value = true
 }
 
+/* ---------- Colas por especialidad ---------- */
 const queues = ref([])
 async function loadQueues() {
   const r = await service.getSpecialties()
   if (r.ok) { queues.value = r.data; specialties.value = r.data }
 }
 
+/* ---------- Derivar ---------- */
 const referring = ref(false)
 const alreadyReferred = ref(false)
 const referral = ref(null)
@@ -95,6 +99,7 @@ async function refer() {
   referral.value = r.data
   ep.value.referred = true
   saveEpisode(ep.value)
+  // Derivacion completada: alertas resueltas y dispositivos liberados
   try {
     await alertingService.resolveByEpisode(ep.value.id)
     releaseEpisodeDevices(ep.value.id)
@@ -103,6 +108,7 @@ async function refer() {
   await makeVoucher()
 }
 
+/* ---------- Comprobante ---------- */
 const voucher = ref(null)
 const showVoucher = ref(false)
 
@@ -114,10 +120,6 @@ async function makeVoucher() {
   showVoucher.value = true
 }
 
-  /**
-   * Sends the referral voucher through the given channel.
-   * @param {string} channel - Delivery channel (Qr, Sms, ...).
-   */
 async function sendVoucher(channel) {
   if (!voucher.value) return
   const r = await service.sendVoucher(voucher.value, channel)
@@ -140,6 +142,7 @@ onMounted(async () => {
     level.value = l ? { ...l, name: t('triage.level.' + l.code + '.name') } : null
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
   }
+  // if the episode was already referred, restore its context
   const existing = await service.findByEpisode(id)
   if (existing) {
     referral.value = existing
