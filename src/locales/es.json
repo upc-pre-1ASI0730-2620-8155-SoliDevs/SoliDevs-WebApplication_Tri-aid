@@ -461,5 +461,6 @@
   "um.errUsernameShort": "El usuario debe tener al menos 4 caracteres",
   "um.errPasswordShort": "La contraseña debe tener al menos 6 caracteres",
   "um.errEmail": "Ingresa un correo válido",
-  "pr.edit": "Editar perfil"
+  "pr.edit": "Editar perfil",
+  "suspended.contactAdmin": "El pago lo gestiona el administrador de tu institución. Notifícale para regularizar la suscripción."
 }

@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
 import { subscriptionStore } from '../../../subscription/application/subscription-store.js'
+import { iamStore } from '../../../iam/application/iam-store.js'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -20,6 +21,10 @@ onMounted(() => {
 })
 
 function goPay() { router.push('/subscriptions') }
+
+// Solo el administrador gestiona la suscripcion: el personal ve la
+// indicacion de contactarlo en lugar de un enlace que el RBAC expulsaria.
+const isAdmin = computed(() => iamStore.isAdmin)
 </script>
 
 <template>
@@ -32,9 +37,12 @@ function goPay() { router.push('/subscriptions') }
         <li>{{ t('suspended.point1') }}</li>
         <li>{{ t('suspended.point2') }}</li>
       </ul>
-      <button class="ta-btn sus__cta" @click="goPay">
+      <button v-if="isAdmin" class="ta-btn sus__cta" @click="goPay">
         <i class="pi pi-credit-card"></i>{{ t('suspended.regularize') }}
       </button>
+      <p v-else class="sus__contact">
+        <i class="pi pi-info-circle"></i>{{ t('suspended.contactAdmin') }}
+      </p>
       <p class="sus__note">{{ t('suspended.note') }}</p>
     </div>
   </div>
@@ -50,5 +58,6 @@ function goPay() { router.push('/subscriptions') }
 .sus__points li{padding-left:22px;position:relative}
 .sus__points li::before{content:'✕';position:absolute;left:0;color:var(--ta-danger);font-weight:700;font-size:.8rem;top:2px}
 .sus__cta{justify-content:center;display:inline-flex;gap:8px;margin-top:6px}
+.sus__contact{margin:6px 0 0;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:#eef5f1;border:1px solid var(--ta-line);color:var(--ta-muted);font-size:.86rem}
 .sus__note{margin:0;font-size:.76rem;color:var(--ta-muted)}
 </style>

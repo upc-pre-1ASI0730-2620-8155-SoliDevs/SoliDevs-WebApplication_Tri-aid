@@ -461,5 +461,6 @@
   "um.errUsernameShort": "Username must be at least 4 characters",
   "um.errPasswordShort": "Password must be at least 6 characters",
   "um.errEmail": "Enter a valid email address",
-  "pr.edit": "Edit profile"
+  "pr.edit": "Edit profile",
+  "suspended.contactAdmin": "Payments are managed by your institution administrator. Let them know to regularize the subscription."
 }
