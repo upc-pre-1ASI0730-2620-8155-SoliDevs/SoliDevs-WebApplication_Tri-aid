@@ -557,5 +557,6 @@
   "pf.portal.user": "User",
   "pf.portal.pass": "Temporary password",
   "pf.portal.note": "Hand it to the patient: it works for their first sign-in (user: DNI or email) and can be replaced from the portal.",
-  "register.nextAccount": "Continue to my account"
+  "register.nextAccount": "Continue to my account",
+  "suspended.contactAdmin": "Payments are managed by your institution administrator. Let them know to regularize the subscription."
 }
