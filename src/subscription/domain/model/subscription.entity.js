@@ -18,6 +18,7 @@ export class Subscription {
         planId = null,
         billingCycle = 'monthly',
         status = 'pending',
+        trialEndsAt = null,
         startedAt = null,
         renewalDate = null,
         graceDays = 7,
@@ -27,7 +28,8 @@ export class Subscription {
         this.institution = institution
         this.planId = planId
         this.billingCycle = billingCycle
-        this.status = status === 'active' ? 'active' : 'pending'
+        this.status = ['active', 'pending', 'trial'].includes(status) ? status : 'pending'
+        this.trialEndsAt = trialEndsAt
         this.startedAt = startedAt
         this.renewalDate = renewalDate
         this.graceDays = Number(graceDays) || 7
@@ -57,12 +59,24 @@ export class Subscription {
     }
 
     /**
-     * Display state: 'active', 'pending' (inside the grace window) or
-     * 'overdue' (grace expired without regularizing the payment).
+     * Display state: 'trial' (free evaluation window), 'active',
+     * 'pending' (inside the grace window) or 'overdue' (grace expired
+     * without regularizing the payment, or trial lapsed).
      */
     get state() {
         if (this.status === 'active') return 'active'
+        if (this.status === 'trial') {
+            const end = this.trialEndsAt ? new Date(this.trialEndsAt) : null
+            return end && new Date() <= end ? 'trial' : 'overdue'
+        }
         return this.isGraceExpired ? 'overdue' : 'pending'
+    }
+
+    /** Days remaining in the trial window (0 when already lapsed). */
+    get trialDaysLeft() {
+        if (this.status !== 'trial' || !this.trialEndsAt) return 0
+        const ms = new Date(this.trialEndsAt) - new Date()
+        return Math.max(0, Math.ceil(ms / 86400000))
     }
 
     /** Date the renewal will land on after one more cycle. */
