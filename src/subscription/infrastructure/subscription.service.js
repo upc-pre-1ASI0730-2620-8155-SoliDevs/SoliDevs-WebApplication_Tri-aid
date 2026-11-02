@@ -23,11 +23,37 @@ export class SubscriptionService {
         return { data: list }
     }
 
-    /** Current institution subscription, or null when not contracted yet. */
-    async getSubscription() {
+    /** Subscription of the given institution, or null when not contracted. */
+    async getSubscription(institution = null) {
         const response = await this.api.getSubscriptions()
-        const [first] = response.data || []
-        return { data: first ? new Subscription(first) : null }
+        const list = response.data || []
+        const match = institution
+            ? list.find(s => String(s.institution).toLowerCase() === String(institution).toLowerCase())
+            : list[0]
+        return { data: match ? new Subscription(match) : null }
+    }
+
+    /**
+     * Starts the 14-day free trial for a freshly registered institution
+     * (onboarding). Full access until the window lapses; the renewal
+     * date stays null until a plan is contracted.
+     * @param {string} institution - Institution name.
+     * @param {string} [planId] - Plan the institution is interested in.
+     * @returns {Promise<{ok: true, data: Subscription}>}
+     */
+    async startTrial(institution, planId = null) {
+        const trialEnds = new Date()
+        trialEnds.setDate(trialEnds.getDate() + 14)
+        const draft = new Subscription({
+            institution,
+            planId,
+            billingCycle: 'monthly',
+            status: 'trial',
+            startedAt: new Date().toISOString(),
+            trialEndsAt: trialEnds.toISOString()
+        })
+        const response = await this.api.createSubscription({ ...draft })
+        return { ok: true, data: new Subscription(response.data) }
     }
 
     /**
