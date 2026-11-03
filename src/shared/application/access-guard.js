@@ -22,7 +22,7 @@ export async function accessGuard(to) {
     const path = to.path
 
     // Rutas que nunca requieren sesion.
-    const publicPaths = ['/login', '/recuperar']
+    const publicPaths = ['/login', '/recuperar', '/register']
     if (publicPaths.includes(path)) return iamStore.isSignedIn ? '/panel' : null
 
     // Restaurar la sesion abierta (no-op si ya esta lista).

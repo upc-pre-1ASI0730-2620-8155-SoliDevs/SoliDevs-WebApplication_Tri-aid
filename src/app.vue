@@ -19,14 +19,20 @@ onMounted(() => window.addEventListener('keydown', onKey))
 const scroller = ref(null)
 const progress = ref(0)
 
-// Recordatorio del periodo de gracia (suscripcion con pago pendiente).
+// Recordatorio del periodo de gracia (pago pendiente) o de la prueba.
 const graceBanner = computed(() => {
   const sub = subscriptionStore.subscription
-  return sub?.state === 'pending' ? sub : null
+  if (sub?.state === 'pending' || sub?.state === 'trial') return sub
+  return null
 })
+const isTrial = computed(() => graceBanner.value?.state === 'trial')
 const graceDate = computed(() => {
   const sub = graceBanner.value
-  if (!sub?.renewalDate) return ''
+  if (!sub) return ''
+  if (sub.state === 'trial') {
+    return new Date(sub.trialEndsAt).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: 'long' })
+  }
+  if (!sub.renewalDate) return ''
   const limit = new Date(`${sub.renewalDate}T23:59:59`)
   limit.setDate(limit.getDate() + (sub.graceDays || 7))
   return limit.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: 'long' })
@@ -71,10 +77,10 @@ watch(() => route.fullPath, () => {
         <div class="tb__bar"><span :style="{ transform: `scaleX(${progress})` }"></span></div>
       </header>
       <main ref="scroller" class="content" @scroll.passive="onScroll">
-        <div v-if="graceBanner && route.path !== '/subscriptions'" class="grace-banner">
-          <i class="pi pi-exclamation-triangle"></i>
-          <span>{{ t('sub.bannerPending', { date: graceDate }) }}</span>
-          <router-link to="/subscriptions" class="grace-banner__link">{{ t('subscription.retryPayment') }}</router-link>
+        <div v-if="graceBanner && route.path !== '/subscriptions'" class="grace-banner" :class="{ 'grace-banner--trial': isTrial }">
+          <i class="pi" :class="isTrial ? 'pi-gift' : 'pi-exclamation-triangle'"></i>
+          <span>{{ isTrial ? t('sub.bannerTrial', { date: graceDate }) : t('sub.bannerPending', { date: graceDate }) }}</span>
+          <router-link to="/subscriptions" class="grace-banner__link">{{ isTrial ? t('subscription.contract') : t('subscription.retryPayment') }}</router-link>
         </div>
         <router-view v-slot="{ Component, route: r }">
           <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
@@ -87,6 +93,7 @@ watch(() => route.fullPath, () => {
 <style>
 body { margin: 0; }
 .grace-banner{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 16px;border-radius:10px;background:#fdf4e0;border:1px solid #efd9a8;color:#9a6d10;font-size:.85rem;font-family:var(--ta-font)}
+.grace-banner--trial{background:#e8f1fb;border-color:#bcd4ef;color:#2c5d97}
 .grace-banner__link{margin-left:auto;color:#9a6d10;font-weight:600;text-decoration:underline;white-space:nowrap}
 #app { border-inline: 0; }
 .shell{display:flex;height:100vh;overflow:hidden;background:var(--ta-bg);font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4;text-align:left}
