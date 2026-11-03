@@ -176,6 +176,11 @@ async function submit() {
 <style scoped>
 .rg__row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fe{font-size:.74rem;color:var(--ta-danger)}
+.pass-wrap{position:relative;display:flex}
+.pass-wrap input{width:100%;padding-right:2.6rem}
+.pass-toggle{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:none;background:transparent;color:#64748b;cursor:pointer;border-radius:.4rem}
+.pass-toggle:hover{color:#1d6b4f;background:rgba(29,107,79,.08)}
+.pass-toggle i{font-size:1rem;line-height:1}
 .rg__plan{display:inline-flex;align-items:center;gap:8px;margin:12px 0 0;padding:7px 14px;border-radius:999px;background:#e3f6ea;color:var(--ta-brand);font-size:.8rem;font-weight:600}
 .rg__trial{display:flex;align-items:center;gap:8px;justify-content:center;margin:10px 0 0;font-size:.8rem;color:var(--ta-brand);font-weight:600}
 .rg__login{margin:14px 0 0;text-align:center;font-size:.85rem;color:var(--ta-muted)}
