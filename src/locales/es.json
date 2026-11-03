@@ -495,5 +495,13 @@
   "register.loginLink": "Inicia sesión",
   "login.noAccount": "¿Tu institución no tiene cuenta? Regístrala",
   "subscription.state_trial": "En prueba",
-  "sub.bannerTrial": "Tu prueba gratis termina el {date}. Contrata un plan para mantener el acceso de tu equipo."
+  "sub.bannerTrial": "Tu prueba gratis termina el {date}. Contrata un plan para mantener el acceso de tu equipo.",
+  "register.cardTitle": "Crea tu cuenta administradora",
+  "register.cardSub": "Tú gestionas el personal y la suscripción de tu institución.",
+  "register.ft1.t": "14 días de prueba gratis",
+  "register.ft1.d": "Acceso completo a la plataforma. Sin tarjeta de crédito.",
+  "register.ft2.t": "Tú controlas el acceso",
+  "register.ft2.d": "Solo tú creas las cuentas del personal de tu institución.",
+  "register.ft3.t": "Listo en minutos",
+  "register.ft3.d": "Registra tu institución y empieza a clasificar pacientes hoy."
 }
