@@ -81,7 +81,11 @@ async function submit() {
     iamStore.setUser(created.data)
     // 2. Sesion abierta + suscripcion en prueba de 14 dias (Subscription).
     await iamStore.service.signIn(form.value.username.trim(), form.value.password)
-    await subscriptionStore.service.startTrial(created.data.institution, selectedPlan.value)
+    // El slug de la landing (?plan=esencial) mapea al id real del plan.
+    const planId = selectedPlan.value
+        ? (subscriptionStore.plans.find(p => p.id.endsWith(selectedPlan.value))?.id ?? null)
+        : null
+    await subscriptionStore.service.startTrial(created.data.institution, planId)
     await subscriptionStore.load({ force: true })
     notify({ type: 'success', message: t('register.toastWelcome') })
     router.push('/subscriptions')
