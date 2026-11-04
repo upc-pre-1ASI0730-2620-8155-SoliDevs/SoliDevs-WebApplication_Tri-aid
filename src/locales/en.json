@@ -503,5 +503,11 @@
   "register.ft2.t": "You control access",
   "register.ft2.d": "Only you create staff accounts for your institution.",
   "register.ft3.t": "Ready in minutes",
-  "register.ft3.d": "Register your institution and start triaging patients today."
+  "register.ft3.d": "Register your institution and start triaging patients today.",
+  "um.seatsUnlimited": "Unlimited",
+  "um.seatsHint": "Institution accounts allowed by the contracted plan",
+  "um.limitReachedTitle": "Plan limit reached",
+  "um.limitReached": "Your plan allows up to {limit} staff accounts. Upgrade your plan to add more.",
+  "um.upgrade": "View plans",
+  "subscription.fSeats": "Staff accounts"
 }

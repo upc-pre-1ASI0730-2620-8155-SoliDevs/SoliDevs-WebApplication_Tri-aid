@@ -503,5 +503,11 @@
   "register.ft2.t": "Tú controlas el acceso",
   "register.ft2.d": "Solo tú creas las cuentas del personal de tu institución.",
   "register.ft3.t": "Listo en minutos",
-  "register.ft3.d": "Registra tu institución y empieza a clasificar pacientes hoy."
+  "register.ft3.d": "Registra tu institución y empieza a clasificar pacientes hoy.",
+  "um.seatsUnlimited": "Ilimitado",
+  "um.seatsHint": "Cuentas de tu institución según el plan contratado",
+  "um.limitReachedTitle": "Límite del plan alcanzado",
+  "um.limitReached": "Tu plan permite hasta {limit} cuentas de personal. Mejora de plan para agregar más.",
+  "um.upgrade": "Ver planes",
+  "subscription.fSeats": "Cuentas de personal"
 }

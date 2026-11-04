@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
+import { iamStore } from '../../../iam/application/iam-store.js'
 import { subscriptionStore } from '../../application/subscription-store.js'
 import { Plan } from '../../domain/model/plan.entity.js'
 import { notify } from '../../../shared/application/toast-store.js'
@@ -40,6 +41,12 @@ const closing = ref(false)        // bloquea interaccion durante el cierre anima
 
 const state = computed(() => subscriptionStore.subscription?.state ?? null)
 const subscription = computed(() => subscriptionStore.subscription)
+
+// Cuentas activas de la institucion frente al limite del plan (maxUsers).
+const seatCount = ref(0)
+const seats = computed(() => subscriptionStore.seatInfo(seatCount.value))
+const seatsLabel = computed(() =>
+    seats.value.unlimited ? t('um.seatsUnlimited') : `${seatCount.value} / ${seats.value.limit}`)
 const currentPlan = computed(() =>
     subscriptionStore.plans.find(p => p.id === subscription.value?.planId) || null
 )
@@ -51,7 +58,13 @@ const fmtDate = d => d ? new Date(`${d}T12:00:00`).toLocaleDateString(locale.val
 const fmtDateTime = iso => iso ? new Date(iso).toLocaleString(locale.value === 'en' ? 'en-US' : 'es-PE',
     { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
 
-onMounted(() => { subscriptionStore.load() })
+onMounted(async () => {
+  await subscriptionStore.load()
+  try {
+    const users = await iamStore.service.api.getUsers()
+    seatCount.value = (users.data || []).filter(u => u.institution === subscriptionStore.subscription?.institution).length
+  } catch { /* el conteo de asientos es informativo */ }
+})
 
 function openCheckout(plan) {
     checkout.value = { plan: new Plan(plan) }
@@ -174,6 +187,7 @@ function maskedCard() {
           <div class="sub-fact"><span>{{ t('subscription.fCycle') }}</span><b>{{ t(`subscription.cycle_${subscription.billingCycle}`) }}</b></div>
           <div class="sub-fact"><span>{{ t('subscription.fRenewal') }}</span><b>{{ fmtDate(subscription.renewalDate) }}</b></div>
           <div class="sub-fact"><span>{{ t('subscription.fInstitution') }}</span><b>{{ subscription.institution }}</b></div>
+          <div class="sub-fact"><span>{{ t('subscription.fSeats') }}</span><b :class="{ 'sub-seats--full': seats.atLimit, 'sub-seats--near': seats.nearLimit && !seats.atLimit }">{{ seatsLabel }}</b></div>
         </div>
 
         <p v-else class="ta-sub sub-none">{{ t('subscription.noSub') }}</p>
@@ -302,8 +316,11 @@ function maskedCard() {
 .sub-status__side{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .sub-badge{padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap}
 .sub-badge--active{background:#e3f6ea;color:var(--ta-brand)}
+.sub-badge--trial{background:#e8f1fb;color:#2c5d97}
 .sub-badge--pending{background:#fdf4e0;color:#9a6d10}
 .sub-badge--overdue{background:var(--ta-danger-bg);color:var(--ta-danger)}
+.sub-seats--near{color:#9a6d10}
+.sub-seats--full{color:var(--ta-danger)}
 .sub-overdue-note,.sub-pending-note{font-size:.78rem;color:var(--ta-muted);max-width:230px;text-align:right}
 .sub-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
 .sub-plan{display:flex;flex-direction:column;gap:10px;padding:22px}

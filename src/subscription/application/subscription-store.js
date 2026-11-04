@@ -35,5 +35,30 @@ export const subscriptionStore = reactive({
     setSubscription(subscription) {
         this.subscription = subscription
         this.loaded = true
+    },
+
+    /**
+     * Seat usage against the contracted plan (maxUsers; 0 = unlimited).
+     * @param {number} used - Accounts of the institution.
+     * @returns {{limit:number, used:number, unlimited:boolean, nearLimit:boolean, atLimit:boolean}}
+     */
+    seatInfo(used = 0) {
+        const limit = this.subscription?.status === 'active' || this.subscription?.status === 'trial'
+            ? (currentPlanLimit(this) ?? 0)
+            : 0
+        const unlimited = !limit
+        return {
+            limit,
+            used,
+            unlimited,
+            nearLimit: !unlimited && used >= Math.ceil(limit * 0.8),
+            atLimit: !unlimited && used >= limit
+        }
     }
 })
+
+/** Seat limit of the contracted plan (maxUsers); null when unknown. */
+function currentPlanLimit(store) {
+    const plan = store.plans.find(p => p.id === store.subscription?.planId)
+    return plan ? plan.maxUsers : null
+}
