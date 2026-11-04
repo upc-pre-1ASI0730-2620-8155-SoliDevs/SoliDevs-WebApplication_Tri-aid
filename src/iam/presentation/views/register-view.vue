@@ -306,6 +306,11 @@ function animateReject() {
 
 <style scoped>
 .rg__steps{display:flex;gap:8px;list-style:none;margin:14px 0 18px;padding:0}
+.pass-wrap{position:relative;display:flex}
+.pass-wrap input{width:100%;padding-right:2.6rem}
+.pass-toggle{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:none;background:transparent;color:#64748b;cursor:pointer;border-radius:.4rem}
+.pass-toggle:hover{color:#1d6b4f;background:rgba(29,107,79,.08)}
+.pass-toggle i{font-size:1rem;line-height:1}
 .rg__steps li{flex:1;display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--ta-muted);border-top:3px solid var(--ta-line);padding-top:9px}
 .rg__steps li span{width:18px;height:18px;border-radius:999px;background:var(--ta-line);color:var(--ta-muted);display:grid;place-items:center;font-size:.66rem;font-weight:700;flex:none}
 .rg__steps li.on{color:var(--ta-brand);border-top-color:var(--ta-accent)}
