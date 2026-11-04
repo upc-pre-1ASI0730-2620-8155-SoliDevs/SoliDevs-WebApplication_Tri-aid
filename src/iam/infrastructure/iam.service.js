@@ -25,6 +25,18 @@ export class IamService {
      * @param {Object} input - { institution, names, surnames, email, username, password }
      * @returns {Promise<{ok: true, data: User}>} The admin account.
      */
+    /**
+     * Early availability check for the register wizard (step 1): the
+     * institution name must not belong to an existing account.
+     * @param {string} institution
+     * @returns {Promise<boolean>} true when available.
+     */
+    async isInstitutionAvailable(institution) {
+        const users = await this.api.getUsers()
+        const needle = String(institution || '').trim().toLowerCase()
+        return !(users.data || []).some(u => String(u.institution || '').trim().toLowerCase() === needle)
+    }
+
     async registerInstitution(input) {
         await delay()
         const users = await this.api.getUsers()

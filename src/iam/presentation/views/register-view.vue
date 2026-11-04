@@ -42,7 +42,9 @@ const rules = {
 }
 const fieldError = key => rules[key]?.(form.value[key]) || ''
 const showErr = key => touched.value[key] && typeof fieldError(key) === 'string' && fieldError(key)
-const step1Valid = computed(() => Object.keys(rules).every(k => fieldError(k) === true))
+const institutionTaken = ref(false)
+const instChecking = ref(false)
+const step1Valid = computed(() => Object.keys(rules).every(k => fieldError(k) === true) && !institutionTaken.value)
 
 // ── Paso 2: plan y ciclo ──
 const slug = computed(() => {
@@ -87,7 +89,22 @@ const cardDigits = computed(() => (cardNumber.value || '').replace(/\D/g, ''))
 const cardMasked = computed(() => cardDigits.value ? `Visa •••• ${cardDigits.value.slice(-4)}` : '')
 const step3Valid = computed(() => cardDigits.value.length >= 13 && cardHolder.value.trim().length >= 3)
 
-function blur(key) { touched.value[key] = true }
+function blur(key) {
+    touched.value[key] = true
+    if (key === 'institution') checkInstitution()
+}
+
+/** Disponibilidad temprana del nombre de institucion (paso 1). */
+async function checkInstitution() {
+    const v = form.value.institution.trim()
+    if (v.length < 3) { institutionTaken.value = false; return }
+    instChecking.value = true
+    try {
+        const available = await iamStore.service.isInstitutionAvailable(v)
+        if (form.value.institution.trim() === v) institutionTaken.value = !available
+    } catch { /* la validacion final del submit es la autoridad */ }
+    finally { instChecking.value = false }
+}
 
 function animateStep(direction = 1) {
   if (reduce() || !stepPane.value) return
@@ -179,7 +196,8 @@ function animateReject() {
           <div class="field">
             <label for="institution">{{ t('register.fInstitution') }}</label>
             <input id="institution" v-model="form.institution" @blur="blur('institution')" />
-            <span v-if="showErr('institution')" class="fe">{{ fieldError('institution') }}</span>
+            <span v-if="institutionTaken" class="fe">{{ t('register.err.institutionTaken') }}</span>
+            <span v-else-if="showErr('institution')" class="fe">{{ fieldError('institution') }}</span>
           </div>
           <div class="rg__row">
             <div class="field">
