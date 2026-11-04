@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
@@ -13,6 +13,10 @@ const route = useRoute()
 const router = useRouter()
 
 const card = ref(null)
+const stepPane = ref(null)
+const step = ref(1) // 1 cuenta · 2 plan · 3 tarjeta
+const busy = ref(false)
+const error = ref('')
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const features = computed(() => [
@@ -21,25 +25,11 @@ const features = computed(() => [
   { icon: 'mail', title: t('register.ft3.t'), text: t('register.ft3.d') }
 ])
 
-const form = ref({
-  institution: '',
-  names: '',
-  surnames: '',
-  email: '',
-  username: '',
-  password: '',
-  confirm: ''
-})
-const loading = ref(false)
-const error = ref('')
+// ── Paso 1: institucion y administrador ──
+const form = ref({ institution: '', names: '', surnames: '', email: '', username: '', password: '', confirm: '' })
+const touched = ref({})
 const showPass = ref(false)
 const showConfirm = ref(false)
-
-// Plan preseleccionado cuando se llega desde la landing (?plan=...).
-const selectedPlan = computed(() => {
-  const slug = String(route.query.plan || '')
-  return ['esencial', 'profesional', 'red'].includes(slug) ? slug : null
-})
 
 const rules = {
   institution: v => v.trim().length >= 3 || t('register.err.institution'),
@@ -51,22 +41,83 @@ const rules = {
   confirm: v => v === form.value.password || t('register.err.confirm')
 }
 const fieldError = key => rules[key]?.(form.value[key]) || ''
-const touched = ref({})
 const showErr = key => touched.value[key] && typeof fieldError(key) === 'string' && fieldError(key)
-const valid = computed(() => Object.keys(rules).every(k => fieldError(k) === true))
+const step1Valid = computed(() => Object.keys(rules).every(k => fieldError(k) === true))
 
-onMounted(() => {
-  if (reduce()) return
+// ── Paso 2: plan y ciclo ──
+const slug = computed(() => {
+  const s = String(route.query.plan || '')
+  return ['esencial', 'profesional', 'red'].includes(s) ? s : null
+})
+const selectedPlanId = ref(null)
+const cycle = ref('monthly')
+const chosenPlan = computed(() => {
+  if (selectedPlanId.value) return subscriptionStore.plans.find(p => p.id === selectedPlanId.value) || null
+  return slug.value ? subscriptionStore.plans.find(p => p.id.endsWith(slug.value)) || null : null
+})
+const step2Valid = computed(() => chosenPlan.value !== null)
+
+const breakdown = computed(() => {
+  const plan = chosenPlan.value
+  if (!plan) return null
+  const monthly = plan.monthlyPrice
+  const list = cycle.value === 'annual' ? monthly * 12 : monthly
+  const price = cycle.value === 'annual' ? plan.annualPrice : plan.monthlyPrice
+  return {
+    list,
+    price,
+    discount: list - price,
+    total: price,
+    savingPct: plan.annualDiscount,
+    firstCharge: firstChargeDate()
+  }
+})
+function firstChargeDate() {
+  const d = new Date()
+  d.setDate(d.getDate() + 14)
+  return d.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: 'long', year: 'numeric' })
+}
+
+// ── Paso 3: tarjeta ──
+const cardNumber = ref('')
+const cardHolder = ref('')
+const simulateReject = ref(false)
+const showCard = ref(false)
+const cardDigits = computed(() => (cardNumber.value || '').replace(/\D/g, ''))
+const cardMasked = computed(() => cardDigits.value ? `Visa •••• ${cardDigits.value.slice(-4)}` : '')
+const step3Valid = computed(() => cardDigits.value.length >= 13 && cardHolder.value.trim().length >= 3)
+
+function blur(key) { touched.value[key] = true }
+
+function animateStep(direction = 1) {
+  if (reduce() || !stepPane.value) return
+  gsap.fromTo(stepPane.value,
+    { x: 34 * direction, opacity: 0 },
+    { x: 0, opacity: 1, duration: 0.38, ease: 'power2.out' })
+}
+function goTo(n) {
+  step.value = n
+  error.value = ''
+  nextTick(() => animateStep(n))
+}
+function next1() {
+  touched.value = Object.fromEntries(Object.keys(rules).map(k => [k, true]))
+  if (step1Valid.value) goTo(2)
+}
+function next2() { if (step2Valid.value) goTo(3) }
+
+onMounted(async () => {
+  // Los planes se cargan temprano: el paso 2 necesita precios y el slug del landing.
+  await subscriptionStore.load()
+  if (chosenPlan.value) selectedPlanId.value = chosenPlan.value.id
+  if (reduce() || !card.value) return
   gsap.fromTo(card.value, { y: 26, opacity: 0 },
     { y: 0, opacity: 1, duration: 0.5, ease: 'back.out(1.4)' })
 })
 
-function blur(key) { touched.value[key] = true }
-
 async function submit() {
-  touched.value = Object.fromEntries(Object.keys(rules).map(k => [k, true]))
-  if (!valid.value) return
-  loading.value = true
+  if (!step3Valid.value) return
+  busy.value = true
   error.value = ''
   try {
     // 1. Institucion + cuenta administradora (IAM).
@@ -79,13 +130,9 @@ async function submit() {
       password: form.value.password
     })
     iamStore.setUser(created.data)
-    // 2. Sesion abierta + suscripcion en prueba de 14 dias (Subscription).
+    // 2. Sesion abierta + trial con tarjeta registrada (Subscription).
     await iamStore.service.signIn(form.value.username.trim(), form.value.password)
-    // El slug de la landing (?plan=esencial) mapea al id real del plan.
-    const planId = selectedPlan.value
-        ? (subscriptionStore.plans.find(p => p.id.endsWith(selectedPlan.value))?.id ?? null)
-        : null
-    await subscriptionStore.service.startTrial(created.data.institution, planId)
+    await subscriptionStore.service.startTrial(created.data.institution, chosenPlan.value.id, cardMasked.value)
     await subscriptionStore.load({ force: true })
     notify({ type: 'success', message: t('register.toastWelcome') })
     router.push('/subscriptions')
@@ -94,10 +141,20 @@ async function submit() {
       ? 'register.err.usernameTaken'
       : e.code === 'institution-taken'
         ? 'register.err.institutionTaken'
-        : 'register.err.api')
+        : e.code === 'card-rejected'
+          ? 'register.err.cardRejected'
+          : 'register.err.api')
+    if (e.code === 'card-rejected') animateReject()
   } finally {
-    loading.value = false
+    busy.value = false
   }
+}
+
+/** Shake cuando la tarjeta de verificacion es rechazada. */
+function animateReject() {
+  if (reduce() || !stepPane.value) return
+  gsap.fromTo(stepPane.value, { x: 0 },
+    { keyframes: [{ x: -12 }, { x: 10 }, { x: -7 }, { x: 4 }, { x: 0 }], duration: 0.5, ease: 'power1.out' })
 }
 </script>
 
@@ -106,71 +163,141 @@ async function submit() {
     <div ref="card">
       <h2>{{ t('register.cardTitle') }}</h2>
       <p class="sub">{{ t('register.cardSub') }}</p>
-      <p v-if="selectedPlan" class="rg__plan">
-        <i class="pi pi-star-fill"></i>{{ t('register.planSelected', { plan: t(`register.plan_${selectedPlan}`) }) }}
-      </p>
+
+      <!-- Progreso -->
+      <ol class="rg__steps">
+        <li :class="{ on: step >= 1 }"><span>1</span>{{ t('register.stepAccount') }}</li>
+        <li :class="{ on: step >= 2 }"><span>2</span>{{ t('register.stepPlan') }}</li>
+        <li :class="{ on: step >= 3 }"><span>3</span>{{ t('register.stepCard') }}</li>
+      </ol>
+
       <p v-if="error" class="err">{{ error }}</p>
 
-      <form @submit.prevent="submit" novalidate>
-        <div class="field">
-          <label for="institution">{{ t('register.fInstitution') }}</label>
-          <input id="institution" v-model="form.institution" @blur="blur('institution')" />
-          <span v-if="showErr('institution')" class="fe">{{ fieldError('institution') }}</span>
-        </div>
-
-        <div class="rg__row">
+      <div ref="stepPane">
+        <!-- ═══ PASO 1: cuenta ═══ -->
+        <form v-if="step === 1" @submit.prevent="next1" novalidate>
           <div class="field">
-            <label for="names">{{ t('register.fNames') }}</label>
-            <input id="names" v-model="form.names" @blur="blur('names')" />
-            <span v-if="showErr('names')" class="fe">{{ fieldError('names') }}</span>
+            <label for="institution">{{ t('register.fInstitution') }}</label>
+            <input id="institution" v-model="form.institution" @blur="blur('institution')" />
+            <span v-if="showErr('institution')" class="fe">{{ fieldError('institution') }}</span>
+          </div>
+          <div class="rg__row">
+            <div class="field">
+              <label for="names">{{ t('register.fNames') }}</label>
+              <input id="names" v-model="form.names" @blur="blur('names')" />
+              <span v-if="showErr('names')" class="fe">{{ fieldError('names') }}</span>
+            </div>
+            <div class="field">
+              <label for="surnames">{{ t('register.fSurnames') }}</label>
+              <input id="surnames" v-model="form.surnames" @blur="blur('surnames')" />
+              <span v-if="showErr('surnames')" class="fe">{{ fieldError('surnames') }}</span>
+            </div>
           </div>
           <div class="field">
-            <label for="surnames">{{ t('register.fSurnames') }}</label>
-            <input id="surnames" v-model="form.surnames" @blur="blur('surnames')" />
-            <span v-if="showErr('surnames')" class="fe">{{ fieldError('surnames') }}</span>
+            <label for="email">{{ t('register.fEmail') }}</label>
+            <input id="email" type="email" v-model="form.email" @blur="blur('email')" />
+            <span v-if="showErr('email')" class="fe">{{ fieldError('email') }}</span>
           </div>
-        </div>
-
-        <div class="field">
-          <label for="email">{{ t('register.fEmail') }}</label>
-          <input id="email" type="email" v-model="form.email" @blur="blur('email')" />
-          <span v-if="showErr('email')" class="fe">{{ fieldError('email') }}</span>
-        </div>
-
-        <div class="field">
-          <label for="username">{{ t('register.fUsername') }}</label>
-          <input id="username" v-model="form.username" autocomplete="username" @blur="blur('username')" />
-          <span v-if="showErr('username')" class="fe">{{ fieldError('username') }}</span>
-        </div>
-
-        <div class="rg__row">
           <div class="field">
-            <label for="password">{{ t('register.fPassword') }}</label>
+            <label for="username">{{ t('register.fUsername') }}</label>
+            <input id="username" v-model="form.username" autocomplete="username" @blur="blur('username')" />
+            <span v-if="showErr('username')" class="fe">{{ fieldError('username') }}</span>
+          </div>
+          <div class="rg__row">
+            <div class="field">
+              <label for="password">{{ t('register.fPassword') }}</label>
+              <div class="pass-wrap">
+                <input id="password" :type="showPass ? 'text' : 'password'" v-model="form.password" autocomplete="new-password" @blur="blur('password')" />
+                <button type="button" class="pass-toggle" @click="showPass = !showPass" :aria-label="t('login.showPass')">
+                  <i class="pi" :class="showPass ? 'pi-eye-slash' : 'pi-eye'"></i>
+                </button>
+              </div>
+              <span v-if="showErr('password')" class="fe">{{ fieldError('password') }}</span>
+            </div>
+            <div class="field">
+              <label for="confirm">{{ t('register.fConfirm') }}</label>
+              <div class="pass-wrap">
+                <input id="confirm" :type="showConfirm ? 'text' : 'password'" v-model="form.confirm" autocomplete="new-password" @blur="blur('confirm')" />
+                <button type="button" class="pass-toggle" @click="showConfirm = !showConfirm" :aria-label="t('login.showPass')">
+                  <i class="pi" :class="showConfirm ? 'pi-eye-slash' : 'pi-eye'"></i>
+                </button>
+              </div>
+              <span v-if="showErr('confirm')" class="fe">{{ fieldError('confirm') }}</span>
+            </div>
+          </div>
+          <button class="btn" :disabled="!step1Valid && Object.keys(touched).length > 0">{{ t('register.nextPlan') }}</button>
+        </form>
+
+        <!-- ═══ PASO 2: plan y resumen ═══ -->
+        <form v-else-if="step === 2" @submit.prevent="next2" novalidate>
+          <div class="rg__cycle">
+            <button type="button" :class="{ on: cycle === 'monthly' }" @click="cycle = 'monthly'">{{ t('subscription.cycle_monthly') }}</button>
+            <button type="button" :class="{ on: cycle === 'annual' }" @click="cycle = 'annual'">
+              {{ t('subscription.cycle_annual') }} <em v-if="chosenPlan?.annualDiscount">−{{ chosenPlan.annualDiscount }}%</em>
+            </button>
+          </div>
+
+          <div class="rg__plans">
+            <button v-for="p in subscriptionStore.plans" :key="p.id" type="button"
+                    class="rg__plan" :class="{ sel: chosenPlan?.id === p.id }" @click="selectedPlanId = p.id">
+              <b>{{ p.name }}</b>
+              <span>{{ p.priceFor(cycle) === 0 ? t('plan.institutional.price') : `S/ ${p.priceFor(cycle)}` }}<small>/{{ t(cycle === 'annual' ? 'subscription.perYear' : 'subscription.perMonth') }}</small></span>
+            </button>
+          </div>
+
+          <div v-if="breakdown" class="rg__summary">
+            <div class="rg__sumrow"><span>{{ t('register.sumPlan') }}</span><b>{{ chosenPlan.name }} · {{ t(cycle === 'annual' ? 'subscription.cycle_annual' : 'subscription.cycle_monthly') }}</b></div>
+            <div class="rg__sumrow"><span>{{ t('register.sumList') }}</span><s v-if="breakdown.discount">S/ {{ breakdown.list }}</s><b v-else>S/ {{ breakdown.list }}</b></div>
+            <div class="rg__sumrow" v-if="breakdown.discount"><span>{{ t('register.sumDiscount') }}</span><b class="ok">− S/ {{ breakdown.discount }}</b></div>
+            <div class="rg__sumrow rg__sumrow--total"><span>{{ t('register.sumToday') }}</span><b>S/ 0</b></div>
+            <div class="rg__sumrow"><span>{{ t('register.sumFirstCharge', { date: breakdown.firstCharge }) }}</span><b>S/ {{ breakdown.total }}</b></div>
+          </div>
+          <p class="rg__trial"><i class="pi pi-gift"></i>{{ t('register.trialNote2') }}</p>
+
+          <div class="rg__nav">
+            <button type="button" class="btn btn--ghost" @click="goTo(1)">{{ t('register.back') }}</button>
+            <button class="btn" :disabled="!step2Valid">{{ t('register.nextCard') }}</button>
+          </div>
+        </form>
+
+        <!-- ═══ PASO 3: tarjeta ═══ -->
+        <form v-else @submit.prevent="submit" novalidate>
+          <div class="rg__summary rg__summary--mini">
+            <div class="rg__sumrow"><span>{{ t('register.sumPlan') }}</span><b>{{ chosenPlan?.name }} · {{ t(cycle === 'annual' ? 'subscription.cycle_annual' : 'subscription.cycle_monthly') }}</b></div>
+            <div class="rg__sumrow rg__sumrow--total"><span>{{ t('register.sumToday') }}</span><b>S/ 0</b></div>
+            <div class="rg__sumrow"><span>{{ t('register.sumFirstChargeShort') }}</span><b>S/ {{ breakdown?.total }} · {{ breakdown?.firstCharge }}</b></div>
+          </div>
+
+          <div class="field">
+            <label for="cardNumber">{{ t('register.fCard') }}</label>
             <div class="pass-wrap">
-              <input id="password" :type="showPass ? 'text' : 'password'" v-model="form.password" autocomplete="new-password" @blur="blur('password')" />
-              <button type="button" class="pass-toggle" @click="showPass = !showPass" :aria-label="t('login.showPass')">
-                <i class="pi" :class="showPass ? 'pi-eye-slash' : 'pi-eye'"></i>
+              <input id="cardNumber" :type="showCard ? 'text' : 'password'" v-model="cardNumber" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="cc-number" />
+              <button type="button" class="pass-toggle" @click="showCard = !showCard" :aria-label="t('login.showPass')">
+                <i class="pi" :class="showCard ? 'pi-eye-slash' : 'pi-eye'"></i>
               </button>
             </div>
-            <span v-if="showErr('password')" class="fe">{{ fieldError('password') }}</span>
+            <span v-if="cardDigits && cardDigits.length < 13" class="fe">{{ t('register.err.card') }}</span>
           </div>
           <div class="field">
-            <label for="confirm">{{ t('register.fConfirm') }}</label>
-            <div class="pass-wrap">
-              <input id="confirm" :type="showConfirm ? 'text' : 'password'" v-model="form.confirm" autocomplete="new-password" @blur="blur('confirm')" />
-              <button type="button" class="pass-toggle" @click="showConfirm = !showConfirm" :aria-label="t('login.showPass')">
-                <i class="pi" :class="showConfirm ? 'pi-eye-slash' : 'pi-eye'"></i>
-              </button>
-            </div>
-            <span v-if="showErr('confirm')" class="fe">{{ fieldError('confirm') }}</span>
+            <label for="cardHolder">{{ t('register.fHolder') }}</label>
+            <input id="cardHolder" v-model="cardHolder" autocomplete="cc-name" />
+            <span v-if="cardHolder && cardHolder.trim().length < 3" class="fe">{{ t('register.err.holder') }}</span>
           </div>
-        </div>
 
-        <button class="btn" :disabled="loading">
-          {{ loading ? t('register.creating') : t('register.submit') }}
-        </button>
-        <p class="rg__trial"><i class="pi pi-gift"></i>{{ t('register.trialNote') }}</p>
-      </form>
+          <label class="rg__reject">
+            <input type="checkbox" v-model="simulateReject" />
+            <span>{{ t('register.simulateReject') }}</span>
+          </label>
+          <p class="rg__note"><i class="pi pi-shield"></i>{{ t('register.cardNote', { date: breakdown?.firstCharge }) }}</p>
+
+          <div class="rg__nav">
+            <button type="button" class="btn btn--ghost" :disabled="busy" @click="goTo(2)">{{ t('register.back') }}</button>
+            <button class="btn" :disabled="busy || !step3Valid">
+              {{ busy ? t('register.creating') : t('register.finish') }}
+            </button>
+          </div>
+        </form>
+      </div>
 
       <p class="rg__login">{{ t('register.haveAccount') }} <router-link class="link" to="/login">{{ t('register.loginLink') }}</router-link></p>
     </div>
@@ -178,16 +305,39 @@ async function submit() {
 </template>
 
 <style scoped>
+.rg__steps{display:flex;gap:8px;list-style:none;margin:14px 0 18px;padding:0}
+.rg__steps li{flex:1;display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--ta-muted);border-top:3px solid var(--ta-line);padding-top:9px}
+.rg__steps li span{width:18px;height:18px;border-radius:999px;background:var(--ta-line);color:var(--ta-muted);display:grid;place-items:center;font-size:.66rem;font-weight:700;flex:none}
+.rg__steps li.on{color:var(--ta-brand);border-top-color:var(--ta-accent)}
+.rg__steps li.on span{background:var(--ta-brand);color:#fff}
 .rg__row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fe{font-size:.74rem;color:var(--ta-danger)}
-.pass-wrap{position:relative;display:flex}
-.pass-wrap input{width:100%;padding-right:2.6rem}
-.pass-toggle{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:none;background:transparent;color:#64748b;cursor:pointer;border-radius:.4rem}
-.pass-toggle:hover{color:#1d6b4f;background:rgba(29,107,79,.08)}
-.pass-toggle i{font-size:1rem;line-height:1}
-.rg__plan{display:inline-flex;align-items:center;gap:8px;margin:12px 0 0;padding:7px 14px;border-radius:999px;background:#e3f6ea;color:var(--ta-brand);font-size:.8rem;font-weight:600}
+.rg__cycle{display:flex;border:1px solid var(--ta-line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.rg__cycle button{flex:1;border:0;background:transparent;padding:10px;cursor:pointer;font:inherit;font-size:.85rem;color:var(--ta-muted);display:flex;gap:8px;align-items:center;justify-content:center}
+.rg__cycle button.on{background:var(--ta-brand);color:#fff}
+.rg__cycle em{font-style:normal;font-size:.68rem;background:rgba(255,255,255,.25);border-radius:999px;padding:2px 8px}
+.rg__cycle button:not(.on) em{background:#e3f6ea;color:var(--ta-brand)}
+.rg__plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.rg__plan{border:1px solid var(--ta-line);border-radius:10px;background:var(--ta-surface);padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;font:inherit;text-align:left;color:var(--ta-text)}
+.rg__plan.sel{border-color:var(--ta-brand);outline:2px solid var(--ta-brand);background:#f2faf5}
+.rg__plan b{font-size:.92rem}
+.rg__plan span{font-family:var(--ta-mono);font-size:.85rem}
+.rg__plan small{color:var(--ta-muted);font-family:var(--ta-font)}
+.rg__summary{border:1px dashed var(--ta-line);border-radius:10px;padding:12px 14px;display:grid;gap:7px;margin-bottom:6px}
+.rg__summary--mini{background:#f4f9f6}
+.rg__sumrow{display:flex;justify-content:space-between;align-items:center;font-size:.84rem;color:var(--ta-muted)}
+.rg__sumrow b{color:var(--ta-text);font-family:var(--ta-mono);font-weight:600}
+.rg__sumrow b.ok{color:var(--ta-brand)}
+.rg__sumrow s{color:var(--ta-muted)}
+.rg__sumrow--total{border-top:1px solid var(--ta-line);padding-top:7px}
+.rg__sumrow--total b{font-size:1rem}
+.rg__nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+.rg__nav .btn{flex:1}
+.rg__note{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:.78rem;color:var(--ta-muted)}
+.rg__reject{display:flex;gap:8px;align-items:center;font-size:.82rem;color:var(--ta-muted);cursor:pointer;margin-top:12px}
 .rg__trial{display:flex;align-items:center;gap:8px;justify-content:center;margin:10px 0 0;font-size:.8rem;color:var(--ta-brand);font-weight:600}
 .rg__login{margin:14px 0 0;text-align:center;font-size:.85rem;color:var(--ta-muted)}
 .rg__login a{font-weight:600}
-@media (max-width:560px){.rg__row{grid-template-columns:1fr}}
+.btn--ghost{background:transparent;border:1px solid var(--ta-line);color:var(--ta-muted)}
+@media (max-width:560px){.rg__row{grid-template-columns:1fr}.rg__plans{grid-template-columns:1fr}}
 </style>

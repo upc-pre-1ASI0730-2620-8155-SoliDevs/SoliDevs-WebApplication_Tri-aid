@@ -19,6 +19,7 @@ export class Subscription {
         billingCycle = 'monthly',
         status = 'pending',
         trialEndsAt = null,
+        paymentMethod = '',
         startedAt = null,
         renewalDate = null,
         graceDays = 7,
@@ -30,6 +31,7 @@ export class Subscription {
         this.billingCycle = billingCycle
         this.status = ['active', 'pending', 'trial'].includes(status) ? status : 'pending'
         this.trialEndsAt = trialEndsAt
+        this.paymentMethod = paymentMethod
         this.startedAt = startedAt
         this.renewalDate = renewalDate
         this.graceDays = Number(graceDays) || 7
@@ -77,6 +79,17 @@ export class Subscription {
         if (this.status !== 'trial' || !this.trialEndsAt) return 0
         const ms = new Date(this.trialEndsAt) - new Date()
         return Math.max(0, Math.ceil(ms / 86400000))
+    }
+
+    /** Whether the trial window already elapsed (auto-charge due). */
+    get isTrialExpired() {
+        if (this.status !== 'trial' || !this.trialEndsAt) return false
+        return new Date() > new Date(this.trialEndsAt)
+    }
+
+    /** Date the trial ends, formatted-ready (ISO date part). */
+    get trialEndDate() {
+        return this.trialEndsAt ? this.trialEndsAt.slice(0, 10) : null
     }
 
     /** Date the renewal will land on after one more cycle. */

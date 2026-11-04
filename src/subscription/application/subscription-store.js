@@ -12,6 +12,7 @@ export const subscriptionStore = reactive({
     subscription: null,
     loaded: false,
     loading: false,
+    trialJustCharged: false,
 
     service: markRaw(new SubscriptionService()),
 
@@ -24,7 +25,14 @@ export const subscriptionStore = reactive({
                 this.service.getSubscription(session.institution)
             ])
             this.plans = plans.data
-            this.subscription = subscription.data
+            // Cobro automatico del fin de trial (trial con tarjeta).
+            if (subscription.data) {
+                const settled = await this.service.autoChargeTrialEnd(subscription.data)
+                this.subscription = settled.data
+                this.trialJustCharged = settled.charged
+            } else {
+                this.subscription = null
+            }
             this.loaded = true
         } finally {
             this.loading = false

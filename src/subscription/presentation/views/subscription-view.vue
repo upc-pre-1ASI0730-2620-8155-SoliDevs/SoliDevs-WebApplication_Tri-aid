@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
 import { iamStore } from '../../../iam/application/iam-store.js'
@@ -9,6 +10,7 @@ import { notify } from '../../../shared/application/toast-store.js'
 import { session } from '../../../shared/application/demo-session.js'
 
 const { t, locale } = useI18n()
+const route = useRoute()
 const busy = ref(false)
 
 /** Selected billing cycle. */
@@ -60,6 +62,13 @@ const fmtDateTime = iso => iso ? new Date(iso).toLocaleString(locale.value === '
 
 onMounted(async () => {
   await subscriptionStore.load()
+  // Llegada desde el landing con plan de interes (usuario con sesion):
+  // abrir el checkout de ese plan directamente.
+  const slug = String(route.query.plan || '')
+  if (slug && !subscription.value) {
+    const plan = subscriptionStore.plans.find(p => p.id.endsWith(slug))
+    if (plan) openCheckout(plan)
+  }
   try {
     const users = await iamStore.service.api.getUsers()
     seatCount.value = (users.data || []).filter(u => u.institution === subscriptionStore.subscription?.institution).length
@@ -188,6 +197,7 @@ function maskedCard() {
           <div class="sub-fact"><span>{{ t('subscription.fRenewal') }}</span><b>{{ fmtDate(subscription.renewalDate) }}</b></div>
           <div class="sub-fact"><span>{{ t('subscription.fInstitution') }}</span><b>{{ subscription.institution }}</b></div>
           <div class="sub-fact"><span>{{ t('subscription.fSeats') }}</span><b :class="{ 'sub-seats--full': seats.atLimit, 'sub-seats--near': seats.nearLimit && !seats.atLimit }">{{ seatsLabel }}</b></div>
+          <div v-if="subscription.paymentMethod" class="sub-fact"><span>{{ t('subscription.fCard') }}</span><b>{{ subscription.paymentMethod }}</b></div>
         </div>
 
         <p v-else class="ta-sub sub-none">{{ t('subscription.noSub') }}</p>

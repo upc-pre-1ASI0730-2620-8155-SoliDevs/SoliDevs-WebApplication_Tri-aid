@@ -34,14 +34,15 @@ export class SubscriptionService {
     }
 
     /**
-     * Starts the 14-day free trial for a freshly registered institution
-     * (onboarding). Full access until the window lapses; the renewal
-     * date stays null until a plan is contracted.
+     * Starts the 14-day card-required trial for a freshly registered
+     * institution (onboarding). The card is validated at signup and kept
+     * on file (masked) for the automatic charge when the trial ends.
      * @param {string} institution - Institution name.
-     * @param {string} [planId] - Plan the institution is interested in.
+     * @param {string} [planId] - Plan the institution selected.
+     * @param {string} [method] - Masked payment method on file.
      * @returns {Promise<{ok: true, data: Subscription}>}
      */
-    async startTrial(institution, planId = null) {
+    async startTrial(institution, planId = null, method = '') {
         const trialEnds = new Date()
         trialEnds.setDate(trialEnds.getDate() + 14)
         const draft = new Subscription({
@@ -50,10 +51,40 @@ export class SubscriptionService {
             billingCycle: 'monthly',
             status: 'trial',
             startedAt: new Date().toISOString(),
-            trialEndsAt: trialEnds.toISOString()
+            trialEndsAt: trialEnds.toISOString(),
+            paymentMethod: method
         })
         const response = await this.api.createSubscription({ ...draft })
         return { ok: true, data: new Subscription(response.data) }
+    }
+
+    /**
+     * Automatic charge when the trial window ends (card-required trial).
+     * With a card on file the charge converts the trial to an active
+     * subscription; without one it simply lapses to overdue so the
+     * existing blocking flow takes over.
+     * Backend swap note: with the .NET API this runs as a scheduled job
+     * server-side; the UI only shows the resulting state.
+     * @param {Subscription} subscription
+     * @returns {Promise<{ok: true, charged: boolean, data: Subscription}>}
+     */
+    async autoChargeTrialEnd(subscription) {
+        const sub = new Subscription({ ...subscription })
+        if (!sub.isTrialExpired) return { ok: true, charged: false, data: sub }
+        if (!sub.paymentMethod) return { ok: true, charged: false, data: sub }
+        await delay()
+        const amount = sub.payments.length
+            ? sub.payments[sub.payments.length - 1].amount
+            : 0
+        sub.addPayment({ amount, status: 'paid', method: sub.paymentMethod })
+        sub.status = 'active'
+        // El primer ciclo arranca el dia que termina la prueba.
+        const renewal = new Date(`${sub.trialEndDate}T12:00:00`)
+        if (sub.billingCycle === 'annual') renewal.setFullYear(renewal.getFullYear() + 1)
+        else renewal.setMonth(renewal.getMonth() + 1)
+        sub.renewalDate = renewal.toISOString().slice(0, 10)
+        const response = await this.api.updateSubscription(sub.id, { ...sub })
+        return { ok: true, charged: true, data: new Subscription(response.data) }
     }
 
     /**

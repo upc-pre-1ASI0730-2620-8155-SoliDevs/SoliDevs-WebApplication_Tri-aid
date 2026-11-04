@@ -23,7 +23,16 @@ export async function accessGuard(to) {
 
     // Rutas que nunca requieren sesion.
     const publicPaths = ['/login', '/recuperar', '/register']
-    if (publicPaths.includes(path)) return iamStore.isSignedIn ? '/panel' : null
+    if (publicPaths.includes(path)) {
+        // Cliente con sesion que llega desde el landing con intencion de
+        // compra: directo al checkout de ese plan, sin registro/login.
+        if (path === '/register' && to.query.plan) {
+            return iamStore.isSignedIn
+                ? { path: '/subscriptions', query: { plan: String(to.query.plan) } }
+                : null
+        }
+        return iamStore.isSignedIn ? '/panel' : null
+    }
 
     // Restaurar la sesion abierta (no-op si ya esta lista).
     await iamStore.restore()
