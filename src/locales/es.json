@@ -532,5 +532,6 @@
   "register.cardNote": "Validamos tu tarjeta sin cobro ahora. El primer cargo se realiza el {date} al terminar tu prueba, y luego en cada renovación. Cancela cuando quieras.",
   "register.trialNote2": "14 días de prueba gratis · Sin cobro hoy · Cancela cuando quieras",
   "register.plan_custom": "A medida",
-  "subscription.fCard": "Tarjeta registrada"
+  "subscription.fCard": "Tarjeta registrada",
+  "register.selected": "Seleccionado"
 }

@@ -830,42 +830,42 @@
     {
       "id": "plan-esencial",
       "name": "Esencial",
-      "monthlyPrice": 49,
-      "annualPrice": 470,
+      "for": "Para clínicas pequeñas y proyectos piloto",
+      "monthlyPrice": 79,
+      "annualPrice": 756,
       "maxUsers": 5,
       "features": [
-        "Hasta 5 usuarios",
-        "Triaje y signos vitales",
-        "Reportes básicos",
-        "Soporte por correo"
+        "Hasta 5 usuarios de triaje",
+        "Captura automática de signos vitales",
+        "Alertas de valores fuera de rango en tiempo real",
+        "Portal del paciente incluido"
+      ]
+    },
+    {
+      "id": "plan-profesional",
+      "name": "Profesional",
+      "for": "Para hospitales con múltiples puntos de atención",
+      "monthlyPrice": 119,
+      "annualPrice": 1138,
+      "maxUsers": 0,
+      "features": [
+        "Usuarios de triaje ilimitados",
+        "Clasificación asistida NT-158 + analíticas",
+        "Derivación multi-especialidad",
+        "Soporte prioritario"
       ]
     },
     {
       "id": "plan-institucional",
       "name": "Institucional",
-      "monthlyPrice": 129,
-      "annualPrice": 1238,
-      "maxUsers": 25,
-      "features": [
-        "Hasta 25 usuarios",
-        "Alertas y escalamiento",
-        "Derivación entre especialidades",
-        "Reportes auditables",
-        "Soporte prioritario"
-      ]
-    },
-    {
-      "id": "plan-red",
-      "name": "Red Hospitalaria",
-      "monthlyPrice": 299,
-      "annualPrice": 2870,
+      "for": "Para redes de salud y proyectos smart-city",
+      "monthlyPrice": 249,
+      "annualPrice": 2390,
       "maxUsers": 100,
       "features": [
-        "Hasta 100 usuarios",
-        "Multi-sede",
-        "Integración con dispositivos",
-        "Reportes ejecutivos",
-        "Gestor de cuenta dedicado"
+        "Gestión multi-sede",
+        "Integración por API con sistemas hospitalarios",
+        "SLA + onboarding dedicado"
       ]
     }
   ],

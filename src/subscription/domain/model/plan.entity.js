@@ -8,6 +8,7 @@ export class Plan {
         id = null,
         name = '',
         description = '',
+        for: audience = '',
         monthlyPrice = 0,
         annualPrice = 0,
         maxUsers = 0,
@@ -16,6 +17,7 @@ export class Plan {
         this.id = id
         this.name = name
         this.description = description
+        this.for = audience
         this.monthlyPrice = Number(monthlyPrice) || 0
         this.annualPrice = Number(annualPrice) || 0
         this.maxUsers = Number(maxUsers) || 0

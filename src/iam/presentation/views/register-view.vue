@@ -258,8 +258,15 @@ function animateReject() {
           <div class="rg__plans">
             <button v-for="p in subscriptionStore.plans" :key="p.id" type="button"
                     class="rg__plan" :class="{ sel: chosenPlan?.id === p.id }" @click="selectedPlanId = p.id">
-              <b>{{ p.name }}</b>
-              <span>{{ p.priceFor(cycle) === 0 ? t('plan.institutional.price') : `S/ ${p.priceFor(cycle)}` }}<small>/{{ t(cycle === 'annual' ? 'subscription.perYear' : 'subscription.perMonth') }}</small></span>
+              <span v-if="chosenPlan?.id === p.id" class="rg__plan__tag">{{ t('register.selected') }}</span>
+              <b class="rg__plan__name">{{ p.name }}</b>
+              <span class="rg__plan__for">{{ p.for || p.description }}</span>
+              <span class="rg__plan__price">
+                {{ p.priceFor(cycle) === 0 ? t('plan.institutional.price') : `S/ ${p.priceFor(cycle)}` }}<small>/{{ t(cycle === 'annual' ? 'subscription.perYear' : 'subscription.perMonth') }}</small>
+              </span>
+              <ul class="rg__plan__feats">
+                <li v-for="f in p.features" :key="f">{{ f }}</li>
+              </ul>
             </button>
           </div>
 
@@ -340,12 +347,18 @@ function animateReject() {
 .rg__cycle button.on{background:var(--ta-brand);color:#fff}
 .rg__cycle em{font-style:normal;font-size:.68rem;background:rgba(255,255,255,.25);border-radius:999px;padding:2px 8px}
 .rg__cycle button:not(.on) em{background:#e3f6ea;color:var(--ta-brand)}
-.rg__plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.rg__plan{border:1px solid var(--ta-line);border-radius:10px;background:var(--ta-surface);padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;font:inherit;text-align:left;color:var(--ta-text)}
-.rg__plan.sel{border-color:var(--ta-brand);outline:2px solid var(--ta-brand);background:#f2faf5}
-.rg__plan b{font-size:.92rem}
-.rg__plan span{font-family:var(--ta-mono);font-size:.85rem}
-.rg__plan small{color:var(--ta-muted);font-family:var(--ta-font)}
+.rg__plans{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;align-items:stretch}
+.rg__plan{position:relative;border:1px solid var(--ta-line);border-radius:12px;background:var(--ta-surface);padding:18px 14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;font:inherit;text-align:left;color:var(--ta-text);transition:transform .2s ease,box-shadow .2s ease}
+.rg__plan:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(10,40,25,.10)}
+.rg__plan.sel{border-color:var(--ta-brand);outline:2px solid var(--ta-brand);background:#f4faf6}
+.rg__plan__tag{position:absolute;top:-10px;right:12px;background:var(--ta-brand);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.rg__plan__name{font-size:1.02rem}
+.rg__plan__for{font-size:.76rem;color:var(--ta-muted);line-height:1.35;min-height:2.2em}
+.rg__plan__price{font-family:var(--ta-mono);font-size:1.3rem;color:var(--ta-brand);font-weight:600}
+.rg__plan__price small{font-family:var(--ta-font);font-size:.72rem;font-weight:400;color:var(--ta-muted)}
+.rg__plan__feats{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.rg__plan__feats li{font-size:.78rem;line-height:1.35;padding-left:17px;position:relative}
+.rg__plan__feats li::before{content:'✓';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
 .rg__summary{border:1px dashed var(--ta-line);border-radius:10px;padding:12px 14px;display:grid;gap:7px;margin-bottom:6px}
 .rg__summary--mini{background:#f4f9f6}
 .rg__sumrow{display:flex;justify-content:space-between;align-items:center;font-size:.84rem;color:var(--ta-muted)}

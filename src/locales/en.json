@@ -532,5 +532,6 @@
   "register.cardNote": "We validate your card with no charge today. The first charge happens on {date} when your trial ends, then on every renewal. Cancel anytime.",
   "register.trialNote2": "14-day free trial · No charge today · Cancel anytime",
   "register.plan_custom": "Custom",
-  "subscription.fCard": "Card on file"
+  "subscription.fCard": "Card on file",
+  "register.selected": "Selected"
 }
