@@ -341,7 +341,9 @@ function animateReject() {
 .rg__steps li.on{color:var(--ta-brand);border-top-color:var(--ta-accent)}
 .rg__steps li.on span{background:var(--ta-brand);color:#fff}
 .rg__row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fe{font-size:.74rem;color:var(--ta-danger)}
+.fe{position:absolute;left:0;bottom:2px;font-size:.74rem;color:var(--ta-danger);line-height:1.15;max-width:100%}
+.rg__field,.field{position:relative;padding-bottom:17px}
+.field:has(.pass-wrap){padding-bottom:34px}
 .rg__cycle{display:flex;border:1px solid var(--ta-line);border-radius:10px;overflow:hidden;margin-bottom:14px}
 .rg__cycle button{flex:1;border:0;background:transparent;padding:10px;cursor:pointer;font:inherit;font-size:.85rem;color:var(--ta-muted);display:flex;gap:8px;align-items:center;justify-content:center}
 .rg__cycle button.on{background:var(--ta-brand);color:#fff}
