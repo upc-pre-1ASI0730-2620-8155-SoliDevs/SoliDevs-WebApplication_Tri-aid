@@ -545,5 +545,8 @@
   "plan.plan-institucional.for": "For health networks and smart-city projects",
   "plan.plan-institucional.f1": "Multi-campus management",
   "plan.plan-institucional.f2": "API integration with hospital systems",
-  "plan.plan-institucional.f3": "SLA + dedicated onboarding"
+  "plan.plan-institucional.f3": "SLA + dedicated onboarding",
+  "register.sumPlan": "Plan",
+  "register.sumToday": "Total due today",
+  "register.toastWelcome": "Account created! Your 14-day trial is active."
 }
