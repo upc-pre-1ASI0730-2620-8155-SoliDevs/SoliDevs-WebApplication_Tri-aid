@@ -177,7 +177,7 @@ function animateReject() {
 
 <template>
   <AuthShell :title="t('register.title')" :lead="t('register.lead')" :features="features">
-    <div ref="card">
+    <div ref="card" class="rg__root">
       <h2>{{ t('register.cardTitle') }}</h2>
       <p class="sub">{{ t('register.cardSub') }}</p>
 
@@ -349,17 +349,19 @@ function animateReject() {
 .rg__cycle button.on{background:var(--ta-brand);color:#fff}
 .rg__cycle em{font-style:normal;font-size:.68rem;background:rgba(255,255,255,.25);border-radius:999px;padding:2px 8px}
 .rg__cycle button:not(.on) em{background:#e3f6ea;color:var(--ta-brand)}
-.rg__plans{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;align-items:stretch}
-.rg__plan{position:relative;border:1px solid var(--ta-line);border-radius:12px;background:var(--ta-surface);padding:18px 14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;font:inherit;text-align:left;color:var(--ta-text);transition:transform .2s ease,box-shadow .2s ease}
-.rg__plan:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(10,40,25,.10)}
-.rg__plan.sel{border-color:var(--ta-brand);outline:2px solid var(--ta-brand);background:#f4faf6}
-.rg__plan__tag{position:absolute;top:-10px;right:12px;background:var(--ta-brand);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
-.rg__plan__name{font-size:1.02rem}
-.rg__plan__for{font-size:.76rem;color:var(--ta-muted);line-height:1.35;min-height:2.2em}
-.rg__plan__price{font-family:var(--ta-mono);font-size:1.3rem;color:var(--ta-brand);font-weight:600}
-.rg__plan__price small{font-family:var(--ta-font);font-size:.72rem;font-weight:400;color:var(--ta-muted)}
-.rg__plan__feats{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
-.rg__plan__feats li{font-size:.78rem;line-height:1.35;padding-left:17px;position:relative}
+.rg__plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:14px;align-items:stretch}
+.rg__plan{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--ta-surface);border:1px solid var(--ta-line);border-radius:16px;padding:28px 24px;cursor:pointer;font:inherit;text-align:left;color:var(--ta-text);transition:transform .25s ease,box-shadow .25s ease}
+.rg__plan:hover{transform:translateY(-6px);box-shadow:0 14px 34px rgba(10,34,26,.12)}
+.rg__plan.sel{border:2px solid var(--ta-brand)}
+.rg__plan__tag{position:absolute;top:-13px;right:20px;background:var(--ta-brand);color:#fff;font:700 .72rem/1 var(--ta-font);letter-spacing:.8px;text-transform:uppercase;padding:6px 12px;border-radius:999px}
+.rg__plan__name{font-size:1.15rem;color:var(--ta-text)}
+.rg__plan__for{color:var(--ta-muted);opacity:.7;font-size:.9rem;min-height:2.4em}
+.rg__plan__price{font:500 2.4rem/1 var(--ta-mono);letter-spacing:-1px;color:var(--ta-brand)}
+.rg__plan__price small{font-size:.95rem;font-weight:400;letter-spacing:0;color:var(--ta-text);opacity:.65}
+.rg__plan__feats{list-style:none;display:grid;gap:8px;margin:10px 0 0;padding:0}
+.rg__plan__feats li{font-size:.92rem;color:var(--ta-text);padding-left:22px;position:relative}
+.rg__plan__feats li::before{content:'\u2713';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
+.rg__plan__feats li::before{content:'\u2713';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
 .rg__plan__feats li::before{content:'✓';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
 .rg__summary{border:1px dashed var(--ta-line);border-radius:10px;padding:12px 14px;display:grid;gap:7px;margin-bottom:6px}
 .rg__summary--mini{background:#f4f9f6}
@@ -377,5 +379,12 @@ function animateReject() {
 .rg__login{margin:14px 0 0;text-align:center;font-size:.85rem;color:var(--ta-muted)}
 .rg__login a{font-weight:600}
 .btn--ghost{background:transparent;border:1px solid var(--ta-line);color:var(--ta-muted)}
-@media (max-width:560px){.rg__row{grid-template-columns:1fr}.rg__plans{grid-template-columns:1fr}}
+@media (max-width:560px){.rg__row{grid-template-columns:1fr}.rg__plans{grid-template-columns:1fr}.rg__plan__feats{grid-template-columns:1fr}}
+</style>
+
+<!-- La tarjeta del AuthShell mide 380px; el wizard con 3 columnas de planes necesita mas aire. -->
+<style>
+/* Solo el grid de planes rompe al ancho completo del panel auth. */
+.auth__card:has(.rg__plans){overflow:visible}
+.rg__plans{position:relative;width:calc(100vw - 34vw);max-width:640px;left:50%;transform:translateX(-50%)}
 </style>
