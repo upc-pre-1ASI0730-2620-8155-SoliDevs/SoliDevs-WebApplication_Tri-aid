@@ -528,5 +528,22 @@
   "register.trialNote2": "14-day free trial · No charge today · Cancel anytime",
   "register.plan_custom": "Custom",
   "subscription.fCard": "Card on file",
-  "register.selected": "Selected"
+  "register.selected": "Selected",
+  "plan.plan-esencial.name": "Esencial",
+  "plan.plan-esencial.for": "For small clinics and pilot projects",
+  "plan.plan-esencial.f1": "Up to 5 triage users",
+  "plan.plan-esencial.f2": "Automatic vital signs capture",
+  "plan.plan-esencial.f3": "Real-time out-of-range alerts",
+  "plan.plan-esencial.f4": "Patient portal included",
+  "plan.plan-profesional.name": "Professional",
+  "plan.plan-profesional.for": "For hospitals with multiple points of care",
+  "plan.plan-profesional.f1": "Unlimited triage users",
+  "plan.plan-profesional.f2": "Assisted NT-158 classification + analytics",
+  "plan.plan-profesional.f3": "Multi-specialty routing",
+  "plan.plan-profesional.f4": "Priority support",
+  "plan.plan-institucional.name": "Institutional",
+  "plan.plan-institucional.for": "For health networks and smart-city projects",
+  "plan.plan-institucional.f1": "Multi-campus management",
+  "plan.plan-institucional.f2": "API integration with hospital systems",
+  "plan.plan-institucional.f3": "SLA + dedicated onboarding"
 }

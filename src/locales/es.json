@@ -528,5 +528,22 @@
   "register.trialNote2": "14 días de prueba gratis · Sin cobro hoy · Cancela cuando quieras",
   "register.plan_custom": "A medida",
   "subscription.fCard": "Tarjeta registrada",
-  "register.selected": "Seleccionado"
+  "register.selected": "Seleccionado",
+  "plan.plan-esencial.name": "Esencial",
+  "plan.plan-esencial.for": "Para clínicas pequeñas y proyectos piloto",
+  "plan.plan-esencial.f1": "Hasta 5 usuarios de triaje",
+  "plan.plan-esencial.f2": "Captura automática de signos vitales",
+  "plan.plan-esencial.f3": "Alertas de valores fuera de rango en tiempo real",
+  "plan.plan-esencial.f4": "Portal del paciente incluido",
+  "plan.plan-profesional.name": "Profesional",
+  "plan.plan-profesional.for": "Para hospitales con múltiples puntos de atención",
+  "plan.plan-profesional.f1": "Usuarios de triaje ilimitados",
+  "plan.plan-profesional.f2": "Clasificación asistida NT-158 + analíticas",
+  "plan.plan-profesional.f3": "Derivación multi-especialidad",
+  "plan.plan-profesional.f4": "Soporte prioritario",
+  "plan.plan-institucional.name": "Institucional",
+  "plan.plan-institucional.for": "Para redes de salud y proyectos smart-city",
+  "plan.plan-institucional.f1": "Gestión multi-sede",
+  "plan.plan-institucional.f2": "Integración por API con sistemas hospitalarios",
+  "plan.plan-institucional.f3": "SLA + onboarding dedicado"
 }

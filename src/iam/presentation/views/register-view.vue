@@ -53,6 +53,13 @@ const slug = computed(() => {
 })
 const selectedPlanId = ref(null)
 const cycle = ref('monthly')
+// Los planes vienen del backend en un idioma fijo; la capa de
+// presentacion los traduce via i18n con fallback al dato crudo.
+function planName(p) { const v = t(`plan.${p.id}.name`); return v === `plan.${p.id}.name` ? p.name : v }
+function planFor(p) { const v = t(`plan.${p.id}.for`); return v === `plan.${p.id}.for` ? (p.for || p.description || '') : v }
+function planFeat(p, i) { const v = t(`plan.${p.id}.f${i + 1}`); return v === `plan.${p.id}.f${i + 1}` ? f0(p, i) : v }
+function f0(p, i) { return p.features[i] || '' }
+
 const chosenPlan = computed(() => {
   if (selectedPlanId.value) return subscriptionStore.plans.find(p => p.id === selectedPlanId.value) || null
   return slug.value ? subscriptionStore.plans.find(p => p.id.endsWith(slug.value)) || null : null
@@ -259,13 +266,13 @@ function animateReject() {
             <button v-for="p in subscriptionStore.plans" :key="p.id" type="button"
                     class="rg__plan" :class="{ sel: chosenPlan?.id === p.id }" @click="selectedPlanId = p.id">
               <span v-if="chosenPlan?.id === p.id" class="rg__plan__tag">{{ t('register.selected') }}</span>
-              <b class="rg__plan__name">{{ p.name }}</b>
-              <span class="rg__plan__for">{{ p.for || p.description }}</span>
+              <b class="rg__plan__name">{{ planName(p) }}</b>
+              <span class="rg__plan__for">{{ planFor(p) }}</span>
               <span class="rg__plan__price">
                 {{ p.priceFor(cycle) === 0 ? t('plan.institutional.price') : `S/ ${p.priceFor(cycle)}` }}<small>/{{ t(cycle === 'annual' ? 'subscription.perYear' : 'subscription.perMonth') }}</small>
               </span>
               <ul class="rg__plan__feats">
-                <li v-for="f in p.features" :key="f">{{ f }}</li>
+                <li v-for="(f, fi) in p.features" :key="f">{{ planFeat(p, fi) }}</li>
               </ul>
             </button>
           </div>
@@ -343,16 +350,16 @@ function animateReject() {
 .rg__cycle em{font-style:normal;font-size:.68rem;background:rgba(255,255,255,.25);border-radius:999px;padding:2px 8px}
 .rg__cycle button:not(.on) em{background:#e3f6ea;color:var(--ta-brand)}
 .rg__plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:18px;align-items:stretch}
-.rg__plan{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--ta-surface);border:1px solid var(--ta-line);border-radius:16px;padding:24px 22px;cursor:pointer;font:inherit;text-align:left;color:var(--ta-text);transition:transform .25s ease,box-shadow .25s ease}
+.rg__plan{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--ta-surface);border:1px solid var(--ta-line);border-radius:16px;padding:18px 18px;cursor:pointer;font:inherit;text-align:left;color:var(--ta-text);transition:transform .25s ease,box-shadow .25s ease}
 .rg__plan:hover{transform:translateY(-6px);box-shadow:0 14px 34px rgba(10,34,26,.12)}
 .rg__plan.sel{border:2px solid var(--ta-brand)}
 .rg__plan__tag{position:absolute;top:-13px;right:20px;background:var(--ta-brand);color:#fff;font:700 .72rem/1 var(--ta-font);letter-spacing:.8px;text-transform:uppercase;padding:6px 12px;border-radius:999px}
-.rg__plan__name{font-size:1.15rem;color:var(--ta-text)}
-.rg__plan__for{color:var(--ta-muted);opacity:.7;font-size:.9rem;min-height:2.4em}
+.rg__plan__name{font-size:1.05rem;color:var(--ta-text)}
+.rg__plan__for{color:var(--ta-muted);opacity:.7;font-size:.78rem;min-height:2.2em}
 .rg__plan__price{font:500 1.35rem/1.1 var(--ta-mono);letter-spacing:-.3px;color:var(--ta-brand);white-space:nowrap}
 .rg__plan__price small{font-size:.85rem;font-weight:400;letter-spacing:0;color:var(--ta-text);opacity:.65}
-.rg__plan__feats{list-style:none;display:grid;gap:8px;margin:10px 0 0;padding:0}
-.rg__plan__feats li{font-size:.92rem;color:var(--ta-text);padding-left:22px;position:relative}
+.rg__plan__feats{list-style:none;display:grid;gap:5px;margin:8px 0 0;padding:0}
+.rg__plan__feats li{font-size:.78rem;color:var(--ta-text);padding-left:18px;position:relative}
 .rg__plan__feats li::before{content:'\u2713';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
 .rg__plan__feats li::before{content:'\u2713';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
 .rg__plan__feats li::before{content:'✓';position:absolute;left:0;color:var(--ta-brand);font-weight:700}
