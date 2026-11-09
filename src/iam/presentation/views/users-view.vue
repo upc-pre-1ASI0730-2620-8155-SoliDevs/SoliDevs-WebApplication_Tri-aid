@@ -71,7 +71,7 @@ async function load() {
 function startCreate() {
     // El plan contratado acota cuantas cuentas puede crear la institucion.
     if (seats.value.atLimit) {
-        notify({ type: 'error', title: t('um.limitReachedTitle'), message: t('um.limitReached', { limit: seats.value.limit }) })
+        notify({ type: 'error', title: t('um.limitReachedTitle'), detail: t('um.limitReached', { limit: seats.value.limit }) })
         return
     }
     form.value = blankForm()

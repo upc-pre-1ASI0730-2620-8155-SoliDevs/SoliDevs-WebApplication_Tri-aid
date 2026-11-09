@@ -93,6 +93,16 @@ const cardHolder = ref('')
 const simulateReject = ref(false)
 const showCard = ref(false)
 const cardDigits = computed(() => (cardNumber.value || '').replace(/\D/g, ''))
+/** Al tipear: solo digitos (16 max), sin reformatear para no pelear con el caret. */
+function onCardInput(e) {
+    cardNumber.value = e.target.value.replace(/\D/g, '').slice(0, 16)
+}
+/** Al salir del campo: se agrupan en bloques de 4 para lectura. */
+function formatCard() {
+    if (cardDigits.value.length >= 4) {
+        cardNumber.value = cardDigits.value.replace(/(\d{4})(?=\d)/g, '$1 ')
+    }
+}
 const cardMasked = computed(() => cardDigits.value ? `Visa •••• ${cardDigits.value.slice(-4)}` : '')
 const step3Valid = computed(() => cardDigits.value.length >= 13 && cardHolder.value.trim().length >= 3)
 
@@ -158,7 +168,7 @@ async function submit() {
     await iamStore.service.signIn(form.value.username.trim(), form.value.password)
     await subscriptionStore.service.startTrial(created.data.institution, chosenPlan.value.id, cardMasked.value)
     await subscriptionStore.load({ force: true })
-    notify({ type: 'success', message: t('register.toastWelcome') })
+    notify({ type: 'success', title: t('register.toastWelcome') })
     router.push('/subscriptions')
   } catch (e) {
     error.value = t(e.code === 'username-taken'
@@ -296,7 +306,7 @@ function animateReject() {
           <div class="field">
             <label for="cardNumber">{{ t('register.fCard') }}</label>
             <div class="pass-wrap">
-              <input id="cardNumber" :type="showCard ? 'text' : 'password'" v-model="cardNumber" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="cc-number" />
+              <input id="cardNumber" :type="showCard ? 'text' : 'password'" :value="cardNumber" @input="onCardInput" @blur="formatCard" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="cc-number" />
               <button type="button" class="pass-toggle" @click="showCard = !showCard" :aria-label="t('login.showPass')">
                 <i class="pi" :class="showCard ? 'pi-eye-slash' : 'pi-eye'"></i>
               </button>
