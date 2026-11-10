@@ -91,7 +91,6 @@ export class SpecialtyAssignmentService {
             const updated = await this.api.updateReferral(referral.id, ReferralAssembler.toResource(referral))
             return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
         }
-        // Queue position = shift base queue + previous live referrals + 1
         const [specResponse, refResponse] = await Promise.all([this.api.getSpecialties(), this.api.getReferrals()])
         const baseWaiting = (specResponse.data || []).find(sp => sp.key === specialty)?.waiting || 0
         const liveReferrals = (refResponse.data || []).filter(r => r.specialty === specialty && r.state !== 'Attended' && String(r.episodeId) !== String(episodeId))
@@ -130,7 +129,6 @@ export class SpecialtyAssignmentService {
         await delay(150)
         const qrCode = `TRI-AID|${referral.episodeId}|${referral.specialty}|${referral.room}|#${referral.queuePosition}`
 
-        // If a voucher already exists for the referral, it is updated
         const existing = ((await this.api.getVouchers()).data || []).find(v => String(v.referralId) === String(referral.id))
         if (existing) {
             existing.qrCode = qrCode

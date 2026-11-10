@@ -87,7 +87,6 @@ watch(editing, async (isEditing) => {
                 { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.3)
     } else {
         animateSwitch('.pr-facts')
-        // The header name may have changed: refresh it too.
         if (session.name !== [user.value.names, user.value.surnames].filter(Boolean).join(' ')) {
             session.name = [user.value.names, user.value.surnames].filter(Boolean).join(' ')
         }

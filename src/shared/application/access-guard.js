@@ -21,18 +21,23 @@ import { subscriptionStore } from '../../subscription/application/subscription-s
 export async function accessGuard(to) {
     const path = to.path
 
-    // Rutas que nunca requieren sesion.
-    const publicPaths = ['/login', '/recuperar']
-    if (publicPaths.includes(path)) return iamStore.isSignedIn ? '/panel' : null
+    const publicPaths = ['/login', '/recuperar', '/register']
+    if (publicPaths.includes(path)) {
+        // Cliente con sesion que llega desde el landing con intencion de
+        // compra: directo al checkout de ese plan, sin registro/login.
+        if (path === '/register' && to.query.plan) {
+            return iamStore.isSignedIn
+                ? { path: '/subscriptions', query: { plan: String(to.query.plan) } }
+                : null
+        }
+        return iamStore.isSignedIn ? '/panel' : null
+    }
 
-    // Restaurar la sesion abierta (no-op si ya esta lista).
     await iamStore.restore()
     if (!iamStore.isSignedIn) return '/login'
 
-    // Solo si hay sesion interesa el estado de la suscripcion.
     await subscriptionStore.load()
 
-    // RBAC: la gestion de usuarios y la suscripcion son del administrador.
     const adminOnlyPaths = ['/subscriptions', '/users']
     if (adminOnlyPaths.includes(path) && !iamStore.isAdmin) return '/panel'
 

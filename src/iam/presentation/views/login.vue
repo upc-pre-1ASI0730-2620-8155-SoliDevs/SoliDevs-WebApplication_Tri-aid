@@ -56,6 +56,7 @@ async function submit() {
       <p v-if="errorMsg" class="err">{{ errorMsg }}</p>
       <button class="btn" :disabled="loading">{{ loading ? t('login.loading') : t('login.h') }}</button>
     </form>
+    <router-link class="link" to="/register">{{ t('login.noAccount') }}</router-link>
     <router-link class="link" to="/recuperar">{{ t('login.forgot') }}</router-link>
   </AuthShell>
 </template>

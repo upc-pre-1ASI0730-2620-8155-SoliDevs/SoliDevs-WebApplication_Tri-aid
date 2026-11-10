@@ -3,6 +3,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
 import { iamStore } from '../../application/iam-store.js'
+import { subscriptionStore } from '../../../subscription/application/subscription-store.js'
 import { notify } from '../../../shared/application/toast-store.js'
 
 const { t } = useI18n()
@@ -18,6 +19,11 @@ const form = ref({})
 const errors = ref({})
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// Seat limit of the contracted plan (maxUsers; 0 = unlimited).
+const seats = computed(() => subscriptionStore.seatInfo(users.value.length))
+const seatsLabel = computed(() =>
+    seats.value.unlimited ? t('um.seatsUnlimited') : `${users.value.length} / ${seats.value.limit}`)
 
 /** Field-level validation for the staff account form. */
 function validate() {
@@ -63,6 +69,10 @@ async function load() {
 }
 
 function startCreate() {
+    if (seats.value.atLimit) {
+        notify({ type: 'error', title: t('um.limitReachedTitle'), detail: t('um.limitReached', { limit: seats.value.limit }) })
+        return
+    }
     form.value = blankForm()
     errors.value = {}
     editing.value = 'new'
@@ -82,7 +92,6 @@ function cancel() {
 
 async function submit() {
     if (!validate()) return
-    // Username must stay unique within the platform (case-insensitive).
     const name = String(form.value.username || '').trim().toLowerCase()
     const taken = users.value.some(u =>
         String(u.id) !== String(editing.value) &&
@@ -133,7 +142,6 @@ onMounted(async () => {
     await load()
     await nextTick()
     if (reduce() || !pageGrid.value) return
-    // Staggered card entrance, same language as the other modules.
     gsap.fromTo(pageGrid.value.querySelectorAll('.um-in'),
         { opacity: 0, y: 16 },
         { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: 'power3.out', clearProps: 'all' })
@@ -147,8 +155,18 @@ onMounted(async () => {
                 <h3 class="ta-h">{{ t('um.title') }}</h3>
                 <p class="ta-sub">{{ t('um.sub') }}</p>
             </div>
-            <button class="ta-btn" @click="startCreate">{{ t('um.new') }}</button>
+            <div class="um-head__right">
+                <span class="um-seats" :class="{ 'um-seats--full': seats.atLimit, 'um-seats--near': seats.nearLimit && !seats.atLimit }" :title="t('um.seatsHint')">
+                    <i class="pi pi-users"></i>{{ seatsLabel }}
+                </span>
+                <button class="ta-btn" :disabled="seats.atLimit" @click="startCreate">{{ t('um.new') }}</button>
+            </div>
         </section>
+
+        <p v-if="seats.atLimit" class="um-limit">
+            <i class="pi pi-exclamation-triangle"></i>{{ t('um.limitReached', { limit: seats.limit }) }}
+            <router-link to="/subscriptions">{{ t('um.upgrade') }}</router-link>
+        </p>
 
         <p class="um-inst um-in">
             <i class="pi pi-hospital"></i>
@@ -243,6 +261,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.um-head__right{display:flex;align-items:center;gap:12px}
+.um-seats{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;background:#eef5f1;border:1px solid var(--ta-line);color:var(--ta-muted);font-size:.82rem;font-weight:600;font-family:var(--ta-mono)}
+.um-seats--near{background:#fdf4e0;border-color:#efd9a8;color:#9a6d10}
+.um-seats--full{background:var(--ta-danger-bg);border-color:var(--ta-danger-line);color:var(--ta-danger)}
+.um-limit{display:flex;align-items:center;gap:10px;margin:0;padding:12px 16px;border-radius:10px;background:var(--ta-danger-bg);border:1px solid var(--ta-danger-line);color:var(--ta-danger);font-size:.86rem}
+.um-limit a{margin-left:auto;color:var(--ta-danger);font-weight:600;text-decoration:underline;white-space:nowrap}
+
 .um-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .um-inst { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.85rem; color: var(--ta-text); }
 .um-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }

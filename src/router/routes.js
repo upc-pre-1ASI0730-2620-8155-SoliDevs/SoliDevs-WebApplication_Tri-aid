@@ -9,6 +9,7 @@ import { accessGuard } from '../shared/application/access-guard.js'
 export default [
   { path: '/', redirect: '/login' },
   { path: '/login', component: () => import('../iam/presentation/views/login.vue'), meta: { layout: 'auth' } },
+  { path: '/register', component: () => import('../iam/presentation/views/register-view.vue'), meta: { layout: 'auth' } },
   { path: '/recuperar', component: () => import('../iam/presentation/views/forgot-password.vue'), meta: { layout: 'auth' } },
   { path: '/acceso-suspendido', component: () => import('../iam/presentation/views/account-suspended.vue'), meta: { layout: 'auth' } },
   { path: '/panel', component: () => import('../panel/presentation/views/panel.vue'), meta: { titleKey: 'nav.panel' } },

@@ -38,7 +38,7 @@ const rows = computed(() => [
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 
-/* ---------- Pestañas ---------- */
+/* ---------- Tabs ---------- */
 const tab = ref('vitals')
 const tabsDef = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
@@ -103,6 +103,16 @@ function onVitalsConfirmed() {
         <dl class="fi-dl">
           <div v-for="r in rows" :key="r[0]"><dt>{{ r[0] }}</dt><dd>{{ r[1] }}</dd></div>
         </dl>
+        <div v-if="!p.sinDni && p.portalPassword" class="pf-portal">
+          <h4 class="ta-h">{{ t('pf.portal.title') }}</h4>
+          <p class="ta-sub">{{ t('pf.portal.sub') }}</p>
+          <dl class="fi-dl">
+            <div><dt>DNI</dt><dd>{{ p.dni }}</dd></div>
+            <div><dt>{{ t('rg.email') }}</dt><dd>{{ p.portalEmail || '—' }}</dd></div>
+            <div><dt>{{ t('pf.portal.pass') }}</dt><dd class="pf-portal__pass">{{ p.portalPassword }}</dd></div>
+          </dl>
+          <p class="pf-portal__note">{{ t('pf.portal.note') }}</p>
+        </div>
       </section>
 
       <section v-else key="h" class="ta-card">
@@ -149,4 +159,9 @@ function onVitalsConfirmed() {
   .fi-dl{grid-template-columns:1fr;gap:12px}
   .fi-stack{gap:12px}
 }
+.pf-portal{margin-top:16px;padding:14px 16px;border-radius:10px;background:#f4faf6;border:1px dashed var(--ta-line)}
+.pf-portal h4{margin:0 0 2px;font-size:.92rem}
+.pf-portal .ta-sub{margin:0 0 10px}
+.pf-portal__pass{font-family:var(--ta-mono);font-weight:600;color:var(--ta-brand)}
+.pf-portal__note{margin:8px 0 0;font-size:.76rem;color:var(--ta-muted)}
 </style>

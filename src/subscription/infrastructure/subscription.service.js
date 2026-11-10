@@ -23,11 +23,67 @@ export class SubscriptionService {
         return { data: list }
     }
 
-    /** Current institution subscription, or null when not contracted yet. */
-    async getSubscription() {
+    /** Subscription of the given institution, or null when not contracted. */
+    async getSubscription(institution = null) {
         const response = await this.api.getSubscriptions()
-        const [first] = response.data || []
-        return { data: first ? new Subscription(first) : null }
+        const list = response.data || []
+        const match = institution
+            ? list.find(s => String(s.institution).toLowerCase() === String(institution).toLowerCase())
+            : list[0]
+        return { data: match ? new Subscription(match) : null }
+    }
+
+    /**
+     * Starts the 14-day card-required trial for a freshly registered
+     * institution (onboarding). The card is validated at signup and kept
+     * on file (masked) for the automatic charge when the trial ends.
+     * @param {string} institution - Institution name.
+     * @param {string} [planId] - Plan the institution selected.
+     * @param {string} [method] - Masked payment method on file.
+     * @returns {Promise<{ok: true, data: Subscription}>}
+     */
+    async startTrial(institution, planId = null, method = '') {
+        const trialEnds = new Date()
+        trialEnds.setDate(trialEnds.getDate() + 14)
+        const draft = new Subscription({
+            institution,
+            planId,
+            billingCycle: 'monthly',
+            status: 'trial',
+            startedAt: new Date().toISOString(),
+            trialEndsAt: trialEnds.toISOString(),
+            paymentMethod: method
+        })
+        const response = await this.api.createSubscription({ ...draft })
+        return { ok: true, data: new Subscription(response.data) }
+    }
+
+    /**
+     * Automatic charge when the trial window ends (card-required trial).
+     * With a card on file the charge converts the trial to an active
+     * subscription; without one it simply lapses to overdue so the
+     * existing blocking flow takes over.
+     * Backend swap note: with the .NET API this runs as a scheduled job
+     * server-side; the UI only shows the resulting state.
+     * @param {Subscription} subscription
+     * @returns {Promise<{ok: true, charged: boolean, data: Subscription}>}
+     */
+    async autoChargeTrialEnd(subscription) {
+        const sub = new Subscription({ ...subscription })
+        if (!sub.isTrialExpired) return { ok: true, charged: false, data: sub }
+        if (!sub.paymentMethod) return { ok: true, charged: false, data: sub }
+        await delay()
+        const amount = sub.payments.length
+            ? sub.payments[sub.payments.length - 1].amount
+            : 0
+        sub.addPayment({ amount, status: 'paid', method: sub.paymentMethod })
+        sub.status = 'active'
+        const renewal = new Date(`${sub.trialEndDate}T12:00:00`)
+        if (sub.billingCycle === 'annual') renewal.setFullYear(renewal.getFullYear() + 1)
+        else renewal.setMonth(renewal.getMonth() + 1)
+        sub.renewalDate = renewal.toISOString().slice(0, 10)
+        const response = await this.api.updateSubscription(sub.id, { ...sub })
+        return { ok: true, charged: true, data: new Subscription(response.data) }
     }
 
     /**
@@ -78,7 +134,6 @@ export class SubscriptionService {
         sub.addPayment({ amount, status: simulateReject ? 'rejected' : 'paid', method: method || 'Visa •••• 4242' })
         if (!simulateReject) {
             sub.status = 'active'
-            // El reintento regulariza el ciclo vencido: la renovacion avanza.
             sub.renewalDate = sub.nextRenewalDate
         }
         const response = await this.api.updateSubscription(sub.id, { ...sub })

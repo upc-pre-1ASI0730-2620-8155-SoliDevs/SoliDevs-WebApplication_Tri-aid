@@ -16,6 +16,54 @@ export class IamService {
     }
 
     /**
+     * Registers a new institution together with its administrator
+     * account (self-service onboarding). Creates the admin user and
+     * opens a session for them. The trial subscription is started by
+     * the Subscription context once the session exists.
+     * Backend swap note: with the .NET API this becomes a single
+     * POST /institutions transaction.
+     * @param {Object} input - { institution, names, surnames, email, username, password }
+     * @returns {Promise<{ok: true, data: User}>} The admin account.
+     */
+    /**
+     * Early availability check for the register wizard (step 1): the
+     * institution name must not belong to an existing account.
+     * @param {string} institution
+     * @returns {Promise<boolean>} true when available.
+     */
+    async isInstitutionAvailable(institution) {
+        const users = await this.api.getUsers()
+        const needle = String(institution || '').trim().toLowerCase()
+        return !(users.data || []).some(u => String(u.institution || '').trim().toLowerCase() === needle)
+    }
+
+    async registerInstitution(input) {
+        await delay()
+        const users = await this.api.getUsers()
+        const list = users.data || []
+        const usernameTaken = list.some(u => String(u.username).toLowerCase() === input.username.trim().toLowerCase())
+        if (usernameTaken) {
+            const error = new Error('username-taken')
+            error.code = 'username-taken'
+            throw error
+        }
+        const institutionTaken = list.some(u => String(u.institution).toLowerCase() === input.institution.trim().toLowerCase())
+        if (institutionTaken) {
+            const error = new Error('institution-taken')
+            error.code = 'institution-taken'
+            throw error
+        }
+        const admin = new User({
+            ...input,
+            institution: input.institution.trim(),
+            role: 'Triage Administrator',
+            unit: 'Triaje'
+        })
+        const created = await this.api.createUser({ ...admin })
+        return { ok: true, data: new User(created.data) }
+    }
+
+    /**
      * Sign in with username and password. On success opens a session
      * record and returns the signed-in user (without credentials).
      * @param {string} username

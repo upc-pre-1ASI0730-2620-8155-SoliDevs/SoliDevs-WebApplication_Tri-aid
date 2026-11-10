@@ -15,8 +15,8 @@ export class VitalSignsApi extends BaseApi {
 
     constructor() {
         super()
-        this.#episodesEndpoint = new BaseEndpoint(this, episodesPath)
-        this.#devicesEndpoint = new BaseEndpoint(this, devicesPath)
+        this.#episodesEndpoint = new BaseEndpoint(this, episodesPath, { tenantScoped: true })
+        this.#devicesEndpoint = new BaseEndpoint(this, devicesPath, { tenantScoped: true })
     }
 
     updateEpisodeVitals(id, resource) {

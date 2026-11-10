@@ -50,11 +50,13 @@ export const iamStore = reactive({
      * @returns {Promise<{ok: boolean}>}
      */
     async updateOwnProfile(input) {
-        // Merge over the stored record: an omitted password must not be
-        // wiped by the full-record PUT.
+        // PUT replaces the whole record: merge the editable fields over
+        // the stored one so username, institution, role, unit and shift
+        // survive the save.
         if (!input.password) delete input.password
-        await this.service.api.updateUser(this.user.id, input)
-        // Re-read the stored record so the in-memory user stays clean.
+        const stored = await this.service.api.getUserById(this.user.id)
+        const merged = { ...stored.data, ...input }
+        await this.service.api.updateUser(this.user.id, merged)
         const fresh = await this.service.api.getUserById(this.user.id)
         this.setUser(new User(fresh.data))
         return { ok: true, data: fresh.data }

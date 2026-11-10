@@ -38,7 +38,6 @@ export class SpecialtyRules {
       if (rule.words.some(w => text.includes(w))) return { ok: true, specialtyKey: rule.specialty, rule: 'symptom' }
     }
 
-    // No symptom match: the priority drives the destination.
     const l = levelByCode(level)
     if (l && (l.code === 'I' || l.code === 'II')) return { ok: true, specialtyKey: 'CirugiaGeneral', rule: 'priority' }
     return { ok: true, specialtyKey: 'MedicinaInterna', rule: 'priority' }

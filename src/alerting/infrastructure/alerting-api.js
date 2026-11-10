@@ -12,7 +12,7 @@ export class AlertingApi extends BaseApi {
 
     constructor() {
         super()
-        this.#alertsEndpoint = new BaseEndpoint(this, alertsEndpointPath)
+        this.#alertsEndpoint = new BaseEndpoint(this, alertsEndpointPath, { tenantScoped: true })
     }
 
     getAlerts() { return this.#alertsEndpoint.getAll() }

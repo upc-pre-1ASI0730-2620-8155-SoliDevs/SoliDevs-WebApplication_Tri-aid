@@ -9,7 +9,8 @@
       "overriddenBy": null,
       "justification": null,
       "suggestedAt": "2026-10-05T11:27:33.551Z",
-      "confirmedAt": "2026-10-05T11:27:36.371Z"
+      "confirmedAt": "2026-10-05T11:27:36.371Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 2,
@@ -20,7 +21,8 @@
       "overriddenBy": null,
       "justification": null,
       "suggestedAt": "2026-10-05T11:27:45.781Z",
-      "confirmedAt": "2026-10-05T11:27:48.620Z"
+      "confirmedAt": "2026-10-05T11:27:48.620Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 3,
@@ -31,7 +33,8 @@
       "overriddenBy": null,
       "justification": null,
       "suggestedAt": "2026-10-05T18:50:29.396Z",
-      "confirmedAt": "2026-10-05T18:50:33.361Z"
+      "confirmedAt": "2026-10-05T18:50:33.361Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 4,
@@ -42,7 +45,8 @@
       "overriddenBy": null,
       "justification": null,
       "suggestedAt": "2026-10-05T20:38:45.983Z",
-      "confirmedAt": "2026-10-05T20:38:54.455Z"
+      "confirmedAt": "2026-10-05T20:38:54.455Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 5,
@@ -53,7 +57,8 @@
       "overriddenBy": null,
       "justification": null,
       "suggestedAt": "2026-10-05T20:48:46.520Z",
-      "confirmedAt": "2026-10-05T20:48:48.580Z"
+      "confirmedAt": "2026-10-05T20:48:48.580Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 6,
@@ -64,7 +69,8 @@
       "overriddenBy": null,
       "justification": null,
       "suggestedAt": "2026-10-05T20:49:40.731Z",
-      "confirmedAt": "2026-10-05T20:49:42.484Z"
+      "confirmedAt": "2026-10-05T20:49:42.484Z",
+      "institution": "Hospital Central de Lima"
     }
   ],
   "referrals": [
@@ -77,7 +83,8 @@
       "state": "Referred",
       "changeReason": null,
       "referredAt": "2026-10-05T18:46:20.960Z",
-      "symptom": "EMERGENCIA — Frecuencia cardíaca 128 lpm"
+      "symptom": "EMERGENCIA — Frecuencia cardíaca 128 lpm",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 2,
@@ -88,7 +95,8 @@
       "state": "Referred",
       "changeReason": null,
       "referredAt": "2026-10-05T18:50:40.897Z",
-      "symptom": "CARD-001 — Dolor torácico"
+      "symptom": "CARD-001 — Dolor torácico",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 3,
@@ -99,7 +107,8 @@
       "state": "Referred",
       "changeReason": null,
       "referredAt": "2026-10-05T20:25:41.234Z",
-      "symptom": "RFF10 — Dolor abdominal agudo"
+      "symptom": "RFF10 — Dolor abdominal agudo",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 4,
@@ -110,7 +119,8 @@
       "state": "Referred",
       "changeReason": null,
       "referredAt": "2026-10-05T20:41:22.905Z",
-      "symptom": "RFF10 — Dolor abdominal agudo"
+      "symptom": "RFF10 — Dolor abdominal agudo",
+      "institution": "Hospital Central de Lima"
     }
   ],
   "vouchers": [
@@ -119,28 +129,32 @@
       "referralId": 1,
       "qrCode": "TRI-AID|EP-261005-0002|CirugiaGeneral|CG-1|#3",
       "channel": "QrPortal",
-      "sentAt": null
+      "sentAt": null,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 2,
       "referralId": 2,
       "qrCode": "TRI-AID|EP-261005-0003|Cardiologia|CA-2|#4",
       "channel": "QrPortal",
-      "sentAt": null
+      "sentAt": null,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 3,
       "referralId": 3,
       "qrCode": "TRI-AID|EP-261005-0001|CirugiaGeneral|CG-1|#4",
       "channel": "QrPortal",
-      "sentAt": null
+      "sentAt": null,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 4,
       "referralId": 4,
       "qrCode": "TRI-AID|EP-261005-0004|CirugiaGeneral|CG-1|#5",
       "channel": "QrPortal",
-      "sentAt": null
+      "sentAt": null,
+      "institution": "Hospital Central de Lima"
     }
   ],
   "specialties": [
@@ -229,7 +243,8 @@
       "sex": "F",
       "phone": "",
       "address": "",
-      "id": 1
+      "id": 1,
+      "institution": "Hospital Central de Lima"
     },
     {
       "sinDni": false,
@@ -241,7 +256,8 @@
       "sex": "F",
       "phone": "",
       "address": "",
-      "id": 2
+      "id": 2,
+      "institution": "Hospital Central de Lima"
     },
     {
       "sinDni": false,
@@ -253,7 +269,8 @@
       "sex": "M",
       "phone": "",
       "address": "",
-      "id": 3
+      "id": 3,
+      "institution": "Hospital Central de Lima"
     },
     {
       "sinDni": false,
@@ -265,7 +282,8 @@
       "sex": "F",
       "phone": "",
       "address": "",
-      "id": 4
+      "id": 4,
+      "institution": "Hospital Central de Lima"
     },
     {
       "sinDni": false,
@@ -277,7 +295,23 @@
       "sex": "F",
       "phone": "",
       "address": "",
-      "id": 5
+      "id": 5,
+      "institution": "Hospital Central de Lima"
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "70012345",
+      "names": "Juan",
+      "surnames": "Portal Test",
+      "birth": "1985-03-15",
+      "sex": "F",
+      "phone": "987654321",
+      "address": "Av Test 1",
+      "portalPassword": "TGY-2562",
+      "portalEmail": "",
+      "institution": "Hospital Central de Lima",
+      "id": 6
     }
   ],
   "episodes": [
@@ -313,7 +347,8 @@
       },
       "confirmed": true,
       "vitalsConfirmedAt": "2026-10-05T20:25:34.711Z",
-      "referred": true
+      "referred": true,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "EP-261005-0002",
@@ -347,7 +382,8 @@
       },
       "confirmed": true,
       "vitalsConfirmedAt": "2026-10-05T20:26:04.191Z",
-      "referred": true
+      "referred": true,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "EP-261005-0003",
@@ -384,7 +420,8 @@
       "classifiedLevel": "V_NonUrgent",
       "classifiedLevelCode": "V",
       "classifiedLevelColor": "#2563eb",
-      "referred": true
+      "referred": true,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "EP-261005-0004",
@@ -421,7 +458,8 @@
       "classifiedLevel": "III_Urgent",
       "classifiedLevelCode": "III",
       "classifiedLevelColor": "#ca8a04",
-      "referred": true
+      "referred": true,
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "EP-261005-0005",
@@ -468,7 +506,8 @@
       "vitalsConfirmedAt": "2026-10-05T20:48:46.080Z",
       "classifiedLevel": "I_Resuscitation",
       "classifiedLevelCode": "I",
-      "classifiedLevelColor": "#b42318"
+      "classifiedLevelColor": "#b42318",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "EP-261005-0006",
@@ -513,7 +552,16 @@
         }
       },
       "confirmed": true,
-      "vitalsConfirmedAt": "2026-10-06T13:47:22.134Z"
+      "vitalsConfirmedAt": "2026-10-06T13:47:22.134Z",
+      "institution": "Hospital Central de Lima"
+    },
+    {
+      "id": "EP-261029-0001",
+      "key": "70012345",
+      "arrival": "2026-10-29T17:32:10.153Z",
+      "vitals": {},
+      "confirmed": false,
+      "institution": "Hospital Central de Lima"
     }
   ],
   "devices": [
@@ -523,7 +571,8 @@
       "online": true,
       "lastUse": "15:38",
       "id": 4,
-      "linkedEpisode": "EP-261005-0005"
+      "linkedEpisode": "EP-261005-0005",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "pa",
@@ -531,7 +580,8 @@
       "online": true,
       "lastUse": "15:38",
       "id": 5,
-      "linkedEpisode": "EP-261005-0005"
+      "linkedEpisode": "EP-261005-0005",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "spo2",
@@ -539,7 +589,8 @@
       "online": true,
       "lastUse": "15:38",
       "id": 6,
-      "linkedEpisode": "EP-261005-0005"
+      "linkedEpisode": "EP-261005-0005",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "fc",
@@ -547,7 +598,8 @@
       "online": true,
       "lastUse": "",
       "id": 7,
-      "linkedEpisode": "EP-261005-0005"
+      "linkedEpisode": "EP-261005-0005",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "temp",
@@ -555,7 +607,8 @@
       "online": true,
       "lastUse": "",
       "id": 8,
-      "linkedEpisode": "EP-261005-0006"
+      "linkedEpisode": "EP-261005-0006",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "pa",
@@ -563,7 +616,8 @@
       "online": true,
       "lastUse": "",
       "id": 9,
-      "linkedEpisode": "EP-261005-0006"
+      "linkedEpisode": "EP-261005-0006",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "spo2",
@@ -571,7 +625,8 @@
       "online": true,
       "lastUse": "",
       "id": 10,
-      "linkedEpisode": "EP-261005-0006"
+      "linkedEpisode": "EP-261005-0006",
+      "institution": "Hospital Central de Lima"
     },
     {
       "type": "fc",
@@ -579,7 +634,8 @@
       "online": true,
       "lastUse": "15:38",
       "id": 11,
-      "linkedEpisode": "EP-261005-0006"
+      "linkedEpisode": "EP-261005-0006",
+      "institution": "Hospital Central de Lima"
     }
   ],
   "symptoms": [
@@ -695,7 +751,8 @@
       "acknowledgedAt": "2026-10-05T20:22:52.019Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T11:27:33.004Z"
+      "createdAt": "2026-10-05T11:27:33.004Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 2,
@@ -711,7 +768,8 @@
       "acknowledgedAt": "2026-10-05T20:23:13.146Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T11:27:33.004Z"
+      "createdAt": "2026-10-05T11:27:33.004Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 3,
@@ -727,7 +785,8 @@
       "acknowledgedAt": "2026-10-05T20:23:18.928Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T11:27:33.004Z"
+      "createdAt": "2026-10-05T11:27:33.004Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 4,
@@ -743,7 +802,8 @@
       "acknowledgedAt": "2026-10-05T20:22:48.246Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T11:27:36.377Z"
+      "createdAt": "2026-10-05T11:27:36.377Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": 5,
@@ -759,7 +819,8 @@
       "acknowledgedAt": "2026-10-05T20:23:43.197Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T11:27:45.269Z"
+      "createdAt": "2026-10-05T11:27:45.269Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "6",
@@ -775,7 +836,8 @@
       "acknowledgedAt": "2026-10-05T21:01:39.951Z",
       "escalatedAt": "2026-10-05T21:00:30.833Z",
       "escalatedTo": "Trauma Shock",
-      "createdAt": "2026-10-05T20:28:16.787Z"
+      "createdAt": "2026-10-05T20:28:16.787Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "7",
@@ -791,7 +853,8 @@
       "acknowledgedAt": "2026-10-05T20:28:31.356Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T20:28:16.787Z"
+      "createdAt": "2026-10-05T20:28:16.787Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "8",
@@ -807,7 +870,8 @@
       "acknowledgedAt": "2026-10-05T20:28:27.940Z",
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T20:28:16.787Z"
+      "createdAt": "2026-10-05T20:28:16.787Z",
+      "institution": "Hospital Central de Lima"
     },
     {
       "id": "G4nG9aH",
@@ -823,49 +887,50 @@
       "acknowledgedAt": null,
       "escalatedAt": null,
       "escalatedTo": null,
-      "createdAt": "2026-10-05T20:48:48.611Z"
+      "createdAt": "2026-10-05T20:48:48.611Z",
+      "institution": "Hospital Central de Lima"
     }
   ],
   "plans": [
     {
       "id": "plan-esencial",
       "name": "Esencial",
-      "monthlyPrice": 49,
-      "annualPrice": 470,
+      "for": "Para clínicas pequeñas y proyectos piloto",
+      "monthlyPrice": 79,
+      "annualPrice": 756,
       "maxUsers": 5,
       "features": [
-        "Hasta 5 usuarios",
-        "Triaje y signos vitales",
-        "Reportes básicos",
-        "Soporte por correo"
+        "Hasta 5 usuarios de triaje",
+        "Captura automática de signos vitales",
+        "Alertas de valores fuera de rango en tiempo real",
+        "Portal del paciente incluido"
+      ]
+    },
+    {
+      "id": "plan-profesional",
+      "name": "Profesional",
+      "for": "Para hospitales con múltiples puntos de atención",
+      "monthlyPrice": 119,
+      "annualPrice": 1138,
+      "maxUsers": 0,
+      "features": [
+        "Usuarios de triaje ilimitados",
+        "Clasificación asistida NT-158 + analíticas",
+        "Derivación multi-especialidad",
+        "Soporte prioritario"
       ]
     },
     {
       "id": "plan-institucional",
       "name": "Institucional",
-      "monthlyPrice": 129,
-      "annualPrice": 1238,
-      "maxUsers": 25,
-      "features": [
-        "Hasta 25 usuarios",
-        "Alertas y escalamiento",
-        "Derivación entre especialidades",
-        "Reportes auditables",
-        "Soporte prioritario"
-      ]
-    },
-    {
-      "id": "plan-red",
-      "name": "Red Hospitalaria",
-      "monthlyPrice": 299,
-      "annualPrice": 2870,
+      "for": "Para redes de salud y proyectos smart-city",
+      "monthlyPrice": 249,
+      "annualPrice": 2390,
       "maxUsers": 100,
       "features": [
-        "Hasta 100 usuarios",
-        "Multi-sede",
-        "Integración con dispositivos",
-        "Reportes ejecutivos",
-        "Gestor de cuenta dedicado"
+        "Gestión multi-sede",
+        "Integración por API con sistemas hospitalarios",
+        "SLA + onboarding dedicado"
       ]
     }
   ],
@@ -875,9 +940,11 @@
       "institution": "Hospital Central de Lima",
       "planId": "plan-institucional",
       "billingCycle": "monthly",
-      "status": "pending",
+      "status": "active",
+      "trialEndsAt": null,
+      "paymentMethod": "",
       "startedAt": "2026-08-01T09:00:00.000Z",
-      "renewalDate": "2026-09-25",
+      "renewalDate": "2026-10-25",
       "graceDays": 7,
       "payments": [
         {
@@ -895,6 +962,36 @@
           "paidAt": "2026-09-01T08:40:00.000Z",
           "status": "rejected",
           "method": "Visa •••• 4242"
+        },
+        {
+          "id": "pay-1793289954404",
+          "amount": 129,
+          "currency": "PEN",
+          "status": "paid",
+          "method": "Visa •••• 4242",
+          "paidAt": "2026-10-29T16:05:54.404Z"
+        }
+      ]
+    },
+    {
+      "id": "WSNJi7b",
+      "institution": "Amongus",
+      "planId": "plan-profesional",
+      "billingCycle": "monthly",
+      "status": "active",
+      "trialEndsAt": "2026-11-12T15:46:17.176Z",
+      "paymentMethod": "Visa •••• 3333",
+      "startedAt": "2026-10-29T15:46:17.176Z",
+      "renewalDate": null,
+      "graceDays": 7,
+      "payments": [
+        {
+          "id": "pay-1793288855979",
+          "amount": 0,
+          "currency": "PEN",
+          "status": "paid",
+          "method": "Visa •••• 4242",
+          "paidAt": "2026-10-29T15:47:35.979Z"
         }
       ]
     }
@@ -935,7 +1032,158 @@
       "shift": "Evening",
       "institution": "Hospital Central de Lima",
       "email": "carlos.martinez@hcentral.pe"
+    },
+    {
+      "id": 4,
+      "username": "enfermero.hernan",
+      "password": "triaid123",
+      "names": "Hernan",
+      "surnames": "Huayta",
+      "role": "Triage Nurse",
+      "unit": "Emergencia",
+      "shift": "Noche",
+      "institution": "Hospital Central de Lima",
+      "email": "hernan@hcentral.pe"
     }
   ],
-  "sessions": []
+  "sessions": [
+    {
+      "userId": 4,
+      "username": "bodmetan",
+      "openedAt": "2026-10-29T15:46:17.168Z",
+      "id": 1
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:05:51.112Z",
+      "id": 2
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:06:20.061Z",
+      "id": 4
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:07:35.890Z",
+      "id": 7
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:08:13.173Z",
+      "id": 9
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:09:01.005Z",
+      "id": 12
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:12:58.630Z",
+      "id": 13
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:13:48.144Z",
+      "id": 14
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:14:40.058Z",
+      "id": 15
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:15:38.340Z",
+      "id": 16
+    },
+    {
+      "userId": 4,
+      "username": "enfermero.hernan",
+      "openedAt": "2026-10-29T16:22:58.790Z",
+      "id": 17
+    },
+    {
+      "userId": 4,
+      "username": "enfermero.hernan",
+      "openedAt": "2026-10-29T16:23:24.387Z",
+      "id": 18
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:25:34.221Z",
+      "id": 19
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:26:00.104Z",
+      "id": 20
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:26:48.485Z",
+      "id": 21
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:27:43.566Z",
+      "id": 22
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:28:39.564Z",
+      "id": 23
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:30:11.643Z",
+      "id": 24
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:30:43.793Z",
+      "id": 25
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:32:07.239Z",
+      "id": 26
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:32:32.256Z",
+      "id": 27
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:33:48.935Z",
+      "id": 28
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-11-03T21:24:59.662Z",
+      "id": 29
+    }
+  ]
 }
