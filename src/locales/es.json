@@ -548,5 +548,6 @@
   "plan.plan-institucional.f3": "SLA + onboarding dedicado",
   "register.sumPlan": "Plan",
   "register.sumToday": "Total a pagar hoy",
-  "register.toastWelcome": "¡Cuenta creada! Tu prueba de 14 días está activa."
+  "register.toastWelcome": "¡Cuenta creada! Tu prueba de 14 días está activa.",
+  "plan.institutional.price": "A medida"
 }
