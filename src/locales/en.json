@@ -549,5 +549,12 @@
   "register.sumPlan": "Plan",
   "register.sumToday": "Total due today",
   "register.toastWelcome": "Account created! Your 14-day trial is active.",
-  "plan.institutional.price": "Custom"
+  "plan.institutional.price": "Custom",
+  "rg.email": "Email",
+  "rg.optional": "(optional)",
+  "pf.portal.title": "Patient portal access",
+  "pf.portal.sub": "Temporary credentials for the patient to check their status from the portal.",
+  "pf.portal.user": "User",
+  "pf.portal.pass": "Temporary password",
+  "pf.portal.note": "Hand it to the patient: it works for their first sign-in (user: DNI or email) and can be replaced from the portal."
 }

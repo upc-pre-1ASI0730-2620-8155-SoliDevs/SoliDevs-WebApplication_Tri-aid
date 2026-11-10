@@ -7,7 +7,7 @@ import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const router = useRouter()
-const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '' })
+const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '', email: '' })
 const f = reactive(blank())
 const err = reactive({})
 const today = new Date().toISOString().slice(0, 10)
@@ -146,6 +146,8 @@ function reset() {
         <div class="rg-f rg-wide">
           <label class="ta-label" for="address">{{ t('rg.address') }}</label>
           <input id="address" class="ta-input" v-model="f.address" @keyup.enter="submit" />
+          <div class="field"><label for="email">{{ t('rg.email') }} <small class="opt">{{ t('rg.optional') }}</small></label>
+            <input id="email" type="email" class="ta-input" v-model="f.email" @keyup.enter="submit" /></div>
         </div>
       </div>
 
@@ -200,4 +202,5 @@ function reset() {
   .rg-clearbtn span{display:none}
 }
 @media(max-width:760px){.rg-grid{grid-template-columns:1fr}}
+.opt{font-weight:400;opacity:.6;text-transform:none}
 </style>

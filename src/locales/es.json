@@ -549,5 +549,12 @@
   "register.sumPlan": "Plan",
   "register.sumToday": "Total a pagar hoy",
   "register.toastWelcome": "¡Cuenta creada! Tu prueba de 14 días está activa.",
-  "plan.institutional.price": "A medida"
+  "plan.institutional.price": "A medida",
+  "rg.email": "Correo electrónico",
+  "rg.optional": "(opcional)",
+  "pf.portal.title": "Acceso al portal del paciente",
+  "pf.portal.sub": "Credenciales temporales para que el paciente consulte su estado desde el portal.",
+  "pf.portal.user": "Usuario",
+  "pf.portal.pass": "Contraseña temporal",
+  "pf.portal.note": "Entréguela al paciente: le servirá para su primer ingreso (usuario: DNI o correo) y podrá reemplazarla desde el portal."
 }

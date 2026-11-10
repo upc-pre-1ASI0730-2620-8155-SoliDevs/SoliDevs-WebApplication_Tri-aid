@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import { session } from '../../shared/application/demo-session.js'
 import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
 
 /**
@@ -17,6 +18,18 @@ const epResource = ep => {
 }
 
 const pad = n => String(n).padStart(2, '0')
+
+// Readable temporary portal password for the patient (no 0/O/1/I to
+// avoid dictation mistakes); the patient replaces it from the portal.
+const TMP_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ'
+const TMP_DIGITS = '23456789'
+const randomFrom = alphabet => alphabet[Math.floor(Math.random() * alphabet.length)]
+export function generateTemporaryPassword() {
+    const letters = Array.from({ length: 3 }, () => randomFrom(TMP_ALPHABET)).join('')
+    const digits = Array.from({ length: 4 }, () => randomFrom(TMP_DIGITS)).join('')
+    return `${letters}-${digits}`
+}
+
 
 export const fmtTime = iso => { const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}` }
 export const fmtDateTime = iso => { const d = new Date(iso); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${fmtTime(iso)}` }
@@ -38,7 +51,7 @@ export function ageOf(birth) {
  *   birth, sex, phone, address, sinDni?, docType? }).
  * @returns {Object} The created episode.
  */
-export function registerEpisode(data) {
+export async function registerEpisode(data) {
   const now = new Date()
   const patient = { ...data }
   const i = data.dni ? store.patients.findIndex(p => p.dni === data.dni) : -1
@@ -46,6 +59,10 @@ export function registerEpisode(data) {
     store.patients[i] = { ...store.patients[i], ...patient }
     api.updatePatient(store.patients[i].id ?? store.patients[i].dni, plain(store.patients[i])).catch(console.error)
   } else {
+    // Temporary portal credentials: patient logs in with DNI (or email)
+    // plus this password, and can replace it from the portal.
+    patient.portalPassword = generateTemporaryPassword()
+    patient.portalEmail = data.email || ''
     store.patients.push(patient)
     api.createPatient(plain(patient)).then(r => {
       const j = store.patients.findIndex(x => x.dni === patient.dni)
@@ -55,12 +72,25 @@ export function registerEpisode(data) {
 
   store.seq++
   const prefix = `EP-${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
-  const todays = store.episodes.filter(e => String(e.id || '').startsWith(prefix))
-  const next = todays.reduce((mx, e) => Math.max(mx, parseInt(String(e.id).split('-')[2]) || 0), 0) + 1
-  const id = `${prefix}-${String(next).padStart(4, '0')}`
-  const ep = { id, key: data.dni || `temp-${store.seq}`, patient, arrival: now.toISOString(), vitals: {}, confirmed: false }
+  // Episode ids are global primary keys while the visible store is
+  // tenant-filtered: another institution may already hold today's
+  // sequence, so the create retries on id collision.
+  let id = null
+  let ep = null
+  for (let attempt = 1; attempt <= 10; attempt++) {
+    const todays = store.episodes.filter(e => String(e.id || '').startsWith(prefix))
+    const next = todays.reduce((mx, e) => Math.max(mx, parseInt(String(e.id).split('-')[2]) || 0), 0) + 1
+    id = `${prefix}-${String(next).padStart(4, '0')}`
+    ep = { id, key: data.dni || `temp-${store.seq}`, patient, arrival: now.toISOString(), vitals: {}, confirmed: false }
+    try {
+      await api.createEpisode(epResource(ep))
+      break
+    } catch (e) {
+      if (attempt === 10) { console.error('Could not persist episode:', e); return ep }
+      store.episodes.push({ id, institution: session.institution })
+    }
+  }
   store.episodes.push(ep)
-  api.createEpisode(epResource(ep)).catch(console.error)
   return ep
 }
 

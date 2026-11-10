@@ -297,6 +297,21 @@
       "address": "",
       "id": 5,
       "institution": "Hospital Central de Lima"
+    },
+    {
+      "sinDni": false,
+      "docType": "dni",
+      "dni": "70012345",
+      "names": "Juan",
+      "surnames": "Portal Test",
+      "birth": "1985-03-15",
+      "sex": "F",
+      "phone": "987654321",
+      "address": "Av Test 1",
+      "portalPassword": "TGY-2562",
+      "portalEmail": "",
+      "institution": "Hospital Central de Lima",
+      "id": 6
     }
   ],
   "episodes": [
@@ -542,11 +557,11 @@
     },
     {
       "id": "EP-261029-0001",
-      "key": "87654321",
-      "arrival": "2026-10-29T16:08:36.381Z",
+      "key": "70012345",
+      "arrival": "2026-10-29T17:32:10.153Z",
       "vitals": {},
       "confirmed": false,
-      "institution": "Policlinico Nueva Vida"
+      "institution": "Hospital Central de Lima"
     }
   ],
   "devices": [
@@ -1103,6 +1118,66 @@
       "username": "enfermero.hernan",
       "openedAt": "2026-10-29T16:23:24.387Z",
       "id": 18
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:25:34.221Z",
+      "id": 19
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:26:00.104Z",
+      "id": 20
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:26:48.485Z",
+      "id": 21
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:27:43.566Z",
+      "id": 22
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:28:39.564Z",
+      "id": 23
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:30:11.643Z",
+      "id": 24
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:30:43.793Z",
+      "id": 25
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:32:07.239Z",
+      "id": 26
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:32:32.256Z",
+      "id": 27
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T17:33:48.935Z",
+      "id": 28
     }
   ]
 }
