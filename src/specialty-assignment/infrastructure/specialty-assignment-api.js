@@ -18,9 +18,9 @@ export class SpecialtyAssignmentApi extends BaseApi {
 
     constructor() {
         super()
-        this.#referralsEndpoint = new BaseEndpoint(this, referralsEndpointPath)
+        this.#referralsEndpoint = new BaseEndpoint(this, referralsEndpointPath, { tenantScoped: true })
         this.#specialtiesEndpoint = new BaseEndpoint(this, specialtiesEndpointPath)
-        this.#vouchersEndpoint = new BaseEndpoint(this, vouchersEndpointPath)
+        this.#vouchersEndpoint = new BaseEndpoint(this, vouchersEndpointPath, { tenantScoped: true })
         this.#symptomsEndpoint = new BaseEndpoint(this, symptomsEndpointPath)
     }
 

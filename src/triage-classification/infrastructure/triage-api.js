@@ -12,7 +12,7 @@ export class TriageApi extends BaseApi {
 
     constructor() {
         super()
-        this.#classificationsEndpoint = new BaseEndpoint(this, classificationsEndpointPath)
+        this.#classificationsEndpoint = new BaseEndpoint(this, classificationsEndpointPath, { tenantScoped: true })
     }
 
     getClassifications() {
