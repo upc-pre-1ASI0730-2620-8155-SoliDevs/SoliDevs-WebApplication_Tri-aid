@@ -47,7 +47,7 @@ function toggleOnline(d) {
 
 <template>
   <div class="ta-page fi">
-    <!-- Encabezado del Módulo de Dispositivos -->
+    <!-- Devices module header -->
     <section class="ta-card fi-in" style="--d:0">
       <h3 class="ta-h">{{ t('nav.devices') }}</h3>
       <p class="ta-sub">{{ t('devices.sub') }}</p>

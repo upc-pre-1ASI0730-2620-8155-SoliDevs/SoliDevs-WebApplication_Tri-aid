@@ -25,7 +25,7 @@ const features = computed(() => [
   { icon: 'mail', title: t('register.ft3.t'), text: t('register.ft3.d') }
 ])
 
-// ── Paso 1: institucion y administrador ──
+// ── Step 1: institution and administrator ──
 const form = ref({ institution: '', names: '', surnames: '', email: '', username: '', password: '', confirm: '' })
 const touched = ref({})
 const showPass = ref(false)
@@ -46,15 +46,15 @@ const institutionTaken = ref(false)
 const instChecking = ref(false)
 const step1Valid = computed(() => Object.keys(rules).every(k => fieldError(k) === true) && !institutionTaken.value)
 
-// ── Paso 2: plan y ciclo ──
+// ── Step 2: plan and cycle ──
 const slug = computed(() => {
   const s = String(route.query.plan || '')
   return ['esencial', 'profesional', 'red'].includes(s) ? s : null
 })
 const selectedPlanId = ref(null)
 const cycle = ref('monthly')
-// Los planes vienen del backend en un idioma fijo; la capa de
-// presentacion los traduce via i18n con fallback al dato crudo.
+// Plans come from the backend in a fixed language; the presentation
+// layer translates them via i18n with fallback to the raw value.
 function planName(p) { const v = t(`plan.${p.id}.name`); return v === `plan.${p.id}.name` ? p.name : v }
 function planFor(p) { const v = t(`plan.${p.id}.for`); return v === `plan.${p.id}.for` ? (p.for || p.description || '') : v }
 function planFeat(p, i) { const v = t(`plan.${p.id}.f${i + 1}`); return v === `plan.${p.id}.f${i + 1}` ? f0(p, i) : v }
@@ -87,7 +87,7 @@ function firstChargeDate() {
   return d.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
-// ── Paso 3: tarjeta ──
+// ── Step 3: card ──
 const cardNumber = ref('')
 const cardHolder = ref('')
 const simulateReject = ref(false)
@@ -141,7 +141,6 @@ function next1() {
 function next2() { if (step2Valid.value) goTo(3) }
 
 onMounted(async () => {
-  // Los planes se cargan temprano: el paso 2 necesita precios y el slug del landing.
   await subscriptionStore.load()
   if (chosenPlan.value) selectedPlanId.value = chosenPlan.value.id
   if (reduce() || !card.value) return
@@ -154,7 +153,6 @@ async function submit() {
   busy.value = true
   error.value = ''
   try {
-    // 1. Institucion + cuenta administradora (IAM).
     const created = await iamStore.service.registerInstitution({
       institution: form.value.institution,
       names: form.value.names,
@@ -164,7 +162,6 @@ async function submit() {
       password: form.value.password
     })
     iamStore.setUser(created.data)
-    // 2. Sesion abierta + trial con tarjeta registrada (Subscription).
     await iamStore.service.signIn(form.value.username.trim(), form.value.password)
     await subscriptionStore.service.startTrial(created.data.institution, chosenPlan.value.id, cardMasked.value)
     await subscriptionStore.load({ force: true })

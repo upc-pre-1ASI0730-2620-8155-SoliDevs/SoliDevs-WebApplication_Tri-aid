@@ -141,7 +141,6 @@ onMounted(async () => {
     level.value = l ? { ...l, name: t('triage.level.' + l.code + '.name') } : null
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
   }
-  // if the episode was already referred, restore its context
   const existing = await service.findByEpisode(id)
   if (existing) {
     referral.value = existing

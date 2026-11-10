@@ -18,7 +18,6 @@ export class BaseEndpoint {
     constructor(baseApi, endpointPath, { tenantScoped = false } = {}) {
         this.http = baseApi.http
         this.endpointPath = endpointPath
-        // RTDB REST requires a .json suffix; json-server does not.
         this.suffix = baseApi.isRtdb ? '.json' : ''
         this.tenantScoped = tenantScoped
     }

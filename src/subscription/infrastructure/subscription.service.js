@@ -78,7 +78,6 @@ export class SubscriptionService {
             : 0
         sub.addPayment({ amount, status: 'paid', method: sub.paymentMethod })
         sub.status = 'active'
-        // El primer ciclo arranca el dia que termina la prueba.
         const renewal = new Date(`${sub.trialEndDate}T12:00:00`)
         if (sub.billingCycle === 'annual') renewal.setFullYear(renewal.getFullYear() + 1)
         else renewal.setMonth(renewal.getMonth() + 1)
@@ -135,7 +134,6 @@ export class SubscriptionService {
         sub.addPayment({ amount, status: simulateReject ? 'rejected' : 'paid', method: method || 'Visa •••• 4242' })
         if (!simulateReject) {
             sub.status = 'active'
-            // El reintento regulariza el ciclo vencido: la renovacion avanza.
             sub.renewalDate = sub.nextRenewalDate
         }
         const response = await this.api.updateSubscription(sub.id, { ...sub })

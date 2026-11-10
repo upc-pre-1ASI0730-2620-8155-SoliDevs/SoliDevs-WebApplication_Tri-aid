@@ -53,9 +53,7 @@ onMounted(async () => {
 
 const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated').length);
 
-// Lógica combinada: Filtra primero, ordena después
 const displayAlerts = computed(() => {
-  // 1. Filtrado dinámico
   let filtered = activeAlerts.value;
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
@@ -67,7 +65,6 @@ const displayAlerts = computed(() => {
   if (auditFrom.value) filtered = filtered.filter(a => localDay(a) >= auditFrom.value);
   if (auditTo.value) filtered = filtered.filter(a => localDay(a) <= auditTo.value);
 
-  // 2. Orden cronológico dentro de la severidad, severidades agrupadas al frente
   return [...filtered].sort((a, b) => {
     const group = { critical: 0, warning: 1, escalated: 2, resolved: 3 };
     if (group[a.severity] !== group[b.severity]) return group[a.severity] - group[b.severity];
@@ -95,7 +92,6 @@ const confirmEscalate = async () => {
   pendingEsc.value = null;
   if (!alert) return;
   try {
-    // Direct emergency referral to the Trauma Shock critical care room
     const specs = await specialtyService.getSpecialties();
     const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
     if (trauma) {
@@ -107,7 +103,6 @@ const confirmEscalate = async () => {
       const ep = findEpisode(alert.episode);
       if (ep) { ep.referred = true; saveEpisode(ep); }
     }
-    // Seal this alert as escalated and close the remaining ones
     const up = await alertingService.escalateAlert(alert.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
       const i = activeAlerts.value.findIndex(a => String(a.id) === String(alert.id));
@@ -125,11 +120,9 @@ const confirmAcknowledge = async () => {
   const id = pendingId.value;
   pendingId.value = null;
 
-  // 1) Celebrar primero, con la tarjeta en su posicion actual
   doneId.value = id;
   await new Promise(r => setTimeout(r, 1500));
 
-  // 2) Recien entonces actualizar el estado (la tarjeta se mueve/desaparece)
   const r = await alertingService.acknowledgeAlert(id, session.name || null);
   if (r.ok) {
     const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
@@ -354,7 +347,7 @@ const onDoneEnter = (el, done) => {
 .al-enter-from,.al-leave-to{opacity:0;transform:translateY(8px)}
 .al-move{transition:transform .3s ease}
 
-/* --- Animación de confirmación (GSAP) --- */
+/* --- Confirmation animation (GSAP) --- */
 .al-done{position:absolute;inset:-1px;z-index:2;border-radius:inherit;display:grid;align-content:center;justify-items:center;gap:8px;color:#fff;background:radial-gradient(120% 170% at 50% 0%,var(--ta-brand),var(--ta-ink));clip-path:circle(0% at 14% 88%)}
 .al-done__svg{width:72px;height:72px;overflow:visible}
 .al-done__disc{fill:#fff}

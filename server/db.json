@@ -1020,15 +1020,15 @@
     },
     {
       "id": 4,
-      "username": "bodmetan",
-      "password": "minecraft",
+      "username": "enfermero.hernan",
+      "password": "triaid123",
       "names": "Hernan",
-      "surnames": "asd",
-      "email": "bodmetan@gmail.com",
-      "role": "Triage Administrator",
-      "unit": "Triaje",
-      "shift": "",
-      "institution": "Amongus"
+      "surnames": "Huayta",
+      "role": "Triage Nurse",
+      "unit": "Emergencia",
+      "shift": "Noche",
+      "institution": "Hospital Central de Lima",
+      "email": "hernan@hcentral.pe"
     }
   ],
   "sessions": [
@@ -1067,6 +1067,42 @@
       "username": "admin",
       "openedAt": "2026-10-29T16:09:01.005Z",
       "id": 12
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:12:58.630Z",
+      "id": 13
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:13:48.144Z",
+      "id": 14
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:14:40.058Z",
+      "id": 15
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-10-29T16:15:38.340Z",
+      "id": 16
+    },
+    {
+      "userId": 4,
+      "username": "enfermero.hernan",
+      "openedAt": "2026-10-29T16:22:58.790Z",
+      "id": 17
+    },
+    {
+      "userId": 4,
+      "username": "enfermero.hernan",
+      "openedAt": "2026-10-29T16:23:24.387Z",
+      "id": 18
     }
   ]
 }

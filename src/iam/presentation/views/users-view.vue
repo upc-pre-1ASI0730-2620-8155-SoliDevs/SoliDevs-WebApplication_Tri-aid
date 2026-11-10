@@ -20,7 +20,7 @@ const errors = ref({})
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-// Limite de cuentas del plan contratado (maxUsers; 0 = ilimitado).
+// Seat limit of the contracted plan (maxUsers; 0 = unlimited).
 const seats = computed(() => subscriptionStore.seatInfo(users.value.length))
 const seatsLabel = computed(() =>
     seats.value.unlimited ? t('um.seatsUnlimited') : `${users.value.length} / ${seats.value.limit}`)
@@ -69,7 +69,6 @@ async function load() {
 }
 
 function startCreate() {
-    // El plan contratado acota cuantas cuentas puede crear la institucion.
     if (seats.value.atLimit) {
         notify({ type: 'error', title: t('um.limitReachedTitle'), detail: t('um.limitReached', { limit: seats.value.limit }) })
         return
@@ -93,7 +92,6 @@ function cancel() {
 
 async function submit() {
     if (!validate()) return
-    // Username must stay unique within the platform (case-insensitive).
     const name = String(form.value.username || '').trim().toLowerCase()
     const taken = users.value.some(u =>
         String(u.id) !== String(editing.value) &&
@@ -144,7 +142,6 @@ onMounted(async () => {
     await load()
     await nextTick()
     if (reduce() || !pageGrid.value) return
-    // Staggered card entrance, same language as the other modules.
     gsap.fromTo(pageGrid.value.querySelectorAll('.um-in'),
         { opacity: 0, y: 16 },
         { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: 'power3.out', clearProps: 'all' })

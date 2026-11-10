@@ -6,7 +6,7 @@ const router = createRouter({
   routes
 })
 
-// Acceso: sesion (IAM) + estado de suscripcion (Subscription).
+// Access control: session (IAM) + subscription state (Subscription).
 installGuard(router)
 
 export default router

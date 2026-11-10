@@ -38,7 +38,7 @@ const rows = computed(() => [
 ])
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 
-/* ---------- Pestañas ---------- */
+/* ---------- Tabs ---------- */
 const tab = ref('vitals')
 const tabsDef = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },

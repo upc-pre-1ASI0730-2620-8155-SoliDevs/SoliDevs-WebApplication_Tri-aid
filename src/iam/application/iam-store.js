@@ -57,7 +57,6 @@ export const iamStore = reactive({
         const stored = await this.service.api.getUserById(this.user.id)
         const merged = { ...stored.data, ...input }
         await this.service.api.updateUser(this.user.id, merged)
-        // Re-read the stored record so the in-memory user stays clean.
         const fresh = await this.service.api.getUserById(this.user.id)
         this.setUser(new User(fresh.data))
         return { ok: true, data: fresh.data }

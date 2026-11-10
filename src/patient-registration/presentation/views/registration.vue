@@ -101,7 +101,7 @@ function reset() {
             <button type="button" role="tab" :aria-selected="f.docType === dt.key" :class="{ on: f.docType === dt.key }" :disabled="f.sinDni" :title="t('doc.' + dt.key + '.full')" @click="pick(dt.key)">{{ t('doc.' + dt.key + '.label') }}</button>
           </template>
         </div>
-        <!-- Móvil: selector desplegable nativo -->
+        <!-- Mobile: native dropdown selector -->
         <select class="ta-select rg-seg--mobile" :aria-label="t('rg.docType')" :disabled="f.sinDni" :value="f.docType" @change="pick($event.target.value)">
           <option v-for="dt in docTypes" :key="dt.key" :value="dt.key">{{ t('doc.' + dt.key + '.full') }}</option>
         </select>
@@ -193,7 +193,7 @@ function reset() {
 .rg-titlebox .ta-sub{margin-bottom:0}
 .rg-clearbtn{flex:none}
 
-/* Móvil: volver arriba (solo icono), limpiar arriba derecha, registrar abajo */
+/* Mobile: scroll-to-top (icon only), clear top right, register bottom */
 @media(max-width:760px){
   .rg-head{flex-wrap:wrap;gap:10px}
   .rg-titlebox{flex:1 1 calc(100% - 100px)}

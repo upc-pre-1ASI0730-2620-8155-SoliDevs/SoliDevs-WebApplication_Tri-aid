@@ -25,7 +25,6 @@ export const subscriptionStore = reactive({
                 this.service.getSubscription(session.institution)
             ])
             this.plans = plans.data
-            // Cobro automatico del fin de trial (trial con tarjeta).
             if (subscription.data) {
                 const settled = await this.service.autoChargeTrialEnd(subscription.data)
                 this.subscription = settled.data

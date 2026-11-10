@@ -17,8 +17,8 @@ const busy = ref(false)
 const cycle = ref('monthly')
 const plansGrid = ref(null)
 
-// Transicion de precios al alternar mensual/anual: los valores salen hacia
-// arriba y entran los nuevos con un pequeño stagger por tarjeta.
+// Price transition when switching monthly/annual: old values slide up
+// and the new ones enter with a small stagger per card.
 watch(cycle, async () => {
     await nextTick()
     const cards = plansGrid.value?.querySelectorAll('.sub-plan__price')
@@ -79,7 +79,6 @@ function openCheckout(plan) {
     checkout.value = { plan: new Plan(plan) }
     simulateReject.value = false
     lastOperation.value = null
-    // Entrada: el fondo se oscurece y la tarjeta sube con un rebote suave.
     nextTick(() => {
         const { bd, card } = modalEls()
         if (!bd || !card) return
@@ -103,7 +102,6 @@ function closeCheckout() {
     closing.value = true
     const { bd, card } = modalEls()
     if (!card || !bd) { checkout.value = null; closing.value = false; cardNumber.value = ''; return }
-    // Salida: la tarjeta cae y el fondo se aclara antes de desmontar.
     gsap.to(card, { y: 20, scale: 0.96, opacity: 0, duration: 0.22, ease: 'power2.in' })
     gsap.to(bd, {
         opacity: 0, duration: 0.25, ease: 'power2.in',
@@ -140,7 +138,6 @@ async function run(action) {
         lastOperation.value = result.rejected ? 'rejected' : 'confirmed'
         notify({ type: result.rejected ? 'error' : 'success',
                  title: t(result.rejected ? 'subscription.toastRejected' : 'subscription.toastConfirmed') })
-        // Animar el veredicto del gateway antes de cerrar el modal.
         if (result.rejected) animateReject(); else animateSuccess()
         await new Promise(r => setTimeout(r, 750))
         closeCheckout()
