@@ -1178,6 +1178,12 @@
       "username": "admin",
       "openedAt": "2026-10-29T17:33:48.935Z",
       "id": 28
+    },
+    {
+      "userId": 1,
+      "username": "admin",
+      "openedAt": "2026-11-03T21:24:59.662Z",
+      "id": 29
     }
   ]
 }

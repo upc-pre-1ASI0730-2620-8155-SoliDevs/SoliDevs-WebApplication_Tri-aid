@@ -14,7 +14,7 @@ const router = useRouter()
 
 const card = ref(null)
 const stepPane = ref(null)
-const step = ref(1) // 1 cuenta · 2 plan · 3 tarjeta
+const step = ref(1) // 1 plan · 2 cuenta · 3 tarjeta
 const busy = ref(false)
 const error = ref('')
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -134,11 +134,11 @@ function goTo(n) {
   error.value = ''
   nextTick(() => animateStep(n))
 }
-function next1() {
+function nextPlan() { if (step2Valid.value) goTo(2) }
+function nextAccount() {
   touched.value = Object.fromEntries(Object.keys(rules).map(k => [k, true]))
-  if (step1Valid.value) goTo(2)
+  if (step1Valid.value) goTo(3)
 }
-function next2() { if (step2Valid.value) goTo(3) }
 
 onMounted(async () => {
   await subscriptionStore.load()
@@ -197,8 +197,8 @@ function animateReject() {
 
       <!-- Progreso -->
       <ol class="rg__steps">
-        <li :class="{ on: step >= 1 }"><span>1</span>{{ t('register.stepAccount') }}</li>
-        <li :class="{ on: step >= 2 }"><span>2</span>{{ t('register.stepPlan') }}</li>
+        <li :class="{ on: step >= 1 }"><span>1</span>{{ t('register.stepPlan') }}</li>
+        <li :class="{ on: step >= 2 }"><span>2</span>{{ t('register.stepAccount') }}</li>
         <li :class="{ on: step >= 3 }"><span>3</span>{{ t('register.stepCard') }}</li>
       </ol>
 
@@ -206,7 +206,39 @@ function animateReject() {
 
       <div ref="stepPane">
         <!-- ═══ PASO 1: cuenta ═══ -->
-        <form v-if="step === 1" @submit.prevent="next1" novalidate>
+          <!-- Plan (step 1) -->
+        <form v-if="step === 1" @submit.prevent="nextPlan" novalidate>
+          <div class="rg__cycle">
+            <button type="button" :class="{ on: cycle === 'monthly' }" @click="cycle = 'monthly'">{{ t('subscription.cycle_monthly') }}</button>
+            <button type="button" :class="{ on: cycle === 'annual' }" @click="cycle = 'annual'">
+              {{ t('subscription.cycle_annual') }} <em v-if="chosenPlan?.annualDiscount">−{{ chosenPlan.annualDiscount }}%</em>
+            </button>
+          </div>
+
+          <div class="rg__plans">
+            <button v-for="p in subscriptionStore.plans" :key="p.id" type="button"
+                    class="rg__plan" :class="{ sel: chosenPlan?.id === p.id }" @click="selectedPlanId = p.id">
+              <span v-if="chosenPlan?.id === p.id" class="rg__plan__tag">{{ t('register.selected') }}</span>
+              <b class="rg__plan__name">{{ planName(p) }}</b>
+              <span class="rg__plan__for">{{ planFor(p) }}</span>
+              <span class="rg__plan__price">
+                {{ p.priceFor(cycle) === 0 ? t('plan.institutional.price') : `S/ ${p.priceFor(cycle)}` }}<small>/{{ t(cycle === 'annual' ? 'subscription.perYear' : 'subscription.perMonth') }}</small>
+              </span>
+              <ul class="rg__plan__feats">
+                <li v-for="(f, fi) in p.features" :key="f">{{ planFeat(p, fi) }}</li>
+              </ul>
+            </button>
+          </div>
+
+          <p class="rg__trial"><i class="pi pi-gift"></i>{{ t('register.trialNote2') }}</p>
+
+          <div class="rg__nav">
+            <button type="button" class="btn btn--ghost" :disabled="true" style="visibility:hidden">{{ t('register.back') }}</button>
+            <button class="btn" :disabled="!step2Valid">{{ t('register.nextAccount') }}</button>
+          </div>
+        </form>
+          <!-- Account (step 2) -->
+        <form v-else-if="step === 2" @submit.prevent="nextAccount" novalidate>
           <div class="field">
             <label for="institution">{{ t('register.fInstitution') }}</label>
             <input id="institution" v-model="form.institution" @blur="blur('institution')" />
@@ -257,38 +289,9 @@ function animateReject() {
               <span v-if="showErr('confirm')" class="fe">{{ fieldError('confirm') }}</span>
             </div>
           </div>
-          <button class="btn" :disabled="!step1Valid && Object.keys(touched).length > 0">{{ t('register.nextPlan') }}</button>
-        </form>
-
-        <!-- ═══ PASO 2: plan y resumen ═══ -->
-        <form v-else-if="step === 2" @submit.prevent="next2" novalidate>
-          <div class="rg__cycle">
-            <button type="button" :class="{ on: cycle === 'monthly' }" @click="cycle = 'monthly'">{{ t('subscription.cycle_monthly') }}</button>
-            <button type="button" :class="{ on: cycle === 'annual' }" @click="cycle = 'annual'">
-              {{ t('subscription.cycle_annual') }} <em v-if="chosenPlan?.annualDiscount">−{{ chosenPlan.annualDiscount }}%</em>
-            </button>
-          </div>
-
-          <div class="rg__plans">
-            <button v-for="p in subscriptionStore.plans" :key="p.id" type="button"
-                    class="rg__plan" :class="{ sel: chosenPlan?.id === p.id }" @click="selectedPlanId = p.id">
-              <span v-if="chosenPlan?.id === p.id" class="rg__plan__tag">{{ t('register.selected') }}</span>
-              <b class="rg__plan__name">{{ planName(p) }}</b>
-              <span class="rg__plan__for">{{ planFor(p) }}</span>
-              <span class="rg__plan__price">
-                {{ p.priceFor(cycle) === 0 ? t('plan.institutional.price') : `S/ ${p.priceFor(cycle)}` }}<small>/{{ t(cycle === 'annual' ? 'subscription.perYear' : 'subscription.perMonth') }}</small>
-              </span>
-              <ul class="rg__plan__feats">
-                <li v-for="(f, fi) in p.features" :key="f">{{ planFeat(p, fi) }}</li>
-              </ul>
-            </button>
-          </div>
-
-          <p class="rg__trial"><i class="pi pi-gift"></i>{{ t('register.trialNote2') }}</p>
-
           <div class="rg__nav">
             <button type="button" class="btn btn--ghost" @click="goTo(1)">{{ t('register.back') }}</button>
-            <button class="btn" :disabled="!step2Valid">{{ t('register.nextCard') }}</button>
+            <button class="btn" :disabled="busy || !step1Valid">{{ t('register.nextCard') }}</button>
           </div>
         </form>
 

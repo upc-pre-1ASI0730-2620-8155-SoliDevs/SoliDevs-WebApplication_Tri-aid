@@ -556,5 +556,6 @@
   "pf.portal.sub": "Credenciales temporales para que el paciente consulte su estado desde el portal.",
   "pf.portal.user": "Usuario",
   "pf.portal.pass": "Contraseña temporal",
-  "pf.portal.note": "Entréguela al paciente: le servirá para su primer ingreso (usuario: DNI o correo) y podrá reemplazarla desde el portal."
+  "pf.portal.note": "Entréguela al paciente: le servirá para su primer ingreso (usuario: DNI o correo) y podrá reemplazarla desde el portal.",
+  "register.nextAccount": "Continuar con mi cuenta"
 }
