@@ -2,21 +2,15 @@ import { reactive } from 'vue'
 import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
 import { PatientAssembler } from '../infrastructure/patient.assembler.js'
 import { TriageEpisodeAssembler } from '../infrastructure/triage-episode.assembler.js'
+import { EpisodeState } from '../infrastructure/triage-episode.resource.js'
 
 /**
- * Patient Registration state: patients and care episodes, synced with the
- * fake backend (json-server). Vital signs and devices live in the
- * Vital Signs Capture bounded context.
+ * Patient Registration state: patients and triage episodes, synced with the
+ * RESTful API. Vital signs and devices live in the Vital Signs Capture
+ * bounded context.
  */
 const api = new PatientRegistrationApi()
 export const store = reactive({ patients: [], episodes: [], loaded: false })
-
-const plain = o => JSON.parse(JSON.stringify(o))
-const epResource = ep => {
-  const copy = plain(ep)
-  delete copy.patient
-  return copy
-}
 
 const pad = n => String(n).padStart(2, '0')
 
@@ -64,11 +58,23 @@ export const findEpisode = id => store.episodes.find(e => e.id === id)
 export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
 
 /**
- * Persists the current episode state to the fake backend.
- * @param {Object} ep - Episode to persist.
+ * Syncs the episode state with the API: triage starts once the vital signs
+ * are confirmed and the episode is marked as referred after the referral.
+ * Vital signs, classification and referral data are persisted by their
+ * own bounded contexts.
+ * @param {Object} ep - Episode to sync.
  */
-export function saveEpisode(ep) {
-  api.updateEpisode(ep.id, epResource(ep)).catch(console.error)
+export async function saveEpisode(ep) {
+  try {
+    if ((ep.confirmed || ep.referred) && ep.state === EpisodeState.Waiting) {
+      ep.state = (await api.startTriage(ep.id)).data.state
+    }
+    if (ep.referred && ep.state === EpisodeState.InTriage) {
+      ep.state = (await api.markReferred(ep.id)).data.state
+    }
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 /**
