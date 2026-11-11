@@ -9,6 +9,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-001: Domain-Driven Design Layered Architecture with Bounded Contexts](#adr-001-domain-driven-design-layered-architecture-with-bounded-contexts)
 - [ADR-002: Core Frontend Framework: Vue 3 with Composition API and Vite](#adr-002-core-frontend-framework-vue-3-with-composition-api-and-vite)
 - [ADR-003: State Management with Vue Reactive Stores per Bounded Context](#adr-003-state-management-with-vue-reactive-stores-per-bounded-context)
+- [ADR-004: UI Layer: PrimeVue with Own Design Tokens and GSAP Animations](#adr-004-ui-layer-primevue-with-own-design-tokens-and-gsap-animations)
 
 ---
 
@@ -84,5 +85,28 @@ Services are kept with `markRaw()` inside the stores so they are not made reacti
 - **Negative:**
   - There is no store devtools integration.
   - The shape of each store is a convention, not an enforced API, so it must be kept consistent by review.
+
+---
+
+## ADR-004: UI Layer: PrimeVue with Own Design Tokens and GSAP Animations
+
+### Status
+Accepted
+
+### Context
+The application needs a consistent visual identity that matches the landing page, and the course defines PrimeVue as the component library and Material Design as the design language.
+
+### Decision
+- Register **PrimeVue** with the **Material** preset, the confirmation service and `ConfirmDialog`, and use **PrimeIcons** for icons.
+- Define the visual system in `shared/presentation/styles/tokens.css` and `ui.css`, and build shared components (`sidebar`, `auth-shell`, `toast-host`, `lang-switch`, `patient-banner`).
+- Use **GSAP** for interface animations (notification bell, toasts, language switch, subscription checkout) and respect `prefers-reduced-motion`.
+
+### Consequences
+- **Positive:**
+  - The interface keeps the same look across all bounded contexts.
+  - Animations are disabled for users who ask the system to reduce motion.
+- **Negative:**
+  - Most views are built with own components and styles, so they do not benefit from PrimeVue's ready-made components.
+  - Two styling sources (PrimeVue theme and own tokens) must be kept aligned.
 
 ---
