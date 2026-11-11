@@ -15,6 +15,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-007: Route Protection by Session, Role and Subscription State](#adr-007-route-protection-by-session-role-and-subscription-state)
 - [ADR-008: Internationalization with Vue I18n](#adr-008-internationalization-with-vue-i18n)
 - [ADR-009: Domain Services, Shared Kernel and Domain Events](#adr-009-domain-services-shared-kernel-and-domain-events)
+- [ADR-010: Fake Backend in Development and Firebase in Production](#adr-010-fake-backend-in-development-and-firebase-in-production)
 
 ---
 
@@ -231,3 +232,23 @@ The priority suggestion, the safe vital sign ranges and the specialty rules are 
   - The event bus is in-memory and only lives while the page is open.
 
 ---
+
+## ADR-010: Fake Backend in Development and Firebase in Production
+
+### Status
+Accepted
+
+### Context
+The frontend was built before the RESTful API was available, and the team needed a deployed version for reviews and validation sessions.
+
+### Decision
+- Development uses `json-server` with `server/db.json` and `server/routes.json` on port 3900 (`npm run mock-api`).
+- Production uses Firebase Realtime Database as the data store and Firebase Hosting to serve the `dist` build, with a rewrite of every route to `index.html`.
+- All infrastructure classes read their paths from environment variables, so switching to the RESTful API only requires new values in the environment files and the services that need it.
+
+### Consequences
+- **Positive:**
+  - The application can be developed and deployed without waiting for the backend.
+- **Negative:**
+  - Business validation that belongs to the backend is temporarily done in the browser.
+  - The Realtime Database rules currently allow public read and write, so they must be restricted before real use.
