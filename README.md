@@ -119,3 +119,77 @@ src/
 - `BaseApi` centralizes the Axios configuration; `BaseEndpoint` centralizes CRUD calls and tenant scoping.
 - The access guard combines the IAM session with the subscription state.
 - The shared kernel holds the triage level catalog used by several contexts.
+
+## Layer Responsibilities
+
+### Domain Layer
+- Entities, domain events and domain services as plain JavaScript classes and modules.
+- No Vue or HTTP code.
+
+### Application Layer
+- Reactive stores built with Vue `reactive()` that hold the state of each context and coordinate its use cases.
+
+### Infrastructure Layer
+- API gateways built on `BaseApi` and `BaseEndpoint`.
+- Assemblers and resources that translate backend payloads into domain entities.
+- Services that wrap the API calls of a context.
+
+### Presentation Layer
+- Views, components and route modules.
+- Calls stores and services, and reacts to their state.
+
+## Running the Project
+
+### Prerequisites
+- Node.js and npm, in versions compatible with Vite 8.
+
+### 1) Install dependencies
+```bash
+npm install
+```
+
+### 2) Start the fake backend (`json-server`)
+From the project root:
+```bash
+npm run mock-api
+```
+
+The server reads:
+- `server/db.json`
+- `server/routes.json` (maps `/api/v1/*` to the root resources)
+
+Local API base used by the development environment:
+- `http://localhost:3900/api/v1`
+
+### 3) Start the Vue app
+In a separate terminal, from the project root:
+```bash
+npm run dev
+```
+
+### 4) Build for production
+```bash
+npm run build
+```
+
+### 5) Preview the production build
+```bash
+npm run preview
+```
+
+## Environment Variables
+Environment files included:
+- `.env.development` (json-server)
+- `.env.production` (Firebase Realtime Database)
+
+Main variables:
+- `VITE_TRIAGE_PLATFORM_API_URL`
+- `VITE_PATIENTS_ENDPOINT_PATH`, `VITE_EPISODES_ENDPOINT_PATH`
+- `VITE_DEVICES_ENDPOINT_PATH`, `VITE_SYMPTOMS_ENDPOINT_PATH`
+- `VITE_CLASSIFICATIONS_ENDPOINT_PATH`
+- `VITE_REFERRALS_ENDPOINT_PATH`, `VITE_SPECIALTIES_ENDPOINT_PATH`, `VITE_VOUCHERS_ENDPOINT_PATH`
+- `VITE_ALERTS_ENDPOINT_PATH`
+- `VITE_PLANS_ENDPOINT_PATH`, `VITE_SUBSCRIPTIONS_ENDPOINT_PATH`
+- `VITE_USERS_ENDPOINT_PATH`, `VITE_SESSIONS_ENDPOINT_PATH`
+
+If the fake backend runs on another port, update `VITE_TRIAGE_PLATFORM_API_URL` in `.env.development`.
