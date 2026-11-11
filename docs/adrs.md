@@ -10,6 +10,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-002: Core Frontend Framework: Vue 3 with Composition API and Vite](#adr-002-core-frontend-framework-vue-3-with-composition-api-and-vite)
 - [ADR-003: State Management with Vue Reactive Stores per Bounded Context](#adr-003-state-management-with-vue-reactive-stores-per-bounded-context)
 - [ADR-004: UI Layer: PrimeVue with Own Design Tokens and GSAP Animations](#adr-004-ui-layer-primevue-with-own-design-tokens-and-gsap-animations)
+- [ADR-005: Centralized HTTP Client and Endpoint Abstraction with Tenant Scoping](#adr-005-centralized-http-client-and-endpoint-abstraction-with-tenant-scoping)
 
 ---
 
@@ -108,5 +109,27 @@ The application needs a consistent visual identity that matches the landing page
 - **Negative:**
   - Most views are built with own components and styles, so they do not benefit from PrimeVue's ready-made components.
   - Two styling sources (PrimeVue theme and own tokens) must be kept aligned.
+
+---
+
+## ADR-005: Centralized HTTP Client and Endpoint Abstraction with Tenant Scoping
+
+### Status
+Accepted
+
+### Context
+Every context reads and writes data. The backend changes between environments (`json-server` in development, Firebase Realtime Database in production), and several institutions use the same deployment, so clinical data from one institution must not appear in another.
+
+### Decision
+1. `BaseApi` creates a single Axios instance with the base URL from `VITE_TRIAGE_PLATFORM_API_URL`.
+2. `BaseEndpoint` exposes `getAll`, `getById`, `create`, `update` and `delete`, adds the `.json` suffix when the backend is Firebase, and normalizes collection responses into arrays.
+3. Endpoints created with `tenantScoped: true` tag new records with the signed-in institution and filter reads by it. Catalogs (plans, specialties, symptoms) and IAM stay global.
+
+### Consequences
+- **Positive:**
+  - The same API classes work against both backends.
+  - Clinical data is filtered per institution without repeating logic in each context.
+- **Negative:**
+  - The tenant filter runs in the browser; real isolation must also be enforced by the backend API.
 
 ---
