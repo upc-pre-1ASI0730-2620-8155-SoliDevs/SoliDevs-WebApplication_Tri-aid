@@ -24,6 +24,8 @@ export class PatientRegistrationApi extends BaseApi {
     getPatients() { return this.#patientsEndpoint.getAll() }
     createPatient(resource) { return this.#patientsEndpoint.create(resource) }
     updatePatient(id, resource) { return this.#patientsEndpoint.update(id, resource) }
+    createTemporaryProfile(resource) { return this.http.post(`${patientsPath}/temporary`, resource) }
+    updatePatientContact(id, resource) { return this.http.put(`${patientsPath}/${id}/contact`, resource) }
 
     getEpisodes() { return this.#episodesEndpoint.getAll() }
     createEpisode(resource) { return this.#episodesEndpoint.create(resource) }
