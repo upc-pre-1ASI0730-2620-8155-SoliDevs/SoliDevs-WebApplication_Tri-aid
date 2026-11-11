@@ -1,6 +1,8 @@
 import { reactive } from 'vue'
 import { session } from '../../shared/application/demo-session.js'
 import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
+import { PatientAssembler } from '../infrastructure/patient.assembler.js'
+import { TriageEpisodeAssembler } from '../infrastructure/triage-episode.assembler.js'
 
 /**
  * Patient Registration state: patients and care episodes, synced with the
@@ -107,21 +109,17 @@ export function saveEpisode(ep) {
 }
 
 /**
- * Loads patients and episodes from the fake backend into the reactive
- * store before the app mounts, and re-links every episode with its
- * patient record.
+ * Loads patients and triage episodes from the API into the reactive store
+ * before the app mounts, and links every episode with its patient record.
  * @returns {Promise<void>}
  */
 export async function loadFromServer() {
   try {
     const [pts, eps] = await Promise.all([api.getPatients(), api.getEpisodes()])
-    store.patients = pts.data || []
-    store.episodes = eps.data || []
-    for (const e of store.episodes) {
-      if (!e.vitals || typeof e.vitals !== 'object') e.vitals = {}
-      e.patient = store.patients.find(pt => String(pt.dni) === String(e.key))
-        || store.patients.find(pt => String(pt.id) === String(e.key)) || e.patient
-    }
+    store.patients = (pts.data || []).map(PatientAssembler.toStoreModel)
+    store.episodes = (eps.data || [])
+      .map(e => TriageEpisodeAssembler.toStoreModel(e, store.patients.find(p => p.id === e.patientId)))
+      .filter(e => e.patient)
     store.loaded = true
   } catch (e) {
     console.error('Could not load persisted data:', e)
