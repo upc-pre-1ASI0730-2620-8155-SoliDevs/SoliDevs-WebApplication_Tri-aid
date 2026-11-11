@@ -7,6 +7,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 
 ## Table of Contents
 - [ADR-001: Domain-Driven Design Layered Architecture with Bounded Contexts](#adr-001-domain-driven-design-layered-architecture-with-bounded-contexts)
+- [ADR-002: Core Frontend Framework: Vue 3 with Composition API and Vite](#adr-002-core-frontend-framework-vue-3-with-composition-api-and-vite)
 
 ---
 
@@ -34,5 +35,25 @@ Organize `src` by bounded context: `iam`, `patient-registration`, `vital-signs-c
 - **Negative:**
   - Contexts that read data from others (`panel`, `reports`) depend on several stores at once.
   - Not every context uses all layers yet, so the structure is not fully uniform.
+
+---
+
+## ADR-002: Core Frontend Framework: Vue 3 with Composition API and Vite
+
+### Status
+Accepted
+
+### Context
+The course requires Vue for the frontend web application. The team also needed fast local builds and hot reload while working on many views in parallel.
+
+### Decision
+Use **Vue 3** with Single-File Components and `<script setup>`, bundled with **Vite**. Routes are declared per bounded context and loaded lazily with dynamic `import()`.
+
+### Consequences
+- **Positive:**
+  - Fast startup and hot reload during development.
+  - Lazy-loaded routes keep each view in its own chunk.
+- **Negative:**
+  - The production bundle still produces large chunks, and Vite shows a size warning on build.
 
 ---
