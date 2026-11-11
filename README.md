@@ -193,3 +193,26 @@ Main variables:
 - `VITE_USERS_ENDPOINT_PATH`, `VITE_SESSIONS_ENDPOINT_PATH`
 
 If the fake backend runs on another port, update `VITE_TRIAGE_PLATFORM_API_URL` in `.env.development`.
+
+## Routing Notes
+- Public routes: `/login`, `/register`, `/recuperar` and `/acceso-suspendido`.
+- Protected routes: `/panel`, `/patient-registration/*`, `/vital-signs-capture/*`, `/triage-classification/*`, `/specialty-assignment/*`, `/alerting`, `/reports/*`, `/subscriptions/*`, `/users` and `/profile`.
+- `/subscriptions` and `/users` are only available to administrators.
+- When the subscription is overdue, navigation is limited to `/subscriptions` and `/acceso-suspendido`.
+
+## Deployment
+- `npm run build` generates the `dist` folder.
+- Firebase Hosting serves `dist` and rewrites every route to `index.html` (`firebase.json`).
+- The production data lives in Firebase Realtime Database; `BaseEndpoint` adds the `.json` suffix that its REST API requires.
+
+## Documentation
+- Architecture references:
+  - `docs/adrs.md`
+- Project history and release notes:
+  - `CHANGELOG.md`
+
+## Recommended Development Practices
+- Keep each feature inside its bounded context; move code to `shared` only when several contexts use it.
+- Presentation code calls stores and services, never Axios directly.
+- Name code elements in English and keep comments as short JSDoc.
+- Follow GitFlow and Conventional Commits.
