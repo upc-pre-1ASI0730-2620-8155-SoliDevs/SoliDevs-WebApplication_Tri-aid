@@ -8,6 +8,11 @@ import { EpisodeState, OpenTriageEpisodeResource, TriageEpisodeResource } from '
 // the browser shows the local time.
 const asUtc = value => (value && !/Z$|[+-]\d{2}:\d{2}$/.test(value) ? `${value}Z` : value)
 
+// The API stores the confirmed readings as a JSON payload.
+const parseVitals = raw => {
+    try { return raw ? JSON.parse(raw) : {} } catch { return {} }
+}
+
 export class TriageEpisodeAssembler {
     static toStoreModel(data, patient) {
         const resource = new TriageEpisodeResource(data)
@@ -18,7 +23,7 @@ export class TriageEpisodeAssembler {
             patient,
             arrival: new Date(asUtc(resource.arrivalTime)).toISOString(),
             state: resource.state,
-            vitals: {},
+            vitals: parseVitals(resource.vitals),
             confirmed: resource.state !== EpisodeState.Waiting,
             referred: resource.state === EpisodeState.Referred
         }
