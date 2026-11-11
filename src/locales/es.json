@@ -230,6 +230,7 @@
   "rg.e.birth": "Fecha de nacimiento inválida",
   "rg.e.names": "Ingresa los nombres",
   "rg.e.phone": "El teléfono debe tener 9 dígitos",
+  "rg.e.save": "No se pudo registrar al paciente",
   "rg.e.sex": "Selecciona el sexo",
   "rg.e.surnames": "Ingresa los apellidos",
   "rg.names": "Nombres",
