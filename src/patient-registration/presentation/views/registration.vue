@@ -56,9 +56,9 @@ function validate() {
   return !Object.keys(err).length
 }
 
-function submit() {
+async function submit() {
   if (!validate()) return
-  const ep = registerEpisode({
+  const ep = await registerEpisode({
     sinDni: f.sinDni,
     docType: f.docType,
     dni: f.sinDni ? '' : f.dni,
