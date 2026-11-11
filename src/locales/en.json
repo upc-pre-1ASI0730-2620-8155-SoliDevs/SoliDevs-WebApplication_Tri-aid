@@ -230,6 +230,7 @@
   "rg.e.birth": "Invalid date of birth",
   "rg.e.names": "Enter the first names",
   "rg.e.phone": "Phone must have 9 digits",
+  "rg.e.save": "Could not register the patient",
   "rg.e.sex": "Select the sex",
   "rg.e.surnames": "Enter the last names",
   "rg.names": "First names",

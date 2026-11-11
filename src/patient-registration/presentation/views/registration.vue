@@ -56,20 +56,28 @@ function validate() {
   return !Object.keys(err).length
 }
 
-function submit() {
-  if (!validate()) return
-  const ep = registerEpisode({
-    sinDni: f.sinDni,
-    docType: f.docType,
-    dni: f.sinDni ? '' : f.dni,
-    names: f.names.trim(),
-    surnames: f.surnames.trim(),
-    birth: f.birth,
-    sex: f.sex,
-    phone: f.phone,
-    address: f.address.trim()
-  })
-  router.push(`/patient-registration/${ep.id}`)
+const saving = ref(false)
+async function submit() {
+  if (!validate() || saving.value) return
+  saving.value = true
+  try {
+    const ep = await registerEpisode({
+      sinDni: f.sinDni,
+      docType: f.docType,
+      dni: f.sinDni ? '' : f.dni,
+      names: f.names.trim(),
+      surnames: f.surnames.trim(),
+      birth: f.birth,
+      sex: f.sex,
+      phone: f.phone,
+      address: f.address.trim()
+    })
+    router.push(`/patient-registration/${ep.id}`)
+  } catch (e) {
+    notify({ type: 'error', title: t('rg.e.save'), detail: e.response?.data?.message })
+  } finally {
+    saving.value = false
+  }
 }
 
 function reset() {

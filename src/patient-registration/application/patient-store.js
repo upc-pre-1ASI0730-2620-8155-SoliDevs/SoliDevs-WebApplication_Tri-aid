@@ -1,35 +1,18 @@
 import { reactive } from 'vue'
-import { session } from '../../shared/application/demo-session.js'
 import { PatientRegistrationApi } from '../infrastructure/patient-registration-api.js'
+import { PatientAssembler } from '../infrastructure/patient.assembler.js'
+import { TriageEpisodeAssembler } from '../infrastructure/triage-episode.assembler.js'
+import { EpisodeState } from '../infrastructure/triage-episode.resource.js'
 
 /**
- * Patient Registration state: patients and care episodes, synced with the
- * fake backend (json-server). Vital signs and devices live in the
- * Vital Signs Capture bounded context.
+ * Patient Registration state: patients and triage episodes, synced with the
+ * RESTful API. Vital signs and devices live in the Vital Signs Capture
+ * bounded context.
  */
 const api = new PatientRegistrationApi()
-export const store = reactive({ patients: [], episodes: [], seq: 0, loaded: false })
-
-const plain = o => JSON.parse(JSON.stringify(o))
-const epResource = ep => {
-  const copy = plain(ep)
-  delete copy.patient
-  return copy
-}
+export const store = reactive({ patients: [], episodes: [], loaded: false })
 
 const pad = n => String(n).padStart(2, '0')
-
-// Readable temporary portal password for the patient (no 0/O/1/I to
-// avoid dictation mistakes); the patient replaces it from the portal.
-const TMP_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ'
-const TMP_DIGITS = '23456789'
-const randomFrom = alphabet => alphabet[Math.floor(Math.random() * alphabet.length)]
-export function generateTemporaryPassword() {
-    const letters = Array.from({ length: 3 }, () => randomFrom(TMP_ALPHABET)).join('')
-    const digits = Array.from({ length: 4 }, () => randomFrom(TMP_DIGITS)).join('')
-    return `${letters}-${digits}`
-}
-
 
 export const fmtTime = iso => { const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}` }
 export const fmtDateTime = iso => { const d = new Date(iso); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${fmtTime(iso)}` }
@@ -43,53 +26,29 @@ export function ageOf(birth) {
 }
 
 /**
- * Registers (or updates) the patient and creates a new care episode.
- * Both records are persisted to the fake backend through the write-through
- * API client. The episode id follows the pattern EP-YYMMDD-#### where the
- * sequence is per day, so ids do not collide after page reloads.
+ * Registers the patient (or updates the contact data of a known DNI) and
+ * opens a new triage episode for the visit.
  * @param {Object} data - Patient admission data ({ dni, names, surnames,
  *   birth, sex, phone, address, sinDni?, docType? }).
- * @returns {Object} The created episode.
+ * @returns {Promise<Object>} The opened episode.
  */
 export async function registerEpisode(data) {
-  const now = new Date()
-  const patient = { ...data }
-  const i = data.dni ? store.patients.findIndex(p => p.dni === data.dni) : -1
-  if (i >= 0) {
-    store.patients[i] = { ...store.patients[i], ...patient }
-    api.updatePatient(store.patients[i].id ?? store.patients[i].dni, plain(store.patients[i])).catch(console.error)
+  let patient = data.dni ? store.patients.find(p => p.dni === data.dni) : null
+  if (patient) {
+    if ((data.phone || '') !== patient.phone || (data.address || '') !== patient.address) {
+      const r = await api.updatePatientContact(patient.id, PatientAssembler.toUpdateContactResource(data))
+      Object.assign(patient, PatientAssembler.toStoreModel(r.data))
+    }
   } else {
-    // Temporary portal credentials: patient logs in with DNI (or email)
-    // plus this password, and can replace it from the portal.
-    patient.portalPassword = generateTemporaryPassword()
-    patient.portalEmail = data.email || ''
+    const r = data.sinDni
+      ? await api.createTemporaryProfile(PatientAssembler.toTemporaryProfileResource(data))
+      : await api.createPatient(PatientAssembler.toCreateResource(data))
+    patient = PatientAssembler.toStoreModel(r.data)
     store.patients.push(patient)
-    api.createPatient(plain(patient)).then(r => {
-      const j = store.patients.findIndex(x => x.dni === patient.dni)
-      if (j >= 0) store.patients[j].id = r.data.id
-    }).catch(console.error)
   }
 
-  store.seq++
-  const prefix = `EP-${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
-  // Episode ids are global primary keys while the visible store is
-  // tenant-filtered: another institution may already hold today's
-  // sequence, so the create retries on id collision.
-  let id = null
-  let ep = null
-  for (let attempt = 1; attempt <= 10; attempt++) {
-    const todays = store.episodes.filter(e => String(e.id || '').startsWith(prefix))
-    const next = todays.reduce((mx, e) => Math.max(mx, parseInt(String(e.id).split('-')[2]) || 0), 0) + 1
-    id = `${prefix}-${String(next).padStart(4, '0')}`
-    ep = { id, key: data.dni || `temp-${store.seq}`, patient, arrival: now.toISOString(), vitals: {}, confirmed: false }
-    try {
-      await api.createEpisode(epResource(ep))
-      break
-    } catch (e) {
-      if (attempt === 10) { console.error('Could not persist episode:', e); return ep }
-      store.episodes.push({ id, institution: session.institution })
-    }
-  }
+  const r = await api.openEpisode(TriageEpisodeAssembler.toOpenResource(patient.id))
+  const ep = TriageEpisodeAssembler.toStoreModel(r.data, patient)
   store.episodes.push(ep)
   return ep
 }
@@ -99,29 +58,37 @@ export const findEpisode = id => store.episodes.find(e => e.id === id)
 export const findPatient = (type, number) => store.patients.find(p => !p.sinDni && (p.docType || 'dni') === type && p.dni === number) || null
 
 /**
- * Persists the current episode state to the fake backend.
- * @param {Object} ep - Episode to persist.
+ * Syncs the episode state with the API: triage starts once the vital signs
+ * are confirmed and the episode is marked as referred after the referral.
+ * Vital signs, classification and referral data are persisted by their
+ * own bounded contexts.
+ * @param {Object} ep - Episode to sync.
  */
-export function saveEpisode(ep) {
-  api.updateEpisode(ep.id, epResource(ep)).catch(console.error)
+export async function saveEpisode(ep) {
+  try {
+    if ((ep.confirmed || ep.referred) && ep.state === EpisodeState.Waiting) {
+      ep.state = (await api.startTriage(ep.id)).data.state
+    }
+    if (ep.referred && ep.state === EpisodeState.InTriage) {
+      ep.state = (await api.markReferred(ep.id)).data.state
+    }
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 /**
- * Loads patients and episodes from the fake backend into the reactive
- * store before the app mounts, and re-links every episode with its
- * patient record.
+ * Loads patients and triage episodes from the API into the reactive store
+ * before the app mounts, and links every episode with its patient record.
  * @returns {Promise<void>}
  */
 export async function loadFromServer() {
   try {
     const [pts, eps] = await Promise.all([api.getPatients(), api.getEpisodes()])
-    store.patients = pts.data || []
-    store.episodes = eps.data || []
-    for (const e of store.episodes) {
-      if (!e.vitals || typeof e.vitals !== 'object') e.vitals = {}
-      e.patient = store.patients.find(pt => String(pt.dni) === String(e.key))
-        || store.patients.find(pt => String(pt.id) === String(e.key)) || e.patient
-    }
+    store.patients = (pts.data || []).map(PatientAssembler.toStoreModel)
+    store.episodes = (eps.data || [])
+      .map(e => TriageEpisodeAssembler.toStoreModel(e, store.patients.find(p => p.id === e.patientId)))
+      .filter(e => e.patient)
     store.loaded = true
   } catch (e) {
     console.error('Could not load persisted data:', e)
