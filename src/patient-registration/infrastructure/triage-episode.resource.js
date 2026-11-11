@@ -4,11 +4,12 @@
  * of the triaid-platform RESTful API.
  */
 export class TriageEpisodeResource {
-    constructor({ id, patientId, arrivalTime, state }) {
+    constructor({ id, patientId, arrivalTime, state, vitals }) {
         this.id = id
         this.patientId = patientId
         this.arrivalTime = arrivalTime
         this.state = state
+        this.vitals = vitals
     }
 }
 
