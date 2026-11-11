@@ -1,5 +1,218 @@
-# Vue 3 + Vite
+# Tri-Aid Web Application (`SoliDevs-WebApplication_Tri-aid`)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Overview
+Tri-Aid is a Vue 3 + Vite web application that supports the triage process in hospital and clinic emergency rooms. Triage staff register patients, capture vital signs from linked measurement devices, receive a suggested priority level, confirm or adjust it, and refer each patient to a medical specialty, with alerts when a vital sign is out of range.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+The code is organized with a domain-driven design (DDD) style: each business capability lives in its own bounded context, with domain, application, infrastructure and presentation layers.
+
+Deployed application: https://triaid-solidevs.web.app
+
+## Goals
+- Support the triage workflow end to end: registration, vital signs, classification, referral and alerts.
+- Keep each bounded context isolated, with domain concepts explicit (`entity`, `event`, `resource`, `assembler`, `service`, `store`).
+- Isolate clinical data per institution and control access by session, role and subscription state.
+
+## Tech Stack
+- Vue 3
+- Vite
+- Vue Router
+- Vue I18n
+- PrimeVue (Material preset) + PrimeIcons + PrimeFlex
+- Axios
+- GSAP for interface animations
+- `json-server` as fake backend in development
+- Firebase Hosting and Firebase Realtime Database in production
+
+## Project Structure (DDD-Oriented)
+```text
+src/
+  iam/                          # IAM bounded context
+    domain/model/               # User entity
+    application/                # iamStore (signed-in user and session)
+    infrastructure/             # IamApi, IamService
+    presentation/views/         # Login, register, password recovery, profile, users
+
+  patient-registration/         # Patient Registration bounded context
+    domain/model/               # Patient and Episode entities
+    domain/events/              # PatientRegisteredEvent
+    application/                # Patient store and document types
+    infrastructure/             # PatientRegistrationApi
+    presentation/views/         # Patient list, registration form, patient file
+
+  vital-signs-capture/          # Vital Signs Capture bounded context
+    domain/model/               # DeviceLink, DeviceType, reading source and status
+    domain/events/              # VitalsConfirmedEvent
+    application/                # Vitals store and device store
+    infrastructure/             # VitalSignsApi
+    presentation/               # Devices view, vitals panel and routes
+
+  triage-classification/        # Triage Classification bounded context
+    domain/model/               # Classification entity
+    domain/services/            # Nt158Engine (suggested priority)
+    infrastructure/             # TriageApi, assembler, resource, service
+    presentation/               # Classification view, priority badge, triage guide and routes
+
+  specialty-assignment/         # Specialty Assignment bounded context
+    domain/model/               # Referral, Voucher, Specialty
+    domain/services/            # SpecialtyRules
+    infrastructure/             # SpecialtyAssignmentApi, assemblers, resources, service
+    presentation/               # Assignment view, symptom autocomplete, voucher dialog and routes
+
+  alerting/                     # Alerting bounded context
+    domain/model/               # Alert entity
+    domain/services/            # Safe vital sign ranges
+    application/                # Alert store for the notification bell
+    infrastructure/             # AlertingApi, AlertingService
+    presentation/               # Alert center view and notification bell
+
+  subscription/                 # Subscription bounded context
+    domain/model/               # Plan and Subscription entities
+    application/                # subscriptionStore
+    infrastructure/             # SubscriptionApi, SubscriptionService
+    presentation/               # Subscription view and routes
+
+  panel/                        # Triage dashboard (presentation only)
+  reports/                      # Shift reports (presentation only)
+
+  shared/                       # Shared cross-context concerns
+    domain/shared-kernel/       # Triage level catalog
+    application/                # i18n, access guard, event bus, session, toasts
+    infrastructure/             # BaseApi, BaseEndpoint
+    presentation/               # Sidebar, auth shell, language switch, toasts, styles
+
+  locales/                      # en.json and es.json
+  router/                       # Route table and access guard installation
+```
+
+## Bounded Contexts
+
+### IAM
+- Signs staff in and out, validates credentials and restores the session.
+- Registers a new institution together with its administrator account.
+- Restricts staff account management and subscription management to administrators.
+
+### Patient Registration
+- Registers patients by document number and opens a care episode for each visit.
+- Persists patients and episodes, and generates temporary portal credentials for the patient.
+
+### Vital Signs Capture
+- Links measurement devices to an episode and records readings (simulated automatic readings or manual entry).
+- Publishes `VitalsConfirmedEvent` through the shared event bus when the vital signs are confirmed.
+
+### Triage Classification
+- Suggests a priority level with `Nt158Engine` from the confirmed vital signs.
+- Lets the staff confirm the suggestion or override it with a justification.
+
+### Specialty Assignment
+- Refers the classified patient to a specialty, supported by a coded symptom catalog.
+- Issues the referral voucher and shows the queue per specialty.
+
+### Alerting
+- Generates alerts when a vital sign is outside its safe range.
+- Shows them in the alert center and in the notification bell, where staff can acknowledge or escalate them.
+
+### Subscription
+- Manages the plan catalog, the trial period, checkout with a simulated payment gateway and the payment history.
+- Enforces the staff account limit of each plan.
+
+### Shared
+- `BaseApi` centralizes the Axios configuration; `BaseEndpoint` centralizes CRUD calls and tenant scoping.
+- The access guard combines the IAM session with the subscription state.
+- The shared kernel holds the triage level catalog used by several contexts.
+
+## Layer Responsibilities
+
+### Domain Layer
+- Entities, domain events and domain services as plain JavaScript classes and modules.
+- No Vue or HTTP code.
+
+### Application Layer
+- Reactive stores built with Vue `reactive()` that hold the state of each context and coordinate its use cases.
+
+### Infrastructure Layer
+- API gateways built on `BaseApi` and `BaseEndpoint`.
+- Assemblers and resources that translate backend payloads into domain entities.
+- Services that wrap the API calls of a context.
+
+### Presentation Layer
+- Views, components and route modules.
+- Calls stores and services, and reacts to their state.
+
+## Running the Project
+
+### Prerequisites
+- Node.js and npm, in versions compatible with Vite 8.
+
+### 1) Install dependencies
+```bash
+npm install
+```
+
+### 2) Start the fake backend (`json-server`)
+From the project root:
+```bash
+npm run mock-api
+```
+
+The server reads:
+- `server/db.json`
+- `server/routes.json` (maps `/api/v1/*` to the root resources)
+
+Local API base used by the development environment:
+- `http://localhost:3900/api/v1`
+
+### 3) Start the Vue app
+In a separate terminal, from the project root:
+```bash
+npm run dev
+```
+
+### 4) Build for production
+```bash
+npm run build
+```
+
+### 5) Preview the production build
+```bash
+npm run preview
+```
+
+## Environment Variables
+Environment files included:
+- `.env.development` (json-server)
+- `.env.production` (Firebase Realtime Database)
+
+Main variables:
+- `VITE_TRIAGE_PLATFORM_API_URL`
+- `VITE_PATIENTS_ENDPOINT_PATH`, `VITE_EPISODES_ENDPOINT_PATH`
+- `VITE_DEVICES_ENDPOINT_PATH`, `VITE_SYMPTOMS_ENDPOINT_PATH`
+- `VITE_CLASSIFICATIONS_ENDPOINT_PATH`
+- `VITE_REFERRALS_ENDPOINT_PATH`, `VITE_SPECIALTIES_ENDPOINT_PATH`, `VITE_VOUCHERS_ENDPOINT_PATH`
+- `VITE_ALERTS_ENDPOINT_PATH`
+- `VITE_PLANS_ENDPOINT_PATH`, `VITE_SUBSCRIPTIONS_ENDPOINT_PATH`
+- `VITE_USERS_ENDPOINT_PATH`, `VITE_SESSIONS_ENDPOINT_PATH`
+
+If the fake backend runs on another port, update `VITE_TRIAGE_PLATFORM_API_URL` in `.env.development`.
+
+## Routing Notes
+- Public routes: `/login`, `/register`, `/recuperar` and `/acceso-suspendido`.
+- Protected routes: `/panel`, `/patient-registration/*`, `/vital-signs-capture/*`, `/triage-classification/*`, `/specialty-assignment/*`, `/alerting`, `/reports/*`, `/subscriptions/*`, `/users` and `/profile`.
+- `/subscriptions` and `/users` are only available to administrators.
+- When the subscription is overdue, navigation is limited to `/subscriptions` and `/acceso-suspendido`.
+
+## Deployment
+- `npm run build` generates the `dist` folder.
+- Firebase Hosting serves `dist` and rewrites every route to `index.html` (`firebase.json`).
+- The production data lives in Firebase Realtime Database; `BaseEndpoint` adds the `.json` suffix that its REST API requires.
+
+## Documentation
+- Architecture references:
+  - `docs/adrs.md`
+- Project history and release notes:
+  - `CHANGELOG.md`
+
+## Recommended Development Practices
+- Keep each feature inside its bounded context; move code to `shared` only when several contexts use it.
+- Presentation code calls stores and services, never Axios directly.
+- Name code elements in English and keep comments as short JSDoc.
+- Follow GitFlow and Conventional Commits.
