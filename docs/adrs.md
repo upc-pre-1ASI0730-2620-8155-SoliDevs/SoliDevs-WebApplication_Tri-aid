@@ -8,6 +8,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 ## Table of Contents
 - [ADR-001: Domain-Driven Design Layered Architecture with Bounded Contexts](#adr-001-domain-driven-design-layered-architecture-with-bounded-contexts)
 - [ADR-002: Core Frontend Framework: Vue 3 with Composition API and Vite](#adr-002-core-frontend-framework-vue-3-with-composition-api-and-vite)
+- [ADR-003: State Management with Vue Reactive Stores per Bounded Context](#adr-003-state-management-with-vue-reactive-stores-per-bounded-context)
 
 ---
 
@@ -55,5 +56,33 @@ Use **Vue 3** with Single-File Components and `<script setup>`, bundled with **V
   - Lazy-loaded routes keep each view in its own chunk.
 - **Negative:**
   - The production bundle still produces large chunks, and Vite shows a size warning on build.
+
+---
+
+## ADR-003: State Management with Vue Reactive Stores per Bounded Context
+
+### Status
+Accepted
+
+### Context
+Several views share the same data: the sidebar shows the signed-in user, the notification bell shows alerts produced while classifying a patient, and the dashboard reads patients, classifications and referrals.
+
+### Decision
+Use Vue's own `reactive()` and `computed()` to build one store module per context, without an additional state library:
+- `iamStore` (signed-in user, roles and session restore).
+- `subscriptionStore` (plans and current subscription).
+- Patient Registration `store` (patients and episodes).
+- `deviceStore` and the vitals store functions (devices and readings).
+- `alertStore` (notification bell items).
+
+Services are kept with `markRaw()` inside the stores so they are not made reactive.
+
+### Consequences
+- **Positive:**
+  - No extra dependency; the stores are plain modules imported where needed.
+  - State is shared between views without passing props through many levels.
+- **Negative:**
+  - There is no store devtools integration.
+  - The shape of each store is a convention, not an enforced API, so it must be kept consistent by review.
 
 ---
