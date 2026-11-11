@@ -21,11 +21,16 @@ export class TriageClassificationService {
 
     #episodesKey = id => String(id)
 
-    /** Finds the episode classification in json-server. */
+    /** Finds the episode classification; null when the API reports none. */
     async findByEpisode(episodeId) {
-        const response = await this.api.getClassificationByEpisode(episodeId)
-        const list = response.data || []
-        return ClassificationAssembler.toEntity(list[0] || null)
+        try {
+            const response = await this.api.getClassificationByEpisode(episodeId)
+            const data = Array.isArray(response.data) ? response.data[0] : response.data
+            return ClassificationAssembler.toEntity(data || null)
+        } catch (e) {
+            if (e?.response?.status === 404) return null
+            throw e
+        }
     }
 
     /** Persists (creates or updates) the classification. */
