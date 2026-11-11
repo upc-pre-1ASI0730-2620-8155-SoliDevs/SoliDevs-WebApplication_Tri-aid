@@ -16,8 +16,8 @@ export class PatientRegistrationApi extends BaseApi {
 
     constructor() {
         super()
-        this.#patientsEndpoint = new BaseEndpoint(this, patientsPath, { tenantScoped: true })
-        this.#episodesEndpoint = new BaseEndpoint(this, episodesPath, { tenantScoped: true })
+        this.#patientsEndpoint = new BaseEndpoint(this, patientsPath)
+        this.#episodesEndpoint = new BaseEndpoint(this, episodesPath)
         this.#devicesEndpoint = new BaseEndpoint(this, devicesPath, { tenantScoped: true })
     }
 
