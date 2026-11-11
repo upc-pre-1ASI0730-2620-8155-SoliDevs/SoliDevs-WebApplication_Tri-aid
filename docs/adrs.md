@@ -12,6 +12,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-004: UI Layer: PrimeVue with Own Design Tokens and GSAP Animations](#adr-004-ui-layer-primevue-with-own-design-tokens-and-gsap-animations)
 - [ADR-005: Centralized HTTP Client and Endpoint Abstraction with Tenant Scoping](#adr-005-centralized-http-client-and-endpoint-abstraction-with-tenant-scoping)
 - [ADR-006: Data Transformation via Assembler and Resource Pattern](#adr-006-data-transformation-via-assembler-and-resource-pattern)
+- [ADR-007: Route Protection by Session, Role and Subscription State](#adr-007-route-protection-by-session-role-and-subscription-state)
 
 ---
 
@@ -155,5 +156,31 @@ Other contexts (IAM, Alerting, Subscription) map payloads to entities inside the
   - Changes in the storage format only affect the assembler of that context.
 - **Negative:**
   - The pattern is not applied in every context yet, so mapping lives in two different places depending on the context.
+
+---
+
+## ADR-007: Route Protection by Session, Role and Subscription State
+
+### Status
+Accepted
+
+### Context
+Only signed-in staff may use the application, some screens are only for administrators, and an institution with an overdue subscription must not keep using the clinical modules.
+
+### Decision
+Install a global `router.beforeEach` that calls `accessGuard`:
+- Public paths (`/login`, `/register`, `/recuperar`) redirect signed-in users to `/panel`.
+- Without a session, any other path redirects to `/login`.
+- `/subscriptions` and `/users` require the administrator role.
+- With an overdue subscription, only `/subscriptions` and `/acceso-suspendido` are allowed.
+
+The session id is kept in `sessionStorage` and restored by `iamStore` before each protected navigation.
+
+### Consequences
+- **Positive:**
+  - Access rules live in a single function instead of every view.
+  - The landing page can send a visitor to `/register` with a preselected plan.
+- **Negative:**
+  - Client-side guards only protect navigation; the backend must validate every request on its own.
 
 ---
