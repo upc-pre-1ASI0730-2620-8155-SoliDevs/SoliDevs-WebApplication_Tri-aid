@@ -30,6 +30,9 @@ export class PatientRegistrationApi extends BaseApi {
     getEpisodes() { return this.#episodesEndpoint.getAll() }
     createEpisode(resource) { return this.#episodesEndpoint.create(resource) }
     updateEpisode(id, resource) { return this.#episodesEndpoint.update(id, resource) }
+    openEpisode(resource) { return this.#episodesEndpoint.create(resource) }
+    startTriage(id) { return this.http.put(`${episodesPath}/${id}/start-triage`) }
+    markReferred(id) { return this.http.put(`${episodesPath}/${id}/referred`) }
 
     getDevices() { return this.#devicesEndpoint.getAll() }
     createDevice(resource) { return this.#devicesEndpoint.create(resource) }
