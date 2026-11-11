@@ -11,6 +11,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-003: State Management with Vue Reactive Stores per Bounded Context](#adr-003-state-management-with-vue-reactive-stores-per-bounded-context)
 - [ADR-004: UI Layer: PrimeVue with Own Design Tokens and GSAP Animations](#adr-004-ui-layer-primevue-with-own-design-tokens-and-gsap-animations)
 - [ADR-005: Centralized HTTP Client and Endpoint Abstraction with Tenant Scoping](#adr-005-centralized-http-client-and-endpoint-abstraction-with-tenant-scoping)
+- [ADR-006: Data Transformation via Assembler and Resource Pattern](#adr-006-data-transformation-via-assembler-and-resource-pattern)
 
 ---
 
@@ -131,5 +132,28 @@ Every context reads and writes data. The backend changes between environments (`
   - Clinical data is filtered per institution without repeating logic in each context.
 - **Negative:**
   - The tenant filter runs in the browser; real isolation must also be enforced by the backend API.
+
+---
+
+## ADR-006: Data Transformation via Assembler and Resource Pattern
+
+### Status
+Accepted
+
+### Context
+The backend stores flat records, while the domain uses entities with their own states and rules. Binding raw payloads to the views would tie the interface to the storage format.
+
+### Decision
+Use assemblers and resources in the infrastructure layer to translate between payloads and entities:
+- Triage Classification: `ClassificationAssembler` and `ClassificationResource`.
+- Specialty Assignment: `ReferralAssembler`, `ReferralResource`, `VoucherAssembler` and `VoucherResource`.
+
+Other contexts (IAM, Alerting, Subscription) map payloads to entities inside their service classes.
+
+### Consequences
+- **Positive:**
+  - Changes in the storage format only affect the assembler of that context.
+- **Negative:**
+  - The pattern is not applied in every context yet, so mapping lives in two different places depending on the context.
 
 ---
