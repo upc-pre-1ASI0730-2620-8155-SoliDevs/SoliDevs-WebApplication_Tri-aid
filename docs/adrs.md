@@ -14,6 +14,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-006: Data Transformation via Assembler and Resource Pattern](#adr-006-data-transformation-via-assembler-and-resource-pattern)
 - [ADR-007: Route Protection by Session, Role and Subscription State](#adr-007-route-protection-by-session-role-and-subscription-state)
 - [ADR-008: Internationalization with Vue I18n](#adr-008-internationalization-with-vue-i18n)
+- [ADR-009: Domain Services, Shared Kernel and Domain Events](#adr-009-domain-services-shared-kernel-and-domain-events)
 
 ---
 
@@ -206,5 +207,27 @@ Use **Vue I18n** in composition mode with `src/locales/en.json` and `src/locales
   - The `lang` attribute stays correct for screen readers.
 - **Negative:**
   - Both catalogs must be updated together; a missing key shows the key instead of the text.
+
+---
+
+## ADR-009: Domain Services, Shared Kernel and Domain Events
+
+### Status
+Accepted
+
+### Context
+The priority suggestion, the safe vital sign ranges and the specialty rules are business rules, not interface logic. The triage level is used by classification, referral, alerts and the dashboard.
+
+### Decision
+- Keep business rules as domain services: `Nt158Engine` (Triage Classification), `SpecialtyRules` (Specialty Assignment) and `SAFE_VITAL_RANGES` with `findOutOfRangeVitals` (Alerting).
+- Move the triage level catalog to `shared/domain/shared-kernel/triage-level.js` so contexts do not import each other's domain.
+- Model domain events as classes (`PatientRegisteredEvent`, `VitalsConfirmedEvent`) and publish them through the shared event bus (`event-bus.js`).
+
+### Consequences
+- **Positive:**
+  - Rules can be read and changed without touching the views.
+  - Removing the dependency between domain layers keeps contexts independent.
+- **Negative:**
+  - The event bus is in-memory and only lives while the page is open.
 
 ---
