@@ -13,6 +13,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 - [ADR-005: Centralized HTTP Client and Endpoint Abstraction with Tenant Scoping](#adr-005-centralized-http-client-and-endpoint-abstraction-with-tenant-scoping)
 - [ADR-006: Data Transformation via Assembler and Resource Pattern](#adr-006-data-transformation-via-assembler-and-resource-pattern)
 - [ADR-007: Route Protection by Session, Role and Subscription State](#adr-007-route-protection-by-session-role-and-subscription-state)
+- [ADR-008: Internationalization with Vue I18n](#adr-008-internationalization-with-vue-i18n)
 
 ---
 
@@ -182,5 +183,28 @@ The session id is kept in `sessionStorage` and restored by `iamStore` before eac
   - The landing page can send a visitor to `/register` with a preselected plan.
 - **Negative:**
   - Client-side guards only protect navigation; the backend must validate every request on its own.
+
+---
+
+## ADR-008: Internationalization with Vue I18n
+
+### Status
+Accepted
+
+### Context
+The course requires English (default) and Latin American Spanish in the user interface.
+
+### Decision
+Use **Vue I18n** in composition mode with `src/locales/en.json` and `src/locales/es.json`, configured in `shared/application/i18n.js`:
+- English is the default and fallback language.
+- The selected language is saved in `localStorage` and applied to the `lang` attribute of the document.
+- The `lang-switch` component changes the language from the app shell and the auth screens.
+
+### Consequences
+- **Positive:**
+  - The interface text is outside the components and changes at runtime.
+  - The `lang` attribute stays correct for screen readers.
+- **Negative:**
+  - Both catalogs must be updated together; a missing key shows the key instead of the text.
 
 ---
