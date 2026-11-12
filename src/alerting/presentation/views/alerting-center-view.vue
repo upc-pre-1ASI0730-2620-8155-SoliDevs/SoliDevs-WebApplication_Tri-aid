@@ -78,8 +78,8 @@ const displayAlerts = computed(() => {
   });
 });
 
-const acknowledgeAlert = (id) => {
-  pendingId.value = id;
+const acknowledgeAlert = async (id) => {
+  await confirmAcknowledge(id);
 };
 
 const pendingEsc = ref(null);
@@ -116,8 +116,8 @@ const confirmEscalate = async () => {
 
 const cancelAcknowledge = () => { pendingId.value = null; };
 
-const confirmAcknowledge = async () => {
-  const id = pendingId.value;
+const confirmAcknowledge = async (directId = null) => {
+  const id = directId ?? pendingId.value;
   pendingId.value = null;
 
   doneId.value = id;
@@ -280,14 +280,14 @@ const onDoneEnter = (el, done) => {
     <p v-if="!displayAlerts.length" class="ta-card al-none">{{ t('bell.empty') }}</p>
 
     <Transition :css="false" @enter="onModalEnter" @leave="onModalLeave">
-      <div v-if="pendingId !== null || pendingEsc !== null" class="al-modal" @click.self="pendingId !== null ? cancelAcknowledge() : cancelEscalate()">
+      <div v-if="pendingEsc !== null" class="al-modal" @click.self="cancelEscalate()">
         <div class="al-dialog" role="alertdialog" aria-modal="true" aria-labelledby="al-dlg-title">
           <span class="al-dialog__ico" :class="{ danger: pendingEsc !== null }"><i class="pi" :class="pendingEsc !== null ? 'pi-bolt' : 'pi-bell-slash'"></i></span>
           <h3 id="al-dlg-title" class="al-dialog__title">{{ pendingEsc !== null ? t('alerting.escTitle') : t('alerting.confirmTitle') }}</h3>
           <p class="al-dialog__msg">{{ pendingEsc !== null ? t('alerting.escMsg') : t('alerting.confirmMsg') }}</p>
           <div class="al-dialog__actions">
-            <button class="ta-btn ta-btn--ghost" @click="pendingId !== null ? cancelAcknowledge() : cancelEscalate()">{{ t('alerting.no') }}</button>
-            <button class="ta-btn" :class="{ 'al-btn-esc': pendingEsc !== null }" @click="pendingId !== null ? confirmAcknowledge() : confirmEscalate()">{{ pendingEsc !== null ? t('alerting.escYes') : t('alerting.yes') }}</button>
+            <button class="ta-btn ta-btn--ghost" @click="cancelEscalate()">{{ t('alerting.no') }}</button>
+            <button class="ta-btn" :class="{ 'al-btn-esc': pendingEsc !== null }" @click="confirmEscalate()">{{ t('alerting.escYes') }}</button>
           </div>
         </div>
       </div>
