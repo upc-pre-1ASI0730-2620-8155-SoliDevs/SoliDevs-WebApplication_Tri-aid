@@ -7,7 +7,7 @@ import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const router = useRouter()
-const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '' })
+const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '', email: '' })
 const f = reactive(blank())
 const err = reactive({})
 const today = new Date().toISOString().slice(0, 10)
@@ -56,20 +56,28 @@ function validate() {
   return !Object.keys(err).length
 }
 
-function submit() {
-  if (!validate()) return
-  const ep = registerEpisode({
-    sinDni: f.sinDni,
-    docType: f.docType,
-    dni: f.sinDni ? '' : f.dni,
-    names: f.names.trim(),
-    surnames: f.surnames.trim(),
-    birth: f.birth,
-    sex: f.sex,
-    phone: f.phone,
-    address: f.address.trim()
-  })
-  router.push(`/patient-registration/${ep.id}`)
+const saving = ref(false)
+async function submit() {
+  if (!validate() || saving.value) return
+  saving.value = true
+  try {
+    const ep = await registerEpisode({
+      sinDni: f.sinDni,
+      docType: f.docType,
+      dni: f.sinDni ? '' : f.dni,
+      names: f.names.trim(),
+      surnames: f.surnames.trim(),
+      birth: f.birth,
+      sex: f.sex,
+      phone: f.phone,
+      address: f.address.trim()
+    })
+    router.push(`/patient-registration/${ep.id}`)
+  } catch (e) {
+    notify({ type: 'error', title: t('rg.e.save'), detail: e.response?.data?.message })
+  } finally {
+    saving.value = false
+  }
 }
 
 function reset() {
@@ -101,7 +109,7 @@ function reset() {
             <button type="button" role="tab" :aria-selected="f.docType === dt.key" :class="{ on: f.docType === dt.key }" :disabled="f.sinDni" :title="t('doc.' + dt.key + '.full')" @click="pick(dt.key)">{{ t('doc.' + dt.key + '.label') }}</button>
           </template>
         </div>
-        <!-- Móvil: selector desplegable nativo -->
+        <!-- Mobile: native dropdown selector -->
         <select class="ta-select rg-seg--mobile" :aria-label="t('rg.docType')" :disabled="f.sinDni" :value="f.docType" @change="pick($event.target.value)">
           <option v-for="dt in docTypes" :key="dt.key" :value="dt.key">{{ t('doc.' + dt.key + '.full') }}</option>
         </select>
@@ -146,6 +154,8 @@ function reset() {
         <div class="rg-f rg-wide">
           <label class="ta-label" for="address">{{ t('rg.address') }}</label>
           <input id="address" class="ta-input" v-model="f.address" @keyup.enter="submit" />
+          <div class="field"><label for="email">{{ t('rg.email') }} <small class="opt">{{ t('rg.optional') }}</small></label>
+            <input id="email" type="email" class="ta-input" v-model="f.email" @keyup.enter="submit" /></div>
         </div>
       </div>
 
@@ -193,11 +203,12 @@ function reset() {
 .rg-titlebox .ta-sub{margin-bottom:0}
 .rg-clearbtn{flex:none}
 
-/* Móvil: volver arriba (solo icono), limpiar arriba derecha, registrar abajo */
+/* Mobile: scroll-to-top (icon only), clear top right, register bottom */
 @media(max-width:760px){
   .rg-head{flex-wrap:wrap;gap:10px}
   .rg-titlebox{flex:1 1 calc(100% - 100px)}
   .rg-clearbtn span{display:none}
 }
 @media(max-width:760px){.rg-grid{grid-template-columns:1fr}}
+.opt{font-weight:400;opacity:.6;text-transform:none}
 </style>

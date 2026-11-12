@@ -1,7 +1,7 @@
 import { reactive, computed } from 'vue'
 
-// Las alertas reales vienen del Alerting bounded context (persistidas y
-// generadas en runtime). Forma interna de la campanita:
+// Real alerts come from the Alerting bounded context (persisted and
+// generated at runtime). Internal bell shape:
 // { id, level: 'critical' | 'warning' | 'info', title, detail, time, read, episodeId }
 export const alertStore = reactive({ items: [] })
 

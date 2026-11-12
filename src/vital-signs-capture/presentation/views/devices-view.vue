@@ -5,7 +5,7 @@ import { DeviceType as vitalTypes } from '../../domain/model/device-type.js'
 import { t } from '../../../shared/application/i18n.js'
 import { notify } from '../../../shared/application/toast-store.js'
 
-// Dispositivos precargados para facilitar la vinculación automatica
+/** Preloaded devices to ease automatic linking. */
 const defaultTemplates = [
   { type: 'pa', model: 'Omron Hem-7120' },
   { type: 'spo2', model: 'Contec CMS50D' },
@@ -47,7 +47,7 @@ function toggleOnline(d) {
 
 <template>
   <div class="ta-page fi">
-    <!-- Encabezado del Módulo de Dispositivos -->
+    <!-- Devices module header -->
     <section class="ta-card fi-in" style="--d:0">
       <h3 class="ta-h">{{ t('nav.devices') }}</h3>
       <p class="ta-sub">{{ t('devices.sub') }}</p>

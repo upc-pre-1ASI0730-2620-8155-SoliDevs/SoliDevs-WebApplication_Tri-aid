@@ -1,7 +1,9 @@
 import { reactive } from 'vue'
 
-// Notificaciones globales. Uso: notify({ type: 'success', title: 'Titulo', detail: 'Detalle' })
-// type: 'success' | 'error' | 'warning' | 'info'
+/**
+ * Global notification store.
+ * Usage: notify({ type: 'success', title: 'Title', detail: 'Detail' })
+ */
 export const toasts = reactive([])
 let seq = 0
 

@@ -99,7 +99,6 @@ async function refer() {
   referral.value = r.data
   ep.value.referred = true
   saveEpisode(ep.value)
-  // Derivacion completada: alertas resueltas y dispositivos liberados
   try {
     await alertingService.resolveByEpisode(ep.value.id)
     releaseEpisodeDevices(ep.value.id)
@@ -142,7 +141,6 @@ onMounted(async () => {
     level.value = l ? { ...l, name: t('triage.level.' + l.code + '.name') } : null
     confirmedAt.value = c.confirmedAt ? fmtTime(c.confirmedAt) : null
   }
-  // if the episode was already referred, restore its context
   const existing = await service.findByEpisode(id)
   if (existing) {
     referral.value = existing

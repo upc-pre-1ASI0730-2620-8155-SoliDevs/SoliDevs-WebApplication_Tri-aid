@@ -48,7 +48,7 @@ const num = value => {
 }
 
 // Normalizes the episode vital signs map
-// ({ pa: {value:'148/92'}, spo2: {value:'89'}, ... }) a un resumen plano.
+// ({ pa: {value:'148/92'}, spo2: {value:'89'}, ... }) into a flat summary.
 export function vitalsSummary(vitals = {}) {
   const val = k => num(vitals[k]?.value)
   const pa = String(vitals.pa?.value || '').split('/')

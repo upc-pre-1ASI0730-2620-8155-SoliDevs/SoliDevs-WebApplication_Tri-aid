@@ -7,8 +7,9 @@ import TheSidebar from './shared/presentation/components/sidebar.vue'
 import NotificationBell from './alerting/presentation/components/notification-bell.vue'
 import ToastHost from './shared/presentation/components/toast-host.vue'
 import LangSwitch from './shared/presentation/components/lang-switch.vue'
-import { t } from './shared/application/i18n.js'
+import { t, locale } from './shared/application/i18n.js'
 import { session } from './shared/application/demo-session.js'
+import { subscriptionStore } from './subscription/application/subscription-store.js'
 
 const route = useRoute()
 const isAuth = computed(() => route.meta.layout === 'auth')
@@ -17,6 +18,25 @@ function onKey(e) { if (e.key === 'Escape') sbOpen.value = false }
 onMounted(() => window.addEventListener('keydown', onKey))
 const scroller = ref(null)
 const progress = ref(0)
+
+// Reminder banner: pending-payment grace period or active trial.
+const graceBanner = computed(() => {
+  const sub = subscriptionStore.subscription
+  if (sub?.state === 'pending' || sub?.state === 'trial') return sub
+  return null
+})
+const isTrial = computed(() => graceBanner.value?.state === 'trial')
+const graceDate = computed(() => {
+  const sub = graceBanner.value
+  if (!sub) return ''
+  if (sub.state === 'trial') {
+    return new Date(sub.trialEndsAt).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: 'long' })
+  }
+  if (!sub.renewalDate) return ''
+  const limit = new Date(`${sub.renewalDate}T23:59:59`)
+  limit.setDate(limit.getDate() + (sub.graceDays || 7))
+  return limit.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: 'long' })
+})
 
 function onScroll() {
   const el = scroller.value
@@ -53,11 +73,15 @@ watch(() => route.fullPath, () => {
         <div class="tb__right">
           <LangSwitch />
           <NotificationBell />
-          <div v-if="session.name" class="tb__user"><span class="tb__av">{{ session.initials }}</span><span>{{ session.name }}</span></div>
         </div>
         <div class="tb__bar"><span :style="{ transform: `scaleX(${progress})` }"></span></div>
       </header>
       <main ref="scroller" class="content" @scroll.passive="onScroll">
+        <div v-if="graceBanner && route.path !== '/subscriptions'" class="grace-banner" :class="{ 'grace-banner--trial': isTrial }">
+          <i class="pi" :class="isTrial ? 'pi-gift' : 'pi-exclamation-triangle'"></i>
+          <span>{{ isTrial ? t('sub.bannerTrial', { date: graceDate }) : t('sub.bannerPending', { date: graceDate }) }}</span>
+          <router-link to="/subscriptions" class="grace-banner__link">{{ isTrial ? t('subscription.contract') : t('subscription.retryPayment') }}</router-link>
+        </div>
         <router-view v-slot="{ Component, route: r }">
           <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
         </router-view>
@@ -68,6 +92,9 @@ watch(() => route.fullPath, () => {
 
 <style>
 body { margin: 0; }
+.grace-banner{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 16px;border-radius:10px;background:#fdf4e0;border:1px solid #efd9a8;color:#9a6d10;font-size:.85rem;font-family:var(--ta-font)}
+.grace-banner--trial{background:#e8f1fb;border-color:#bcd4ef;color:#2c5d97}
+.grace-banner__link{margin-left:auto;color:#9a6d10;font-weight:600;text-decoration:underline;white-space:nowrap}
 #app { border-inline: 0; }
 .shell{display:flex;height:100vh;overflow:hidden;background:var(--ta-bg);font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4;text-align:left}
 .shell__main{flex:1;min-width:0;display:flex;flex-direction:column}
@@ -82,7 +109,7 @@ body { margin: 0; }
 .content::-webkit-scrollbar{width:8px}
 .content::-webkit-scrollbar-thumb{background:var(--ta-brand);border-radius:8px}
 
-/* Responsive: topbar compacta en móvil */
+/* Responsive: compact topbar on mobile */
 .tb__left{display:flex;align-items:center;gap:12px;min-width:0}
 .tb__burger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--ta-line);border-radius:9px;background:var(--ta-surface);color:var(--ta-text);font-size:15px;cursor:pointer;transition:background .2s,border-color .2s;flex:none}
 .tb__burger:hover{border-color:var(--ta-brand);color:var(--ta-brand);background:#f2f8f4}

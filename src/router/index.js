@@ -1,8 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import routes from './routes.js'
+import routes, { installGuard } from './routes.js'
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 })
 
+// Access control: session (IAM) + subscription state (Subscription).
+installGuard(router)
+
+export default router
