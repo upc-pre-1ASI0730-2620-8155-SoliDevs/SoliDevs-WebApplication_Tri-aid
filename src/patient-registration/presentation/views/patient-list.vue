@@ -1,16 +1,38 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { store, ageOf, fmtDateTime } from '../../application/patient-store.js'
 import { docLabel } from '../../application/document-types.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
+import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
+import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 
 const q = ref('')
+const triageApi = new TriageApi()
+const specialtyApi = new SpecialtyAssignmentApi()
+
+// Episodes with a confirmed classification and episodes already referred
+// to a specialty, loaded once so every row can show its triage status.
+const confirmedEpisodes = ref(new Set())
+const referredEpisodes = ref(new Set())
+
+onMounted(async () => {
+  try {
+    const [rc, rr] = await Promise.all([triageApi.getClassifications(), specialtyApi.getReferrals()])
+    confirmedEpisodes.value = new Set((rc.data || []).filter(c => c.state === 'Confirmed').map(c => String(c.episodeId)))
+    referredEpisodes.value = new Set((rr.data || []).map(r => String(r.episodeId)))
+  } catch (e) { console.error(e) }
+})
 
 const rows = computed(() => {
   const map = new Map()
   for (const e of store.episodes) {
     const r = map.get(e.key)
-    if (r) { r.visits++; r.last = e } else map.set(e.key, { key: e.key, visits: 1, last: e })
+    const row = r || { key: e.key, visits: 0, last: e }
+    row.visits++
+    row.last = e
+    row.referred = referredEpisodes.value.has(String(e.id))
+    row.confirmed = confirmedEpisodes.value.has(String(e.id))
+    if (!r) map.set(e.key, row)
   }
   return [...map.values()].sort((a, b) => b.last.arrival.localeCompare(a.last.arrival))
 })
@@ -59,9 +81,8 @@ const fullName = p => `${p.surnames}, ${p.names}`
           </div>
           <span class="pl-visits">{{ visitsText(r.visits) }}</span>
           <span class="pl-meta">
-            <span v-if="r.last.classifiedLevelCode" class="pl-lv" :style="{ background: r.last.classifiedLevelColor }">{{ r.last.classifiedLevelCode }}</span>
-            <span class="pl-st" :class="{ ok: r.last.referred, warn: r.last.confirmed && !r.last.referred }">
-              {{ r.last.referred ? t('pl.status.referred') : (r.last.confirmed ? t('pl.status.toRefer') : t('pl.status.pending')) }}
+            <span class="pl-st" :class="{ ok: r.referred, warn: r.confirmed && !r.referred }">
+              {{ r.referred ? t('pl.status.referred') : (r.confirmed ? t('pl.status.toRefer') : t('pl.status.pending')) }}
             </span>
           </span>
           <i class="pi pi-angle-right pl-go"></i>
