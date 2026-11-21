@@ -1,3 +1,11 @@
+## [Unreleased]
+
+### Added
+- Registration shows a "waking up the server" notice when the API takes long to answer.
+
+### Fixed
+- The trial subscription is created with its renewal date and grace period.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
