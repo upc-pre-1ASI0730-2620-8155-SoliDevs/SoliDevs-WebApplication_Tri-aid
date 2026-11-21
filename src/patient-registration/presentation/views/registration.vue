@@ -57,9 +57,12 @@ function validate() {
 }
 
 const saving = ref(false)
+// Render puts the API to sleep after idle time; the first request of the day can take about a minute.
+const wakingUp = ref(false)
 async function submit() {
   if (!validate() || saving.value) return
   saving.value = true
+  const wakeTimer = setTimeout(() => { wakingUp.value = true }, 4000)
   try {
     const ep = await registerEpisode({
       sinDni: f.sinDni,
@@ -76,6 +79,8 @@ async function submit() {
   } catch (e) {
     notify({ type: 'error', title: t('rg.e.save'), detail: e.response?.data?.message })
   } finally {
+    clearTimeout(wakeTimer)
+    wakingUp.value = false
     saving.value = false
   }
 }
@@ -165,7 +170,7 @@ function reset() {
       </label>
 
       <div class="rg-actions">
-        <button class="ta-btn" @click="submit">{{ t('rg.submit') }}</button>
+        <button class="ta-btn" :disabled="saving" @click="submit">{{ wakingUp ? t('rg.wakingUp') : t('rg.submit') }}</button>
       </div>
     </section>
   </div>
