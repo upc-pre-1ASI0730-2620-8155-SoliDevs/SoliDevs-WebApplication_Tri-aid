@@ -561,5 +561,12 @@
   "register.nextAccount": "Continue to my account",
   "suspended.contactAdmin": "Payments are managed by your institution administrator. Let them know to regularize the subscription.",
   "app.wakingUp": "Waking the server up… (first access of the day can take 1 min)",
-  "rg.wakingUp": "Waking the server up… (first access of the day can take 1 min)"
+  "rg.wakingUp": "Waking the server up… (first access of the day can take 1 min)",
+  "alerting.ackError": "Cannot acknowledge an already escalated alert",
+  "reports.stReferred": "Referred",
+  "referral.spec.TraumaShock": "Trauma Shock",
+  "reports.sev.critical": "Critical",
+  "reports.sev.warning": "Warning",
+  "reports.sev.resolved": "Resolved",
+  "reports.sev.escalated": "Escalated"
 }
