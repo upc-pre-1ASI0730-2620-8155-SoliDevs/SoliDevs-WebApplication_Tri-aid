@@ -559,5 +559,7 @@
   "pf.portal.pass": "Contraseña temporal",
   "pf.portal.note": "Entréguela al paciente: le servirá para su primer ingreso (usuario: DNI o correo) y podrá reemplazarla desde el portal.",
   "register.nextAccount": "Continuar con mi cuenta",
-  "suspended.contactAdmin": "El pago lo gestiona el administrador de tu institución. Notifícale para regularizar la suscripción."
+  "suspended.contactAdmin": "El pago lo gestiona el administrador de tu institución. Notifícale para regularizar la suscripción.",
+  "app.wakingUp": "Despertando el servidor… (el primer acceso del día puede tardar 1 min)",
+  "rg.wakingUp": "Despertando el servidor… (el primer acceso del día puede tardar 1 min)"
 }
