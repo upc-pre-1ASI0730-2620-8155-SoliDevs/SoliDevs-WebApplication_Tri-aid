@@ -1,14 +1,14 @@
 # Tri-Aid Web Application (`SoliDevs-WebApplication_Tri-aid`)
 
 ## Overview
-Tri-Aid is a Vue 3 + Vite web application that supports the triage process in hospital and clinic emergency rooms. Triage staff register patients, capture vital signs from linked measurement devices, receive a suggested priority level, confirm or adjust it, and refer each patient to a medical specialty, with alerts when a vital sign is out of range.
+Tri-Aid is a Vue 3 + Vite web application that supports the triage process in hospital and clinic emergency rooms. Triage staff register patients, capture vital signs from linked measurement devices, receive a suggested priority level, confirm or adjust it, and refer each patient to a medical specialty, with incidents when a vital sign is out of range.
 
 The code is organized with a domain-driven design (DDD) style: each business capability lives in its own bounded context, with domain, application, infrastructure and presentation layers.
 
 Deployed application: https://triaid-solidevs.web.app
 
 ## Goals
-- Support the triage workflow end to end: registration, vital signs, classification, referral and alerts.
+- Support the triage workflow end to end: registration, vital signs, classification, referral and incidents.
 - Keep each bounded context isolated, with domain concepts explicit (`entity`, `event`, `resource`, `assembler`, `service`, `store`).
 - Isolate clinical data per institution and control access by session, role and subscription state.
 
@@ -108,7 +108,7 @@ src/
 - Issues the referral voucher and shows the queue per specialty.
 
 ### Incidents
-- Generates incidents when a vital sign is outside its safe range.
+- Raises incidents when a vital sign is outside its safe range.
 - Shows them in the incidents center and in the notification bell, where staff can acknowledge or escalate them.
 
 ### Subscription

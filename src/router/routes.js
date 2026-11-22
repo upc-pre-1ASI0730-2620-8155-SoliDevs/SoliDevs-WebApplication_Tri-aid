@@ -18,7 +18,7 @@ export default [
   { path: '/patient-registration/:episode', component: () => import('../patient-registration/presentation/views/patient-file.vue'), meta: { titleKey: 'pf.title' } },
   { path: '/triage-classification', name: 'triage-classification-bc', children: triageClassificationRoutes },
   { path: '/specialty-assignment', name: 'specialty-assignment-bc', children: specialtyAssignmentRoutes },
-  { path: '/incidents', component: () => import('../incidents/presentation/views/incidents-center-view.vue'), meta: { titleKey: 'nav.alerts' } },
+  { path: '/incidents', component: () => import('../incidents/presentation/views/incidents-center-view.vue'), meta: { titleKey: 'nav.incidents' } },
   { path: '/reports', name: 'reports-bc', children: reportsRoutes },
   { path: '/vital-signs-capture', name: 'vital-signs-bc', children: vitalSignsRoutes },
   { path: '/devices', redirect: '/vital-signs-capture/devices' },

@@ -25,7 +25,7 @@ This document records the key architectural decisions of the Tri-Aid web applica
 Accepted
 
 ### Context
-The triage workflow crosses several business capabilities (patient registration, vital signs, classification, referral, alerts, access and subscriptions). The team splits the work by capability, so the code must let each one evolve without breaking the others.
+The triage workflow crosses several business capabilities (patient registration, vital signs, classification, referral, incidents, access and subscriptions). The team splits the work by capability, so the code must let each one evolve without breaking the others.
 
 ### Decision
 Organize `src` by bounded context: `iam`, `patient-registration`, `vital-signs-capture`, `triage-classification`, `specialty-assignment`, `incidents` and `subscription`, plus `shared`. Each context uses up to four layers:
@@ -72,7 +72,7 @@ Use **Vue 3** with Single-File Components and `<script setup>`, bundled with **V
 Accepted
 
 ### Context
-Several views share the same data: the sidebar shows the signed-in user, the notification bell shows alerts produced while classifying a patient, and the dashboard reads patients, classifications and referrals.
+Several views share the same data: the sidebar shows the signed-in user, the notification bell shows incidents produced while classifying a patient, and the dashboard reads patients, classifications and referrals.
 
 ### Decision
 Use Vue's own `reactive()` and `computed()` to build one store module per context, without an additional state library:
@@ -217,7 +217,7 @@ Use **Vue I18n** in composition mode with `src/locales/en.json` and `src/locales
 Accepted
 
 ### Context
-The priority suggestion, the safe vital sign ranges and the specialty rules are business rules, not interface logic. The triage level is used by classification, referral, alerts and the dashboard.
+The priority suggestion, the safe vital sign ranges and the specialty rules are business rules, not interface logic. The triage level is used by classification, referral, incidents and the dashboard.
 
 ### Decision
 - Keep business rules as domain services: `Nt158Engine` (Triage Classification), `SpecialtyRules` (Specialty Assignment) and `SAFE_VITAL_RANGES` with `findOutOfRangeVitals` (Incidents).

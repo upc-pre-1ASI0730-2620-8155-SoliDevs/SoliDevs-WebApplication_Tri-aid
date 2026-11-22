@@ -20,7 +20,7 @@ export function toBellItem(i) {
     return {
         id: i.id,
         level,
-        title: i.title || (i.vitalSign ? `${i.vitalSign}: ${i.value ?? ''}` : 'Alerta'),
+        title: i.title || (i.vitalSign ? `${i.vitalSign}: ${i.value ?? ''}` : 'Incidencia'),
         detail: i.detail || (i.patientName ? `${i.patientName}${i.safeRange ? ' · ' + i.safeRange : ''}` : ''),
         time,
         read: i.read ?? (severity === 'resolved' || severity === 'escalated'),
