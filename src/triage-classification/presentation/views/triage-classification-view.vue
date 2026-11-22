@@ -7,9 +7,9 @@ import { docLabel } from '../../../patient-registration/application/document-typ
 import { notify } from '../../../shared/application/toast-store.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { session } from '../../../shared/application/demo-session.js'
-import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
-import { pushAlerts } from '../../../alerting/application/alert-store.js'
-import { findOutOfRangeVitals } from '../../../alerting/domain/services/vital-range-rules.js'
+import { IncidentsService } from '../../../incidents/infrastructure/incidents.service.js'
+import { pushIncidents } from '../../../incidents/application/incident-store.js'
+import { findOutOfRangeVitals } from '../../../incidents/domain/services/vital-range-rules.js'
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import PriorityBadge from '../components/priority-badge.vue'
 import TriageGuideModal from '../components/triage-guide-modal.vue'
@@ -137,14 +137,14 @@ async function confirmClassification() {
   classification.value = r.data
   syncEpisodeLevel()
   try {
-    const alerting = new AlertingService()
-    const generated = await alerting.generateForEpisode({
+    const incidents = new IncidentsService()
+    const generated = await incidents.generateForEpisode({
       episode: { id: ep.value.id, arrival: ep.value.arrival },
       patient: p.value,
       outOfRange: findOutOfRangeVitals(ep.value.vitals),
       levelCode: levelDisplay(current.value)?.code
     })
-    pushAlerts(generated.data)
+    pushIncidents(generated.data)
   } catch (e) { console.error(e) }
   const min = cycleMinutes(ep.value)
   notify({
