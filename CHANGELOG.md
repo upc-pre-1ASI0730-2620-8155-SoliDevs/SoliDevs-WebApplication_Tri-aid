@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Acknowledge failures on escalated incidents are reported to the user.
 
+## [3.4.0] - 2026-11-25
+
+### Changed
+- **Breaking — Bounded context rename (Alerting → Incidents):** aligned with the `feature/incident-refactor` branch of the TriAid Platform API.
+  - Folder `src/alerting` → `src/incidents`; `Alert` → `Incident`, `AlertingApi` → `IncidentsApi`, `AlertingService` → `IncidentsService`, `alertStore` → `incidentStore`, `pushAlerts` → `pushIncidents`.
+  - Route `/alerting` → `/incidents`; endpoint path `VITE_ALERTS_ENDPOINT_PATH` → `VITE_INCIDENTS_ENDPOINT_PATH="/incidents"`.
+  - UI vocabulary: i18n keys `alerting.*` → `incidents.*`, `nav.alerts` → `nav.incidents`, `reports.mAlerts`/`alertLog`/`noAlerts` → `mIncidents`/`incidentLog`/`noIncidents`; every visible text now reads "Incidencias" / "Incidents" (nav, bell, center, reports, login, suspended, plan features).
+  - View and store variables renamed (`activeAlerts` → `activeIncidents`, `displayAlerts` → `displayIncidents`, `acknowledgeAlert` → `acknowledgeIncident`, `playAlertSound` → `playIncidentSound`, `alerts` → `incidents` in reports).
+
 ## [3.0.0] - 2026-11-12
 
 ### Added
