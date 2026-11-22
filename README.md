@@ -58,12 +58,12 @@ src/
     infrastructure/             # SpecialtyAssignmentApi, assemblers, resources, service
     presentation/               # Assignment view, symptom autocomplete, voucher dialog and routes
 
-  alerting/                     # Alerting bounded context
-    domain/model/               # Alert entity
+  incidents/                    # Incidents bounded context
+    domain/model/               # Incident entity
     domain/services/            # Safe vital sign ranges
-    application/                # Alert store for the notification bell
-    infrastructure/             # AlertingApi, AlertingService
-    presentation/               # Alert center view and notification bell
+    application/                # Incident store for the notification bell
+    infrastructure/             # IncidentsApi, IncidentsService
+    presentation/               # Incidents center view and notification bell
 
   subscription/                 # Subscription bounded context
     domain/model/               # Plan and Subscription entities
@@ -107,9 +107,9 @@ src/
 - Refers the classified patient to a specialty, supported by a coded symptom catalog.
 - Issues the referral voucher and shows the queue per specialty.
 
-### Alerting
-- Generates alerts when a vital sign is outside its safe range.
-- Shows them in the alert center and in the notification bell, where staff can acknowledge or escalate them.
+### Incidents
+- Generates incidents when a vital sign is outside its safe range.
+- Shows them in the incidents center and in the notification bell, where staff can acknowledge or escalate them.
 
 ### Subscription
 - Manages the plan catalog, the trial period, checkout with a simulated payment gateway and the payment history.
@@ -188,7 +188,7 @@ Main variables:
 - `VITE_DEVICES_ENDPOINT_PATH`, `VITE_SYMPTOMS_ENDPOINT_PATH`
 - `VITE_CLASSIFICATIONS_ENDPOINT_PATH`
 - `VITE_REFERRALS_ENDPOINT_PATH`, `VITE_SPECIALTIES_ENDPOINT_PATH`, `VITE_VOUCHERS_ENDPOINT_PATH`
-- `VITE_ALERTS_ENDPOINT_PATH`
+- `VITE_INCIDENTS_ENDPOINT_PATH`
 - `VITE_PLANS_ENDPOINT_PATH`, `VITE_SUBSCRIPTIONS_ENDPOINT_PATH`
 - `VITE_USERS_ENDPOINT_PATH`, `VITE_SESSIONS_ENDPOINT_PATH`
 
@@ -196,7 +196,7 @@ If the fake backend runs on another port, update `VITE_TRIAGE_PLATFORM_API_URL` 
 
 ## Routing Notes
 - Public routes: `/login`, `/register`, `/recuperar` and `/acceso-suspendido`.
-- Protected routes: `/panel`, `/patient-registration/*`, `/vital-signs-capture/*`, `/triage-classification/*`, `/specialty-assignment/*`, `/alerting`, `/reports/*`, `/subscriptions/*`, `/users` and `/profile`.
+- Protected routes: `/panel`, `/patient-registration/*`, `/vital-signs-capture/*`, `/triage-classification/*`, `/specialty-assignment/*`, `/incidents`, `/reports/*`, `/subscriptions/*`, `/users` and `/profile`.
 - `/subscriptions` and `/users` are only available to administrators.
 - When the subscription is overdue, navigation is limited to `/subscriptions` and `/acceso-suspendido`.
 

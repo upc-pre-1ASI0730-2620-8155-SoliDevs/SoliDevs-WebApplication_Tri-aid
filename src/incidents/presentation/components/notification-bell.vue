@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { gsap } from 'gsap'
-import { alertStore, unreadCount, pushAlerts } from '../../application/alert-store.js'
-import { AlertingService } from '../../infrastructure/alerting.service.js'
+import { incidentStore, unreadCount, pushIncidents } from '../../application/incident-store.js'
+import { IncidentsService } from '../../infrastructure/incidents.service.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const open = ref(false)
@@ -10,7 +10,7 @@ const root = ref(null)
 const bell = ref(null)
 let rings = null
 
-const latest = computed(() => alertStore.items.slice(0, 5))
+const latest = computed(() => incidentStore.items.slice(0, 5))
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function toggle() {
@@ -58,12 +58,12 @@ onMounted(() => {
   loadPersisted()
 })
 
-/** Loads persisted active alerts once so the badge matches the Alerting center. */
+/** Loads persisted active incidents once so the badge matches the Incidents center. */
 async function loadPersisted() {
-  if (alertStore.items.length) return
+  if (incidentStore.items.length) return
   try {
-    const { data } = await new AlertingService().getActiveAlerts()
-    pushAlerts((data || []).filter(a => a.severity !== 'resolved'))
+    const { data } = await new IncidentsService().getActiveIncidents()
+    pushIncidents((data || []).filter(a => a.severity !== 'resolved'))
   } catch (e) { console.error(e) }
 }
 onBeforeUnmount(() => {
@@ -110,7 +110,7 @@ onBeforeUnmount(() => {
         </div>
 
         <footer class="nb__foot" data-in>
-          <router-link to="/alerting" @click="open = false">{{ t('bell.goto') }} <i class="pi pi-arrow-right"></i></router-link>
+          <router-link to="/incidents" @click="open = false">{{ t('bell.goto') }} <i class="pi pi-arrow-right"></i></router-link>
         </footer>
       </div>
     </Transition>

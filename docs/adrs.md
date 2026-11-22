@@ -28,10 +28,10 @@ Accepted
 The triage workflow crosses several business capabilities (patient registration, vital signs, classification, referral, alerts, access and subscriptions). The team splits the work by capability, so the code must let each one evolve without breaking the others.
 
 ### Decision
-Organize `src` by bounded context: `iam`, `patient-registration`, `vital-signs-capture`, `triage-classification`, `specialty-assignment`, `alerting` and `subscription`, plus `shared`. Each context uses up to four layers:
-1. **Domain**: entities, domain events and domain services (`Patient`, `Episode`, `Classification`, `Referral`, `Alert`, `Nt158Engine`).
-2. **Application**: reactive stores that hold state and coordinate use cases (`iamStore`, `subscriptionStore`, `alertStore`).
-3. **Infrastructure**: API gateways, services, assemblers and resources (`TriageApi`, `AlertingService`, `ClassificationAssembler`).
+Organize `src` by bounded context: `iam`, `patient-registration`, `vital-signs-capture`, `triage-classification`, `specialty-assignment`, `incidents` and `subscription`, plus `shared`. Each context uses up to four layers:
+1. **Domain**: entities, domain events and domain services (`Patient`, `Episode`, `Classification`, `Referral`, `Incident`, `Nt158Engine`).
+2. **Application**: reactive stores that hold state and coordinate use cases (`iamStore`, `subscriptionStore`, `incidentStore`).
+3. **Infrastructure**: API gateways, services, assemblers and resources (`TriageApi`, `IncidentsService`, `ClassificationAssembler`).
 4. **Presentation**: views, components and route modules.
 
 `panel` and `reports` only have a presentation layer, because they display data owned by other contexts.
@@ -80,7 +80,7 @@ Use Vue's own `reactive()` and `computed()` to build one store module per contex
 - `subscriptionStore` (plans and current subscription).
 - Patient Registration `store` (patients and episodes).
 - `deviceStore` and the vitals store functions (devices and readings).
-- `alertStore` (notification bell items).
+- `incidentStore` (notification bell items).
 
 Services are kept with `markRaw()` inside the stores so they are not made reactive.
 
@@ -152,7 +152,7 @@ Use assemblers and resources in the infrastructure layer to translate between pa
 - Triage Classification: `ClassificationAssembler` and `ClassificationResource`.
 - Specialty Assignment: `ReferralAssembler`, `ReferralResource`, `VoucherAssembler` and `VoucherResource`.
 
-Other contexts (IAM, Alerting, Subscription) map payloads to entities inside their service classes.
+Other contexts (IAM, Incidents, Subscription) map payloads to entities inside their service classes.
 
 ### Consequences
 - **Positive:**
@@ -220,7 +220,7 @@ Accepted
 The priority suggestion, the safe vital sign ranges and the specialty rules are business rules, not interface logic. The triage level is used by classification, referral, alerts and the dashboard.
 
 ### Decision
-- Keep business rules as domain services: `Nt158Engine` (Triage Classification), `SpecialtyRules` (Specialty Assignment) and `SAFE_VITAL_RANGES` with `findOutOfRangeVitals` (Alerting).
+- Keep business rules as domain services: `Nt158Engine` (Triage Classification), `SpecialtyRules` (Specialty Assignment) and `SAFE_VITAL_RANGES` with `findOutOfRangeVitals` (Incidents).
 - Move the triage level catalog to `shared/domain/shared-kernel/triage-level.js` so contexts do not import each other's domain.
 - Model domain events as classes (`PatientRegisteredEvent`, `VitalsConfirmedEvent`) and publish them through the shared event bus (`event-bus.js`).
 

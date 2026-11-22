@@ -1,6 +1,6 @@
 /**
  * Minimal application event bus used to propagate domain events across
- * bounded contexts (e.g. VitalsConfirmedEvent consumed by Alerting).
+ * bounded contexts (e.g. VitalsConfirmedEvent consumed by Incidents).
  */
 const listeners = {}
 
