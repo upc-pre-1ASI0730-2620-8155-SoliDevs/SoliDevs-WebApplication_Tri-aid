@@ -6,7 +6,7 @@ import PortalLayout from './components/portal-layout.vue'
 
 export default [
   {
-    path: 'portal',
+    path: '/portal',
     meta: { layout: 'portal-public' },
     children: [
       { path: '', name: 'portal-login', component: () => import('./views/portal-login-view.vue'), meta: { titleKey: 'portal.login.title', portalPublic: true } },

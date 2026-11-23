@@ -27,7 +27,7 @@ export default [
   { path: '/subscriptions', name: 'subscription-bc', children: subscriptionRoutes },
   { path: '/users', component: () => import('../iam/presentation/views/users-view.vue'), meta: { titleKey: 'nav.users' } },
   { path: '/profile', component: () => import('../iam/presentation/views/profile-view.vue'), meta: { titleKey: 'nav.profile' } },
-  { path: '/', name: 'patient-portal', children: patientPortalRoutes }
+  ...patientPortalRoutes
 ]
 
 /** Access control: session + subscription state decide each navigation. */

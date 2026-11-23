@@ -56,11 +56,17 @@ watch(() => route.fullPath, () => {
 <template>
   <ToastHost v-if="!isPortal" />
   <LangSwitch v-if="isAuth" class="ls--float" />
-  <!-- Patient portal: the layout stays mounted; only its inner router-view transitions. -->
-  <router-view v-else-if="isPortal" />
-  <router-view v-else-if="isAuth" v-slot="{ Component, route: r }">
-    <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
-  </router-view>
+
+  <template v-if="isPortal">
+    <!-- Patient portal: the layout stays mounted; only its inner router-view transitions. -->
+    <router-view />
+  </template>
+  <template v-else-if="isAuth">
+    <!-- Staff auth pages (login, register, suspended). -->
+    <router-view v-slot="{ Component, route: r }">
+      <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
+    </router-view>
+  </template>
 
   <div v-else class="shell">
     <transition name="fade">
