@@ -692,5 +692,6 @@
   "portal.voucher.helpText": "Si perdiste el comprobante o cambió tu consultorio, acude a admisión con tu documento. Ellos pueden generar uno nuevo.",
   "portal.data.document": "Documento",
   "portal.data.birth": "Nacimiento",
-  "portal.data.email": "E-mail"
+  "portal.data.email": "E-mail",
+  "portal.timeline.referral": "Derivación"
 }

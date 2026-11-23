@@ -54,8 +54,8 @@ onMounted(async () => {
       <div class="pp-col main"><div class="pp-empty">{{ t('portal.voucher.notYet') }}</div></div>
     </div>
 
-    <div v-else class="pp-cols">
-      <!-- ── comprobante ── -->
+    <div v-else class="pp-cols two">
+      <!-- ── el documento ── -->
       <div class="pp-col main">
         <section class="pp-receipt">
           <div class="pp-receipt__head">
@@ -80,27 +80,18 @@ onMounted(async () => {
                 <div class="pp-qr__code">{{ episodeCode }}</div>
               </div>
             </div>
+            <!-- pie del ticket: el recorrido en una línea -->
+            <p class="pp-receipt__foot">
+              <span>{{ t('portal.timeline.arrival') }} <b>{{ fmtTime(episode?.arrivalTime) }}</b></span>
+              <span>{{ t('portal.timeline.priority') }} <b>{{ cls?.confirmedAt ? fmtTime(cls.confirmedAt) : '—' }}</b></span>
+              <span>{{ t('portal.timeline.referral') }} <b>{{ fmtTime(referral.referredAt) }}</b></span>
+            </p>
           </div>
         </section>
       </div>
 
-      <!-- ── historial ── -->
+      <!-- ── apoyo ── -->
       <div class="pp-col">
-        <section class="pp-card">
-          <span class="pp-card__label">{{ t('portal.voucher.history') }}</span>
-          <div class="pp-vrow">
-            <span class="pp-vrow__l"><i class="pi pi-clock"></i>{{ t('portal.timeline.arrival') }}</span>
-            <span class="pp-vrow__v"><b>{{ fmtTime(episode?.arrivalTime) }}</b></span>
-          </div>
-          <div class="pp-vrow">
-            <span class="pp-vrow__l"><i class="pi pi-wave-pulse"></i>{{ t('portal.timeline.vitals') }}</span>
-            <span class="pp-vrow__v"><b>—</b></span>
-          </div>
-          <div class="pp-vrow" v-if="cls">
-            <span class="pp-vrow__l"><i class="pi pi-check-circle"></i>{{ t('portal.timeline.priority') }}</span>
-            <span class="pp-vrow__v"><b>{{ cls.roman }} · {{ t(`portal.level.${cls.levelKey}.name`) }}</b><small>{{ cls.confirmedAt ? t('portal.voucher.confirmedBy', { time: fmtTime(cls.confirmedAt) }) : '' }}</small></span>
-          </div>
-        </section>
         <section class="pp-card">
           <span class="pp-card__label">{{ t('portal.voucher.doctorSees') }}</span>
           <dl class="pp-kv">
@@ -109,10 +100,6 @@ onMounted(async () => {
             <dt>{{ t('portal.data.birth') }}</dt><dd class="mono">{{ fmtDate(patient?.birthDate) }}</dd>
           </dl>
         </section>
-      </div>
-
-      <!-- ── qué hacer ── -->
-      <div class="pp-col">
         <section class="pp-card">
           <span class="pp-card__label">{{ t('portal.voucher.whatToDo') }}</span>
           <ul class="pp-steps">

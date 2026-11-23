@@ -692,5 +692,6 @@
   "portal.voucher.helpText": "If you lost the voucher or your room changed, go to admission with your ID. They can issue a new one.",
   "portal.data.document": "Document",
   "portal.data.birth": "Birth",
-  "portal.data.email": "E-mail"
+  "portal.data.email": "E-mail",
+  "portal.timeline.referral": "Referral"
 }
