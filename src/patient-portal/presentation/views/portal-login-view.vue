@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { gsap } from 'gsap'
 import { patientPortalStore } from '../../application/patient-portal-store.js'
+import LangSwitch from '../../../shared/presentation/components/lang-switch.vue'
 import '../styles/portal.css'
 
 const router = useRouter()
@@ -49,6 +50,7 @@ async function submit() {
 
 <template>
   <div class="pp-login">
+    <LangSwitch class="ls--float" />
     <div class="pp-login__grid">
       <div>
         <span class="pp-login__brand">

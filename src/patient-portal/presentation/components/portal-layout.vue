@@ -9,6 +9,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { patientPortalStore } from '../../application/patient-portal-store.js'
+import LangSwitch from '../../../shared/presentation/components/lang-switch.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -50,12 +51,15 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
           </router-link>
         </nav>
 
-        <span class="pp__user">
+        <span class="pp__head-right">
+          <LangSwitch />
+          <span class="pp__user">
           <span class="pp__av">{{ store.session?.initials || store.overview?.patient?.initials || '…' }}</span>
           <span class="pp__nm">{{ store.session?.fullName || store.overview?.patient?.fullName }}</span>
           <button class="pp__out" type="button" @click="signOut">
             <i class="pi pi-sign-out"></i><span>{{ t('portal.signOut') }}</span>
           </button>
+          </span>
         </span>
       </div>
     </header>
@@ -87,7 +91,8 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
 .pp__tab .pi{font-size:15px}
 .pp__tab:hover{color:var(--ta-text);background:#e7f0ea}
 .pp__tab--active{color:var(--ta-brand);background:#d3f1d9}
-.pp__user{justify-self:end;display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 5px;border:1px solid var(--ta-line);border-radius:999px;background:var(--ta-surface);font-size:13.5px}
+.pp__head-right{justify-self:end;display:inline-flex;align-items:center;gap:14px}
+.pp__user{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 5px;border:1px solid var(--ta-line);border-radius:999px;background:var(--ta-surface);font-size:13.5px}
 .pp__av{width:28px;height:28px;border-radius:50%;background:#d3f1d9;color:var(--ta-brand);display:grid;place-items:center;font-family:var(--ta-font);font-weight:600;font-size:12.5px}
 .pp__nm{padding-right:4px;font-weight:500}
 .pp__out{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:0;border-radius:999px;background:transparent;color:var(--ta-muted);font-size:13px;cursor:pointer;transition:background .2s,color .2s;font-family:inherit}
