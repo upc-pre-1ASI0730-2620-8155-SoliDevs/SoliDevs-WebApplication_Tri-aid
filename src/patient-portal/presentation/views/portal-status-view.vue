@@ -22,15 +22,6 @@ const referral = computed(() => o.value?.referral)
 const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString(locale.value === 'en' ? 'en-US' : 'es-PE', { hour: '2-digit', minute: '2-digit' }) : '—'
 const fmtDate = iso => iso ? new Date(iso).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
 
-const stateKey = computed(() => {
-  if (referral.value) return referral.value.isWaiting ? 'referred' : 'attended'
-  const s = episode.value?.state || ''
-  if (s === 'Waiting') return 'waiting'
-  if (s === 'InTriage') return 'triage'
-  if (s === 'Attended') return 'attended'
-  return 'waiting'
-})
-const stateClass = computed(() => `pp-status--${stateKey.value === 'referred' ? 'referred' : stateKey.value}`)
 
 /** Steps of the care timeline derived from the overview. */
 const timeline = computed(() => {
@@ -128,10 +119,6 @@ onMounted(async () => {
               <span class="pp-tl-step__h">{{ s.now ? t('portal.timeline.now') : s.time || '—' }}</span>
             </div>
           </div>
-        </section>
-        <section class="pp-card">
-          <span class="pp-card__label">{{ t('portal.status.state') }}</span>
-          <span class="pp-status" :class="stateClass">{{ t(`portal.state.${stateKey}`) }}</span>
         </section>
       </div>
 
