@@ -10,9 +10,12 @@ import LangSwitch from './shared/presentation/components/lang-switch.vue'
 import { t, locale } from './shared/application/i18n.js'
 import { session } from './shared/application/demo-session.js'
 import { subscriptionStore } from './subscription/application/subscription-store.js'
+import { patientPortalStore } from './patient-portal/application/patient-portal-store.js'
 
 const route = useRoute()
 const isAuth = computed(() => route.meta.layout === 'auth')
+// The patient portal renders bare: its own layout handles the header.
+const isPortal = computed(() => route.meta.layout === 'portal' || route.meta.layout === 'portal-public')
 const sbOpen = ref(false)
 function onKey(e) { if (e.key === 'Escape') sbOpen.value = false }
 onMounted(() => window.addEventListener('keydown', onKey))
@@ -51,10 +54,11 @@ watch(() => route.fullPath, () => {
 </script>
 
 <template>
-  <ToastHost />
+  <ToastHost v-if="!isPortal" />
   <LangSwitch v-if="isAuth" class="ls--float" />
-  <router-view v-if="isAuth" v-slot="{ Component, route: r }">
-    <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
+  <router-view v-if="isAuth || isPortal" v-slot="{ Component, route: r }">
+    <Transition v-if="isPortal" name="pp-page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
+    <Transition v-else name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
   </router-view>
 
   <div v-else class="shell">

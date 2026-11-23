@@ -21,6 +21,9 @@ import { subscriptionStore } from '../../subscription/application/subscription-s
 export async function accessGuard(to) {
     const path = to.path
 
+    // The patient portal is a separate entry point with its own session guard.
+    if (path === '/portal' || path.startsWith('/portal/')) return null
+
     const publicPaths = ['/login', '/recuperar', '/register']
     if (publicPaths.includes(path)) {
         // Cliente con sesion que llega desde el landing con intencion de

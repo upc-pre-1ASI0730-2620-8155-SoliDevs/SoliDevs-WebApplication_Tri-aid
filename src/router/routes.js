@@ -4,7 +4,9 @@ import specialtyAssignmentRoutes from '../specialty-assignment/presentation/spec
 import reportsRoutes from '../reports/presentation/reports-routes.js'
 import vitalSignsRoutes from '../vital-signs-capture/presentation/vital-signs-routes.js'
 import subscriptionRoutes from '../subscription/presentation/subscription-routes.js'
+import patientPortalRoutes from '../patient-portal/presentation/patient-portal-routes.js'
 import { accessGuard } from '../shared/application/access-guard.js'
+import { patientPortalStore } from '../patient-portal/application/patient-portal-store.js'
 
 export default [
   { path: '/', redirect: '/login' },
@@ -24,7 +26,8 @@ export default [
   { path: '/devices', redirect: '/vital-signs-capture/devices' },
   { path: '/subscriptions', name: 'subscription-bc', children: subscriptionRoutes },
   { path: '/users', component: () => import('../iam/presentation/views/users-view.vue'), meta: { titleKey: 'nav.users' } },
-  { path: '/profile', component: () => import('../iam/presentation/views/profile-view.vue'), meta: { titleKey: 'nav.profile' } }
+  { path: '/profile', component: () => import('../iam/presentation/views/profile-view.vue'), meta: { titleKey: 'nav.profile' } },
+  { path: '/', name: 'patient-portal', children: patientPortalRoutes }
 ]
 
 /** Access control: session + subscription state decide each navigation. */
@@ -32,5 +35,13 @@ export function installGuard(router) {
   router.beforeEach(async to => {
     const redirect = await accessGuard(to)
     return redirect ? { path: redirect } : true
+  })
+  router.beforeEach(to => {
+    if (to.path !== '/portal' && !to.path.startsWith('/portal/')) return true
+    patientPortalStore.restore()
+    const inner = to.meta.layout === 'portal'
+    if (inner && !patientPortalStore.isSignedIn) return { path: '/portal' }
+    if (!inner && to.path === '/portal' && patientPortalStore.isSignedIn) return { path: '/portal/estado' }
+    return true
   })
 }
