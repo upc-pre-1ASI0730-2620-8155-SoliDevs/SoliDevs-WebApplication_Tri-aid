@@ -54,8 +54,6 @@ onMounted(async () => {
   gsap.fromTo(cards, { opacity: 0, y: 18 }, { opacity: 1, y: 0, stagger: .07, duration: .45, ease: 'power3.out', clearProps: 'transform,opacity' })
   const steps = document.querySelectorAll('.pp-tl-step')
   if (steps.length) gsap.fromTo(steps, { opacity: 0, x: -10 }, { opacity: 1, x: 0, stagger: .12, duration: .4, ease: 'power3.out', delay: .25, clearProps: 'transform,opacity' })
-  const now = document.querySelector('.pp-tl-step--now .pp-tl-step__d')
-  if (now) gsap.to(now, { boxShadow: '0 0 0 6px rgba(10,107,56,.14)', duration: 1.4, repeat: -1, yoyo: true, ease: 'sine.inOut' })
 })
 </script>
 
