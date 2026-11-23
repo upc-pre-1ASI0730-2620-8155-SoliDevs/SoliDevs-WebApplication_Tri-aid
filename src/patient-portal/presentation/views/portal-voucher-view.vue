@@ -19,6 +19,7 @@ const episode = computed(() => o.value?.episode)
 const cls = computed(() => o.value?.classification)
 const referral = computed(() => o.value?.referral)
 
+const fmtDate = iso => iso ? new Date(iso).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
 const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString(locale.value === 'en' ? 'en-US' : 'es-PE', { hour: '2-digit', minute: '2-digit' }) : '—'
 const episodeCode = computed(() => `EP-${String(episode.value?.id ?? 0).padStart(4, '0')}`)
 const shiftLabel = computed(() => {
@@ -99,17 +100,13 @@ onMounted(async () => {
             <span class="pp-vrow__l"><i class="pi pi-check-circle"></i>{{ t('portal.timeline.priority') }}</span>
             <span class="pp-vrow__v"><b>{{ cls.roman }} · {{ t(`portal.level.${cls.levelKey}.name`) }}</b><small>{{ cls.confirmedAt ? t('portal.voucher.confirmedBy', { time: fmtTime(cls.confirmedAt) }) : '' }}</small></span>
           </div>
-          <div class="pp-vrow">
-            <span class="pp-vrow__l"><i class="pi pi-arrow-right"></i>{{ t('portal.timeline.waiting') }}</span>
-            <span class="pp-vrow__v"><b>{{ referral.specialty }}</b><small>{{ t('portal.voucher.roomAt', { room: referral.room, time: fmtTime(referral.referredAt) }) }}</small></span>
-          </div>
         </section>
         <section class="pp-card">
           <span class="pp-card__label">{{ t('portal.voucher.doctorSees') }}</span>
           <dl class="pp-kv">
             <dt>{{ t('portal.voucher.patient') }}</dt><dd>{{ patient?.fullName }}</dd>
             <dt>{{ t('portal.data.document') }}</dt><dd class="mono">{{ patient?.dni ? `DNI ${patient.dni}` : '—' }}</dd>
-            <dt>{{ t('portal.data.birth') }}</dt><dd class="mono">{{ patient?.birthDate }}</dd>
+            <dt>{{ t('portal.data.birth') }}</dt><dd class="mono">{{ fmtDate(patient?.birthDate) }}</dd>
           </dl>
         </section>
       </div>
@@ -120,7 +117,7 @@ onMounted(async () => {
           <span class="pp-card__label">{{ t('portal.voucher.whatToDo') }}</span>
           <ul class="pp-steps">
             <li><span class="n">1</span><span>{{ t('portal.voucher.step1') }}</span></li>
-            <li><span class="n">2</span><span>{{ t('portal.voucher.step2', { room: referral.room }) }}</span></li>
+            <li><span class="n">2</span><span>{{ t('portal.voucher.step2') }}</span></li>
             <li><span class="n">3</span><span>{{ t('portal.voucher.step3') }}</span></li>
           </ul>
         </section>

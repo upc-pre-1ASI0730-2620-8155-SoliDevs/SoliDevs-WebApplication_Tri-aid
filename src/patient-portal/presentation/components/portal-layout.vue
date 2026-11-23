@@ -46,13 +46,12 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
         </span>
 
         <nav v-if="!isMobile" class="pp__tabs" aria-label="Portal del paciente">
-          <router-link v-for="tab in tabs" :key="tab.key" :to="tab.to" class="pp__tab" active-class="pp__tab--active">
+          <router-link v-for="tab in tabs" :key="tab.key" :to="tab.to" class="pp__tab" active-class="pp__tab--active" exact-active-class="pp__tab--active">
             <i class="pi" :class="tab.icon"></i><span>{{ t(`portal.nav.${tab.key}`) }}</span>
           </router-link>
         </nav>
 
         <span class="pp__head-right">
-          <LangSwitch />
           <span class="pp__user">
           <span class="pp__av">{{ store.session?.initials || store.overview?.patient?.initials || '…' }}</span>
           <span class="pp__nm">{{ store.session?.fullName || store.overview?.patient?.fullName }}</span>
@@ -60,6 +59,7 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
             <i class="pi pi-sign-out"></i><span>{{ t('portal.signOut') }}</span>
           </button>
           </span>
+          <LangSwitch />
         </span>
       </div>
     </header>
@@ -89,6 +89,7 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
 .pp__tabs{display:flex;gap:4px}
 .pp__tab{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--ta-muted);text-decoration:none;transition:color .2s,background .2s}
 .pp__tab .pi{font-size:15px}
+.pp__tab:focus{outline:none}.pp__tab:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
 .pp__tab:hover{color:var(--ta-text);background:#e7f0ea}
 .pp__tab--active{color:var(--ta-brand);background:#d3f1d9}
 .pp__head-right{justify-self:end;display:inline-flex;align-items:center;gap:14px}
@@ -100,6 +101,7 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
 .pp__out .pi{font-size:13px}
 .pp__main{flex:1;width:100%;max-width:1360px;margin:0 auto;padding:28px 40px 40px}
 .pp__tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ta-line);background:color-mix(in srgb,var(--ta-surface) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px -16px rgba(16,46,36,.18)}
+.pp__tabbar-link:focus{outline:none}.pp__tabbar-link:focus-visible{outline:2px solid var(--ta-accent);outline-offset:-2px}
 .pp__tabbar-link{display:grid;justify-items:center;gap:4px;min-height:56px;padding:9px 0 8px;font-size:12px;font-weight:500;color:var(--ta-muted);text-decoration:none;white-space:nowrap}
 .pp__tabbar-link .pi{font-size:19px}
 .pp__tabbar-link--active{color:var(--ta-brand)}
