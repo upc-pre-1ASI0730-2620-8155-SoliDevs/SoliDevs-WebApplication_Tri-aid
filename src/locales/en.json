@@ -693,5 +693,15 @@
   "portal.data.document": "Document",
   "portal.data.birth": "Birth",
   "portal.data.email": "E-mail",
-  "portal.timeline.referral": "Referral"
+  "portal.timeline.referral": "Referral",
+  "pf.portal.subActive": "The patient can already sign in to the portal with DNI or e-mail and the access code.",
+  "pf.portal.noteActive": "The code is not shown again. If the patient forgot it, generate a new one and hand it over.",
+  "pf.portal.regenerate": "Generate new code",
+  "pf.portal.regenerated": "New code generated. Hand it to the patient now; it will not be shown again.",
+  "rg.issued.title": "Portal access issued",
+  "rg.issued.sub": "The patient can now check their care from the portal.",
+  "rg.issued.user": "Signs in with",
+  "rg.issued.code": "Access code",
+  "rg.issued.note": "Write it down or hand it over now: for security it will not be shown again. If lost, generate a new one from the patient file.",
+  "rg.issued.go": "Got it, open file"
 }

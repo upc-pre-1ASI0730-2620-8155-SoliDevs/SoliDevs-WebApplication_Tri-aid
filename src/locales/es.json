@@ -693,5 +693,15 @@
   "portal.data.document": "Documento",
   "portal.data.birth": "Nacimiento",
   "portal.data.email": "E-mail",
-  "portal.timeline.referral": "Derivación"
+  "portal.timeline.referral": "Derivación",
+  "pf.portal.subActive": "El paciente ya puede entrar al portal con su DNI o correo y su código de acceso.",
+  "pf.portal.noteActive": "El código no vuelve a mostrarse. Si el paciente lo olvidó, genera uno nuevo y entrégaselo.",
+  "pf.portal.regenerate": "Generar nuevo código",
+  "pf.portal.regenerated": "Nuevo código generado. Entrégaselo al paciente ahora; no volverá a mostrarse.",
+  "rg.issued.title": "Acceso al portal entregado",
+  "rg.issued.sub": "El paciente ya puede consultar su atención desde el portal.",
+  "rg.issued.user": "Entra con",
+  "rg.issued.code": "Código de acceso",
+  "rg.issued.note": "Anótalo o entrégaselo ahora: por seguridad no volverá a mostrarse. Si lo pierde, genera uno nuevo desde la ficha del paciente.",
+  "rg.issued.go": "Entendido, abrir ficha"
 }
