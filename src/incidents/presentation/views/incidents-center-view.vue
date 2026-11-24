@@ -269,9 +269,7 @@ const onDoneEnter = (el, done) => {
             {{ t('incidents.escalate') }}
           </button>
         </div>
-        <span v-else class="al-state" :class="`al-state--${incident.severity}`">
-          {{ t(`incidents.state.${incident.severity}`) }}
-        </span>
+
 
         <Transition :css="false" @enter="onDoneEnter">
           <div v-if="doneId === incident.id" class="al-done" aria-hidden="true">
@@ -305,10 +303,7 @@ const onDoneEnter = (el, done) => {
 </template>
 
 <style scoped>
-.al-state{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600}
-.al-state::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.al-state--resolved{background:#d3f1d9;color:var(--ta-brand)}
-.al-state--escalated{background:#f3e8d3;color:#b25410}
+
 .al-page{display:grid;gap:16px}
 .al-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 20px;flex-wrap:wrap}
 .al-head__main{display:grid;gap:12px}
