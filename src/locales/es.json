@@ -379,7 +379,6 @@
   "subscription.overdueNote": "El periodo de gracia de {days} días venció. Regulariza el pago para evitar la suspensión del acceso.",
   "subscription.retryPayment": "Reintentar pago",
   "subscription.regularize": "Regularizar pago",
-  "subscription.simulateRenewal": "Simular renovación",
   "subscription.rejectedNote": "El pago fue rechazado por el gateway. La suscripción permanece sin activar.",
   "subscription.plans": "Planes disponibles",
   "subscription.cycle_monthly": "Mensual",

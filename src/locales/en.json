@@ -379,7 +379,6 @@
   "subscription.overdueNote": "The {days}-day grace period has expired. Regularize the payment to avoid access suspension.",
   "subscription.retryPayment": "Retry payment",
   "subscription.regularize": "Regularize payment",
-  "subscription.simulateRenewal": "Simulate renewal",
   "subscription.rejectedNote": "The payment was rejected by the gateway. The subscription remains inactive.",
   "subscription.plans": "Available plans",
   "subscription.cycle_monthly": "Monthly",

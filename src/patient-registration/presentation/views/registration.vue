@@ -166,11 +166,15 @@ function reset() {
           <input id="phone" class="ta-input" :class="{ bad: err.phone }" v-model="f.phone" inputmode="numeric" maxlength="9" placeholder="987654321" @keyup.enter="submit" />
           <small v-if="err.phone" class="ta-err">{{ err.phone }}</small>
         </div>
-        <div class="rg-f rg-wide">
+        <div class="rg-f">
           <label class="ta-label" for="address">{{ t('rg.address') }}</label>
           <input id="address" class="ta-input" v-model="f.address" @keyup.enter="submit" />
-          <div class="field"><label for="email">{{ t('rg.email') }} <small class="opt">{{ t('rg.optional') }}</small></label>
-            <input id="email" type="email" class="ta-input" v-model="f.email" @keyup.enter="submit" /></div>
+          <small v-if="err.address" class="ta-err">{{ err.address }}</small>
+        </div>
+        <div class="rg-f">
+          <label class="ta-label" for="email">{{ t('rg.email') }} <small class="opt">{{ t('rg.optional') }}</small></label>
+          <input id="email" type="email" class="ta-input" v-model="f.email" placeholder="correo@ejemplo.com" @keyup.enter="submit" />
+          <small v-if="err.email" class="ta-err">{{ err.email }}</small>
         </div>
       </div>
 
