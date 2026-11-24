@@ -40,16 +40,22 @@ onMounted(async () => {
 const episodes = computed(() => [...store.episodes].reverse())
 
 const recent = computed(() => episodes.value.slice(0, 6).map(e => {
-  const c = classifications.value.find(c => c.episodeId === e.id)
+  // The API returns episodeId as a string; the episode id is a string in the store too,
+  // but compare explicitly so a numeric id from another source still matches.
+  const c = classifications.value.find(c => String(c.episodeId) === String(e.id))
   const l = c ? levelByCode(c.level?.split('_')[0]) : null
+  // A classification counts as confirmed when its state is Confirmed, Modified
+  // (nurse adjusted the level) or anything past PendingConfirmation.
+  const state = String(c?.state || '')
+  const confirmed = !!c && state !== 'PendingConfirmation' && state !== ''
   return {
     id: e.id,
     name: `${e.patient?.surnames ?? ''}, ${e.patient?.names ?? ''}`,
     time: fmtTime(e.arrival),
     level: l?.code || null,
     color: l?.color || null,
-    confirmed: c?.isConfirmed || false,
-    classificationConfirmed: !!c?.isConfirmed,
+    confirmed,
+    classificationConfirmed: confirmed,
     referred: !!e.referred
   }
 }))
@@ -58,7 +64,7 @@ const stats = computed(() => ([
   { key: 'admissions', value: episodes.value.length, icon: 'pi pi-users', label: t('panel.stat.admissions') },
   { key: 'pending', value: episodes.value.length - classifications.value.length, icon: 'pi pi-hourglass', label: t('panel.stat.pending') },
   { key: 'classified', value: classifications.value.length, icon: 'pi pi-check-square', label: t('panel.stat.classified') },
-  { key: 'critical', value: classifications.value.filter(c => c.level?.startsWith('I') || c.level?.startsWith('II')).length, icon: 'pi pi-exclamation-circle', label: t('panel.stat.critical') }
+  { key: 'critical', value: classifications.value.filter(c => /^(I|II)_/.test(String(c.level || ''))).length, icon: 'pi pi-exclamation-circle', label: t('panel.stat.critical') }
 ]))
 
 const specName = key => t('referral.spec.' + key)
