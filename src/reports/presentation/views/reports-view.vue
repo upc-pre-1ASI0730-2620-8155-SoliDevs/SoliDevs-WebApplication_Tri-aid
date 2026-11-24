@@ -17,13 +17,15 @@ const toDate = ref('')
 const episodes = ref([])
 const classifications = ref([])
 const alerts = ref([])
+const referrals = ref([])
 const queues = ref([])
 
 onMounted(async () => {
   try {
-    const [rc, ra] = await Promise.all([triageApi.getClassifications(), alertingService.getAudit()])
+    const [rc, ra, rr] = await Promise.all([triageApi.getClassifications(), alertingService.getAudit(), specialtyApi.getReferrals()])
     classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) }))
     alerts.value = ra.data || []
+    referrals.value = rr.data || []
   } catch (e) { console.error(e) }
   episodes.value = [...store.episodes]
   try {
@@ -42,8 +44,12 @@ const inRangeEpisodes = computed(() => episodes.value.filter(e => {
 const careLog = computed(() => inRangeEpisodes.value.map(e => {
   const c = classifications.value.find(c => c.episodeId === e.id)
   const l = c ? levelByCode(c.level?.split('_')[0]) : null
-  const arrival = new Date(e.arrival)
-  const end = c?.confirmedAt ? new Date(c.confirmedAt) : null
+  const referred = referrals.value.some(r => String(r.episodeId) === String(e.id))
+  // The API returns ArrivalTime and ConfirmedAt as UTC without an offset;
+  // mark them as UTC so the browser computes the right elapsed time.
+  const asUtc = v => (/Z$|[+-]\d{2}:\d{2}$/.test(v) ? v : `${v}Z`)
+  const arrival = new Date(asUtc(e.arrival))
+  const end = c?.confirmedAt ? new Date(asUtc(c.confirmedAt)) : null
   const cycle = end ? Math.max(0, Math.round((end - arrival) / 60000)) : null
   return {
     id: e.id,
@@ -52,7 +58,8 @@ const careLog = computed(() => inRangeEpisodes.value.map(e => {
     date: String(e.arrival).slice(0, 10),
     level: l?.code || null,
     levelColor: l?.color || null,
-    confirmed: !!c?.isConfirmed,
+    confirmed: c?.state === 'Confirmed',
+    referred,
     cycle
   }
 }).sort((a, b) => (a.date + a.arrivalTime).localeCompare(b.date + b.arrivalTime)))
@@ -128,8 +135,8 @@ const metrics = computed(() => {
               <span v-else class="rp-nolv">{{ t('reports.noLevel') }}</span>
             </td>
             <td>
-              <span class="rp-st" :class="{ ok: e.confirmed }">
-                {{ e.confirmed ? t('reports.stConfirmed') : t('reports.stPending') }}
+              <span class="rp-st" :class="{ ok: e.confirmed || e.referred }">
+                {{ e.referred ? t('reports.stReferred') : (e.confirmed ? t('reports.stConfirmed') : t('reports.stPending')) }}
               </span>
             </td>
             <td>{{ e.cycle === null ? '—' : e.cycle + ' min' }}</td>
@@ -161,7 +168,7 @@ const metrics = computed(() => {
             <td class="rp-patient">{{ a.patientName }}</td>
             <td>{{ a.vitalSign }}</td>
             <td>{{ a.value }}</td>
-            <td><span class="rp-sev" :class="'sev--' + a.severity">{{ a.severity }}</span></td>
+            <td><span class="rp-sev" :class="'sev--' + a.severity">{{ t('reports.sev.' + a.severity) }}</span></td>
           </tr>
           <tr v-if="!alertsInRange.length">
             <td colspan="5" class="rp-empty">{{ t('reports.noAlerts') }}</td>
