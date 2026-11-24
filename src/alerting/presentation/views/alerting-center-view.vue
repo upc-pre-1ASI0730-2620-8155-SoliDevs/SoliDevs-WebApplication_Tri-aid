@@ -123,15 +123,23 @@ const confirmAcknowledge = async (directId = null) => {
   doneId.value = id;
   await new Promise(r => setTimeout(r, 1500));
 
-  const r = await alertingService.acknowledgeAlert(id, session.name || null);
-  if (r.ok) {
-    const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
-    if (i !== -1) {
-      activeAlerts.value[i] = r.data;
-      if (!r.data.value.includes(t('alerting.backToNormal'))) {
-        activeAlerts.value[i].value = `${t('alerting.backToNormal')} · ${r.data.value}`;
+  try {
+    const r = await alertingService.acknowledgeAlert(id, session.name || null);
+    if (r.ok) {
+      const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
+      if (i !== -1) {
+        activeAlerts.value[i] = r.data;
+        if (!r.data.value.includes(t('alerting.backToNormal'))) {
+          activeAlerts.value[i].value = `${t('alerting.backToNormal')} · ${r.data.value}`;
+        }
       }
+    } else {
+      notify({ type: 'error', title: t('alerting.ackError') });
     }
+  } catch (e) {
+    // The API rejects the transition when the alert was already escalated.
+    console.error(e);
+    notify({ type: 'error', title: t('alerting.ackError') });
   }
   setTimeout(() => { if (String(doneId.value) === String(id)) doneId.value = null; }, 400);
 };
