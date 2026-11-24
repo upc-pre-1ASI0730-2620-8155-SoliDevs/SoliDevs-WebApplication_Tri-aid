@@ -162,12 +162,12 @@ function reset() {
           <small v-if="err.sex" class="ta-err">{{ err.sex }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="phone">{{ t('rg.phone') }}</label>
+          <label class="ta-label" for="phone">{{ t('rg.phone') }} <small class="opt">{{ t('rg.optional') }}</small></label>
           <input id="phone" class="ta-input" :class="{ bad: err.phone }" v-model="f.phone" inputmode="numeric" maxlength="9" placeholder="987654321" @keyup.enter="submit" />
           <small v-if="err.phone" class="ta-err">{{ err.phone }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="address">{{ t('rg.address') }}</label>
+          <label class="ta-label" for="address">{{ t('rg.address') }} <small class="opt">{{ t('rg.optional') }}</small></label>
           <input id="address" class="ta-input" v-model="f.address" @keyup.enter="submit" />
           <small v-if="err.address" class="ta-err">{{ err.address }}</small>
         </div>
