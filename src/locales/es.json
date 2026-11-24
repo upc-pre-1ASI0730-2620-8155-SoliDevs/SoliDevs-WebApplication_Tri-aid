@@ -559,5 +559,7 @@
   "pf.portal.pass": "Contraseña temporal",
   "pf.portal.note": "Entréguela al paciente: le servirá para su primer ingreso (usuario: DNI o correo) y podrá reemplazarla desde el portal.",
   "register.nextAccount": "Continuar con mi cuenta",
-  "suspended.contactAdmin": "El pago lo gestiona el administrador de tu institución. Notifícale para regularizar la suscripción."
+  "suspended.contactAdmin": "El pago lo gestiona el administrador de tu institución. Notifícale para regularizar la suscripción.",
+  "alerting.ackError": "No se puede reconocer una alerta ya escalada",
+  "referral.spec.TraumaShock": "Trauma Shock"
 }
