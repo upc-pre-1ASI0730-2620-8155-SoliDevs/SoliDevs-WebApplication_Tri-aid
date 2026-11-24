@@ -717,5 +717,7 @@
   "reports.levelChart.title": "Patients by urgency level",
   "reports.levelChart.sub": "NT-158 distribution for the selected range",
   "reports.levelChart.unclassified": "+{n} unclassified",
-  "reports.levelChart.empty": "No classified patients in the range."
+  "reports.levelChart.empty": "No classified patients in the range.",
+  "incidents.state.resolved": "Resolved",
+  "incidents.state.escalated": "Escalated"
 }

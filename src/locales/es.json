@@ -717,5 +717,7 @@
   "reports.levelChart.title": "Pacientes por nivel de urgencia",
   "reports.levelChart.sub": "Distribución NT-158 del rango consultado",
   "reports.levelChart.unclassified": "+{n} sin clasificar",
-  "reports.levelChart.empty": "Sin pacientes clasificados en el rango."
+  "reports.levelChart.empty": "Sin pacientes clasificados en el rango.",
+  "incidents.state.resolved": "Resuelta",
+  "incidents.state.escalated": "Escalada"
 }

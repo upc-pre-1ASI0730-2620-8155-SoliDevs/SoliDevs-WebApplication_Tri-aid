@@ -126,9 +126,10 @@ const confirmAcknowledge = async (directId = null) => {
   try {
     const r = await incidentsService.acknowledgeIncident(id, session.name || null);
     if (r.ok) {
-      // The incident is resolved: it leaves the board instead of lingering as a
-      // card with an acknowledge button that no longer applies.
-      activeIncidents.value = activeIncidents.value.filter(a => String(a.id) !== String(id));
+      // The card stays on the board as resolved: the "hide resolved" filter and
+      // the actions row (hidden for terminal states) take it from here.
+      const i = activeIncidents.value.findIndex(a => String(a.id) === String(id));
+      if (i !== -1) activeIncidents.value[i] = r.data;
     } else {
       notify({ type: 'error', title: t('incidents.ackError') });
     }
@@ -259,14 +260,18 @@ const onDoneEnter = (el, done) => {
           </template>
         </div>
 
-        <div class="al-actions" v-if="incident.severity !== 'resolved'">
+        <!-- Resolved and escalated are terminal: nothing left to acknowledge or escalate. -->
+        <div class="al-actions" v-if="incident.severity !== 'resolved' && incident.severity !== 'escalated'">
           <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeIncident(incident.id)">
             {{ t('incidents.acknowledge') }}
           </button>
-          <button v-if="incident.severity !== 'escalated'" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
+          <button class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
             {{ t('incidents.escalate') }}
           </button>
         </div>
+        <span v-else class="al-state" :class="`al-state--${incident.severity}`">
+          {{ t(`incidents.state.${incident.severity}`) }}
+        </span>
 
         <Transition :css="false" @enter="onDoneEnter">
           <div v-if="doneId === incident.id" class="al-done" aria-hidden="true">
@@ -300,6 +305,10 @@ const onDoneEnter = (el, done) => {
 </template>
 
 <style scoped>
+.al-state{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600}
+.al-state::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.al-state--resolved{background:#d3f1d9;color:var(--ta-brand)}
+.al-state--escalated{background:#f3e8d3;color:#b25410}
 .al-page{display:grid;gap:16px}
 .al-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 20px;flex-wrap:wrap}
 .al-head__main{display:grid;gap:12px}
@@ -317,6 +326,9 @@ const onDoneEnter = (el, done) => {
 .al-stack{display:grid;gap:12px}
 .al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line);position:relative;overflow:hidden}
 .al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
+/* Terminal states read as closed: soft border, plain surface. */
+.al-card.sev--escalated{border-left-color:#b25410;background:var(--ta-surface)}
+.al-card.sev--resolved{border-left-color:var(--ta-brand);background:var(--ta-surface);opacity:.85}
 .al-card.sev--warning{border-left-color:#d97706}
 .al-card.sev--escalated{border-left-color:#6d28d9}
 .al-card.sev--resolved{border-left-color:var(--ta-brand)}

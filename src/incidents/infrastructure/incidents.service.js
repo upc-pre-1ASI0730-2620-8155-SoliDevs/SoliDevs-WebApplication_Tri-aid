@@ -19,11 +19,10 @@ export class IncidentsService {
     async getActiveIncidents() {
         await delay(120)
         const response = await this.api.getIncidents()
-        // Only open incidents: resolved and escalated ones are terminal states
-        // and must leave the board once the staff acted on them.
+        // Every incident comes back: the board offers "hide resolved" so the
+        // staff can review what was already acted upon during the shift.
         const list = (response.data || [])
             .map(i => new Incident(i))
-            .filter(i => !['resolved', 'escalated'].includes(String(i.severity).toLowerCase()))
             .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)))
         return { data: list }
     }
