@@ -105,7 +105,6 @@ const metrics = computed(() => {
       <div class="rp-stat crit"><b>{{ metrics.critical }}</b><span>{{ t('reports.mCritical') }}</span></div>
       <div class="rp-stat"><b>{{ metrics.incidents }}</b><span>{{ t('reports.mIncidents') }}</span></div>
       <div class="rp-stat"><b>{{ metrics.avgCycle === null ? '—' : metrics.avgCycle + ' min' }}</b><span>{{ t('reports.mAvgCycle') }}</span></div>
-      <div class="rp-stat"><b>{{ metrics.maxCycle === null ? '—' : metrics.maxCycle + ' min' }}</b><span>{{ t('reports.mMaxCycle') }}</span></div>
     </section>
 
     <section class="ta-card rp-card">

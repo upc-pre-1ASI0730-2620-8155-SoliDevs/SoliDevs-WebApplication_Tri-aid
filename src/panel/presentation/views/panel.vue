@@ -20,15 +20,20 @@ onMounted(async () => {
     classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) }))
   } catch (e) { console.error(e) }
   try {
-    const rs = await specialtyApi.getSpecialties()
-    queues.value = (rs.data || []).map(s => ({ ...s, live: 0 }))
-    const rr = await specialtyApi.getReferrals()
+    // Waiting patients per specialty, counted from the live referrals. The API
+    // returns the specialty by name, so match on name (not on the catalog key).
+    const [rs, rr] = await Promise.all([specialtyApi.getSpecialties(), specialtyApi.getReferrals()])
+    const count = new Map()
     for (const r of (rr.data || [])) {
-      if (r.state === 'Attended') continue
-      const q = queues.value.find(q => q.key === r.specialty)
-      if (q) q.live++
+      if (String(r.state).toLowerCase() !== 'waiting') continue
+      const name = (r.specialty || '').trim().toLowerCase()
+      if (name) count.set(name, (count.get(name) || 0) + 1)
     }
-    queues.value = queues.value.map(q => ({ ...q, waiting: (q.waiting || 0) + q.live }))
+    // Only specialties with someone waiting: an all-zero list is noise.
+    queues.value = (rs.data || [])
+      .map(s => ({ ...s, waiting: count.get(String(s.name).trim().toLowerCase()) || 0 }))
+      .filter(q => q.waiting > 0)
+      .sort((a, b) => b.waiting - a.waiting)
   } catch (e) { console.error(e) }
 })
 
@@ -95,9 +100,10 @@ const specName = key => t('referral.spec.' + key)
     <section class="ta-card pn-card pn-in" style="--d:2">
       <h3 class="ta-h">{{ t('referral.queuesTitle') }}</h3>
       <p class="ta-sub">{{ t('referral.queuesSub') }}</p>
-      <div class="rc-chips">
-        <span v-for="q in queues" :key="q.key" class="rc-chip">{{ specName(q.key) }} <b>{{ q.waiting }}</b></span>
+      <div v-if="queues.length" class="rc-chips">
+        <span v-for="q in queues" :key="q.key" class="rc-chip">{{ q.name }} <b>{{ q.waiting }}</b></span>
       </div>
+      <p v-else class="pn-empty">{{ t('panel.queuesEmpty') }}</p>
     </section>
   </div>
 </template>
