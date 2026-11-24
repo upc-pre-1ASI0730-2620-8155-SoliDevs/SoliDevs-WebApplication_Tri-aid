@@ -126,13 +126,9 @@ const confirmAcknowledge = async (directId = null) => {
   try {
     const r = await incidentsService.acknowledgeIncident(id, session.name || null);
     if (r.ok) {
-      const i = activeIncidents.value.findIndex(a => String(a.id) === String(id));
-      if (i !== -1) {
-        activeIncidents.value[i] = r.data;
-        if (!r.data.value.includes(t('incidents.backToNormal'))) {
-          activeIncidents.value[i].value = `${t('incidents.backToNormal')} · ${r.data.value}`;
-        }
-      }
+      // The incident is resolved: it leaves the board instead of lingering as a
+      // card with an acknowledge button that no longer applies.
+      activeIncidents.value = activeIncidents.value.filter(a => String(a.id) !== String(id));
     } else {
       notify({ type: 'error', title: t('incidents.ackError') });
     }
