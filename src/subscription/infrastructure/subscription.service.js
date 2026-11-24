@@ -52,6 +52,10 @@ export class SubscriptionService {
             status: 'trial',
             startedAt: new Date().toISOString(),
             trialEndsAt: trialEnds.toISOString(),
+            // The trial renews the day after it ends; the grace period
+            // matches the one the platform applies to every subscription.
+            renewalDate: trialEnds.toISOString(),
+            graceDays: 7,
             paymentMethod: method
         })
         const response = await this.api.createSubscription({ ...draft })
