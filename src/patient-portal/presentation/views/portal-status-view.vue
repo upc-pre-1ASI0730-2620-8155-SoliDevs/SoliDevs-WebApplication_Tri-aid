@@ -31,18 +31,13 @@ const timeline = computed(() => {
   const hasVitals = !!episode.value && cls.value !== null
   steps.push({ key: 'vitals', done: hasVitals, now: !hasVitals && episode.value.state !== 'Waiting', time: '' })
   steps.push({ key: 'priority', done: !!cls.value, now: !!cls.value && !referral.value, time: cls.value?.confirmedAt ? fmtTime(cls.value.confirmedAt) : '' })
-  steps.push({ key: 'waiting', done: false, now: !!referral.value && referral.value.isWaiting, time: '' })
-  steps.push({ key: 'care', done: !!referral.value && !referral.value.isWaiting, now: false, time: '' })
+  const attended = o.value?.isAttended ?? false
+  steps.push({ key: 'waiting', done: attended || !!referral.value, now: !!referral.value && referral.value.isWaiting, time: '' })
+  steps.push({ key: 'care', done: attended, now: false, time: '' })
   return steps
 })
 
-/** Vital signs parsed from the episode record (stored as JSON by the staff client). */
-const vitals = computed(() => {
-  try {
-    const v = episode.value?.vitals ? JSON.parse(episode.value.vitals) : null
-    return v && typeof v === 'object' ? Object.entries(v) : []
-  } catch { return [] }
-})
+const vitals = computed(() => o.value?.vitals)
 
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -73,7 +68,11 @@ onMounted(async () => {
       <div class="pp-col main">
         <section class="pp-hero">
           <small>{{ t('portal.status.careState') }}</small>
-          <template v-if="referral">
+          <template v-if="o.isAttended">
+            <div class="pp-hero__title">{{ t('portal.status.attendedTitle') }}</div>
+            <p class="pp-hero__sub">{{ t('portal.status.attendedSub', { specialty: referral?.specialty ?? '' }) }}</p>
+          </template>
+          <template v-else-if="referral">
             <div class="pp-hero__title">{{ t('portal.status.referredTo', { specialty: referral.specialty }) }}</div>
             <p class="pp-hero__sub">{{ t('portal.status.referredSub') }}</p>
             <div class="pp-hero__room"><span class="l">{{ t('portal.status.room') }}</span><span class="n">{{ referral.room }}</span></div>
@@ -124,10 +123,12 @@ onMounted(async () => {
       <div class="pp-col">
         <section class="pp-card">
           <span class="pp-card__label">{{ t('portal.status.vitals') }}</span>
-          <div v-if="vitals.length" v-for="[k, v] in vitals" :key="k" class="pp-vrow">
-            <span class="pp-vrow__l"><i class="pi pi-chart-line"></i>{{ t(`vital.${k}`, k) }}</span>
-            <span class="pp-vrow__v"><b>{{ v }}</b></span>
-          </div>
+          <template v-if="vitals">
+            <div v-for="r in vitals.rows" :key="r.key" class="pp-vrow">
+              <span class="pp-vrow__l"><i class="pi" :class="r.icon"></i>{{ t(`portal.vital.${r.key}`) }}</span>
+              <span class="pp-vrow__v"><b>{{ r.value }} <small style="display:inline;font-family:var(--ta-font)">{{ r.unit }}</small></b><small v-if="r.time">{{ t('portal.vital.measured', { time: r.time }) }}</small></span>
+            </div>
+          </template>
           <p v-else class="pp-empty">{{ t('portal.status.noVitals') }}</p>
         </section>
         <section class="pp-card">

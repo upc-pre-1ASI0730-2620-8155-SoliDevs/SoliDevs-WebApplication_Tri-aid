@@ -4,12 +4,13 @@
  * resolves everything from the token.
  */
 export class PortalOverview {
-    constructor({ patient, episode, classification, referral, queue }) {
+    constructor({ patient, episode, classification, referral, queue, vitals }) {
         this.patient = patient ? new PortalPatient(patient) : null
         this.episode = episode ? new PortalEpisode(episode) : null
         this.classification = classification ? new PortalClassification(classification) : null
         this.referral = referral ? new PortalReferral(referral) : null
         this.queue = queue ? new QueuePosition(queue) : null
+        this.vitals = vitals ? new PortalVitals(vitals) : null
     }
 
     /** True when the episode has a confirmed or suggested NT-158 level. */
@@ -17,6 +18,11 @@ export class PortalOverview {
 
     /** True when the patient was already routed to a specialty. */
     get isReferred() { return this.referral !== null }
+
+    /** True when the patient was already seen: the episode or the referral is closed. */
+    get isAttended() {
+        return this.episode?.state === 'Attended' || (!!this.referral && this.referral.state === 'attended')
+    }
 
     /** True when the episode reached the top of the queue (priority I or II). */
     get isEmergency() { return this.hasPriority && this.classification.level <= 2 }
@@ -98,4 +104,25 @@ export class QueuePosition {
     get behind() { return Math.max(this.total - this.ahead - 1, 0) }
 
     get isNow() { return this.ahead === 0 }
+}
+
+/** Vital signs captured by the staff, as stored on the episode. */
+export class PortalVitals {
+    constructor({ bloodPressure, oxygenSaturation, heartRate, temperature }) {
+        this.bloodPressure = bloodPressure
+        this.oxygenSaturation = oxygenSaturation
+        this.heartRate = heartRate
+        this.temperature = temperature
+    }
+
+    /** Rows ready to render: key, value, unit, time and icon. Only the captured ones. */
+    get rows() {
+        const row = (key, e, unit, icon) => e?.value ? { key, value: e.value, unit, time: e.time || '', icon } : null
+        return [
+            row('bloodPressure', this.bloodPressure, 'mmHg', 'pi-gauge'),
+            row('oxygenSaturation', this.oxygenSaturation, '%', 'pi-tint'),
+            row('heartRate', this.heartRate, 'lpm', 'pi-wave-pulse'),
+            row('temperature', this.temperature, '°C', 'pi-sun')
+        ].filter(Boolean)
+    }
 }

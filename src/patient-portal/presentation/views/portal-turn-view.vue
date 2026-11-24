@@ -97,8 +97,25 @@ onBeforeUnmount(stopPolling)
       </p>
     </header>
 
+    <!-- ya atendido -->
+    <div v-if="o.isAttended" class="pp-cols two">
+      <div class="pp-col main">
+        <section class="pp-hero">
+          <small>{{ t('portal.turn.doneKicker') }}</small>
+          <div class="pp-hero__title">{{ t('portal.turn.doneTitle', { specialty: referral?.specialty ?? '' }) }}</div>
+          <p class="pp-hero__sub">{{ t('portal.turn.doneSub') }}</p>
+        </section>
+      </div>
+      <div class="pp-col">
+        <section class="pp-card">
+          <span class="pp-card__label">{{ t('portal.voucher.title') }}</span>
+          <p style="margin:10px 0 0;font-size:13px;color:var(--ta-muted);line-height:1.5">{{ t('portal.turn.doneVoucher') }}</p>
+        </section>
+      </div>
+    </div>
+
     <!-- aún no derivado -->
-    <div v-if="notReferred" class="pp-cols two">
+    <div v-else-if="notReferred" class="pp-cols two">
       <div class="pp-col main">
         <div class="pp-empty">{{ t('portal.turn.waitReferral') }}</div>
       </div>

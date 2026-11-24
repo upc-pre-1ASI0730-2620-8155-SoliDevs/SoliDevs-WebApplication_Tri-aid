@@ -93,7 +93,7 @@
 .pp-steps li { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; font-size: 13.5px; color: #3d4c44; line-height: 1.5; }
 .pp-steps li .n { width: 26px; height: 26px; border-radius: 50%; background: #d3f1d9; color: var(--ta-brand); display: grid; place-items: center; font-family: var(--ta-mono); font-weight: 600; font-size: 12.5px; }
 .pp-steps li + li { margin-top: 12px; }
-.pp-room-badge { font-family: var(--ta-mono); font-weight: 700; font-size: 28px; line-height: 1; color: var(--ta-brand); padding: 8px 14px; border: 1px solid var(--ta-line); border-radius: 10px; background: #e7f0ea; }
+.pp-room-badge { font-family: var(--ta-mono); font-weight: 700; font-size: 23px; line-height: 1; white-space: nowrap; color: var(--ta-brand); padding: 8px 14px; border: 1px solid var(--ta-line); border-radius: 10px; background: #e7f0ea; }
 
 /* ── Comprobante ── */
 .pp-receipt { border-radius: 15px; overflow: hidden; border: 1px solid var(--ta-line); background: var(--ta-surface); box-shadow: 0 14px 34px -18px rgba(16,46,36,.22); }

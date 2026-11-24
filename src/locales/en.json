@@ -703,5 +703,16 @@
   "rg.issued.user": "Signs in with",
   "rg.issued.code": "Access code",
   "rg.issued.note": "Write it down or hand it over now: for security it will not be shown again. If lost, generate a new one from the patient file.",
-  "rg.issued.go": "Got it, open file"
+  "rg.issued.go": "Got it, open file",
+  "portal.status.attendedTitle": "You have been seen",
+  "portal.status.attendedSub": "Your care in {specialty} is complete. Follow any instructions the staff gave you and head home.",
+  "portal.vital.bloodPressure": "Blood pressure",
+  "portal.vital.oxygenSaturation": "Blood oxygen",
+  "portal.vital.heartRate": "Heart rate",
+  "portal.vital.temperature": "Temperature",
+  "portal.vital.measured": "measured {time}",
+  "portal.turn.doneKicker": "Care completed",
+  "portal.turn.doneTitle": "You were seen in {specialty}",
+  "portal.turn.doneSub": "You are no longer in the queue. Thank you for using Tri-Aid.",
+  "portal.turn.doneVoucher": "Your voucher is still available in the Voucher tab in case you need it for a follow-up."
 }
