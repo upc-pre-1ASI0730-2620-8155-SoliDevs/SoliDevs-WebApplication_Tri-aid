@@ -326,23 +326,20 @@ const onDoneEnter = (el, done) => {
 .al-stack{display:grid;gap:12px}
 .al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line);position:relative;overflow:hidden}
 .al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
-/* Terminal states read as closed: soft border, plain surface. */
+.al-card.sev--warning{border-left-color:#d97706}
 .al-card.sev--escalated{border-left-color:#b25410;background:var(--ta-surface)}
 .al-card.sev--resolved{border-left-color:var(--ta-brand);background:var(--ta-surface);opacity:.85}
-.al-card.sev--warning{border-left-color:#d97706}
-.al-card.sev--escalated{border-left-color:#6d28d9}
-.al-card.sev--resolved{border-left-color:var(--ta-brand)}
 .al-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .al-dot{font-size:8px;color:var(--ta-muted)}
 .sev--critical .al-dot{color:#b42318;animation:al-pulse 1.6s infinite}
 .sev--warning .al-dot{color:#d97706}
-.sev--escalated .al-dot{color:#6d28d9}
+.sev--escalated .al-dot{color:#b25410}
 .sev--resolved .al-dot{color:var(--ta-brand)}
 @keyframes al-pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 .al-name{font-size:14px;font-weight:600;color:var(--ta-text)}
 .al-prio{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
 .al-sound{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#b42318;background:#fee4e2;border-radius:999px;padding:3px 9px}
-.al-esc{font-size:10.5px;font-weight:600;color:#6d28d9;background:#ede9fe;border-radius:999px;padding:3px 9px}
+.al-esc{font-size:10.5px;font-weight:600;color:#b25410;background:#fdf0e3;border-radius:999px;padding:3px 9px}
 .al-res{font-size:10.5px;color:var(--ta-muted)}
 .al-meta{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
 .al-value{font-size:13px;display:flex;align-items:center;gap:6px}
