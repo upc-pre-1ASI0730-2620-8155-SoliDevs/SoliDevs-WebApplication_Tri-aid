@@ -4,6 +4,7 @@ import { store, fmtTime } from '../../../patient-registration/application/patien
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
 import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
+import LevelDistributionChart from '../components/level-distribution-chart.vue'
 import { IncidentsService } from '../../../incidents/infrastructure/incidents.service.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { t } from '../../../shared/application/i18n.js'
@@ -21,11 +22,14 @@ const referrals = ref([])
 const queues = ref([])
 
 onMounted(async () => {
-  try {
-    const [rc, ra, rr] = await Promise.all([triageApi.getClassifications(), incidentsService.getAudit(), specialtyApi.getReferrals()])
-    classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) }))
-    incidents.value = ra.data || []
-    referrals.value = rr.data || []  } catch (e) { console.error(e) }
+  // Each source loads on its own: one failing endpoint (for example the incidents
+  // audit before the backend exposes it) must not leave the whole report empty.
+  const load = async (fn, apply) => { try { apply(await fn()) } catch (e) { console.error(e) } }
+  await Promise.all([
+    load(() => triageApi.getClassifications(), rc => { classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) })) }),
+    load(() => incidentsService.getAudit(), ra => { incidents.value = ra.data || [] }),
+    load(() => specialtyApi.getReferrals(), rr => { referrals.value = rr.data || [] })
+  ])
   episodes.value = [...store.episodes]
   try {
     const rs = await specialtyApi.getSpecialties()
@@ -41,7 +45,8 @@ const inRangeEpisodes = computed(() => episodes.value.filter(e => {
 }))
 
 const careLog = computed(() => inRangeEpisodes.value.map(e => {
-  const c = classifications.value.find(c => c.episodeId === e.id)
+  // The API returns episodeId as a string; the episode id is a number.
+  const c = classifications.value.find(c => String(c.episodeId) === String(e.id))
   const l = c ? levelByCode(c.level?.split('_')[0]) : null
   const referred = referrals.value.some(r => String(r.episodeId) === String(e.id))
   // The API returns ArrivalTime and ConfirmedAt as UTC without an offset;
@@ -106,6 +111,8 @@ const metrics = computed(() => {
       <div class="rp-stat"><b>{{ metrics.incidents }}</b><span>{{ t('reports.mIncidents') }}</span></div>
       <div class="rp-stat"><b>{{ metrics.avgCycle === null ? '—' : metrics.avgCycle + ' min' }}</b><span>{{ t('reports.mAvgCycle') }}</span></div>
     </section>
+
+    <LevelDistributionChart :log="careLog" />
 
     <section class="ta-card rp-card">
       <h3 class="ta-h">{{ t('reports.logTitle') }}</h3>

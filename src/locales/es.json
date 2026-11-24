@@ -713,5 +713,9 @@
   "portal.turn.doneTitle": "Ya fuiste atendida en {specialty}",
   "portal.turn.doneSub": "Ya no estás en la cola. Gracias por usar Tri-Aid.",
   "portal.turn.doneVoucher": "Tu comprobante sigue disponible en la pestaña Comprobante por si lo necesitas para un control posterior.",
-  "panel.queuesEmpty": "Nadie en espera ahora mismo."
+  "panel.queuesEmpty": "Nadie en espera ahora mismo.",
+  "reports.levelChart.title": "Pacientes por nivel de urgencia",
+  "reports.levelChart.sub": "Distribución NT-158 del rango consultado",
+  "reports.levelChart.unclassified": "+{n} sin clasificar",
+  "reports.levelChart.empty": "Sin pacientes clasificados en el rango."
 }

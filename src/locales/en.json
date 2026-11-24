@@ -713,5 +713,9 @@
   "portal.turn.doneTitle": "You were seen in {specialty}",
   "portal.turn.doneSub": "You are no longer in the queue. Thank you for using Tri-Aid.",
   "portal.turn.doneVoucher": "Your voucher is still available in the Voucher tab in case you need it for a follow-up.",
-  "panel.queuesEmpty": "Nobody waiting right now."
+  "panel.queuesEmpty": "Nobody waiting right now.",
+  "reports.levelChart.title": "Patients by urgency level",
+  "reports.levelChart.sub": "NT-158 distribution for the selected range",
+  "reports.levelChart.unclassified": "+{n} unclassified",
+  "reports.levelChart.empty": "No classified patients in the range."
 }
