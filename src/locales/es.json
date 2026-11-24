@@ -561,5 +561,12 @@
   "register.nextAccount": "Continuar con mi cuenta",
   "suspended.contactAdmin": "El pago lo gestiona el administrador de tu institución. Notifícale para regularizar la suscripción.",
   "app.wakingUp": "Despertando el servidor… (el primer acceso del día puede tardar 1 min)",
-  "rg.wakingUp": "Despertando el servidor… (el primer acceso del día puede tardar 1 min)"
+  "rg.wakingUp": "Despertando el servidor… (el primer acceso del día puede tardar 1 min)",
+  "alerting.ackError": "No se puede reconocer una alerta ya escalada",
+  "reports.stReferred": "Derivado",
+  "referral.spec.TraumaShock": "Trauma Shock",
+  "reports.sev.critical": "Crítica",
+  "reports.sev.warning": "Advertencia",
+  "reports.sev.resolved": "Resuelta",
+  "reports.sev.escalated": "Escalada"
 }
