@@ -79,7 +79,7 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
 </template>
 
 <style scoped>
-.pp{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--ta-bg);color:var(--ta-text);font-family:var(--ta-font);letter-spacing:0;line-height:1.45}
+.pp{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background-color:var(--ta-bg);background-image:linear-gradient(to right,var(--ta-grid) 1px,transparent 1px),linear-gradient(to bottom,var(--ta-grid) 1px,transparent 1px);background-size:44px 44px;color:var(--ta-text);font-family:var(--ta-font);letter-spacing:0;line-height:1.45}
 .pp__head{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--ta-line);background:color-mix(in srgb,var(--ta-surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .pp__head-in{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:28px;padding:10px 40px}
 .pp__brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none}

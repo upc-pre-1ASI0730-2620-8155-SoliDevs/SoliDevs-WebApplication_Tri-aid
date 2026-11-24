@@ -107,7 +107,7 @@ body { margin: 0; }
 .grace-banner--trial{background:#e8f1fb;border-color:#bcd4ef;color:#2c5d97}
 .grace-banner__link{margin-left:auto;color:#9a6d10;font-weight:600;text-decoration:underline;white-space:nowrap}
 #app { border-inline: 0; }
-.shell{display:flex;height:100vh;overflow:hidden;background:var(--ta-bg);font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4;text-align:left}
+.shell{display:flex;height:100vh;overflow:hidden;background-color:var(--ta-bg);background-image:linear-gradient(to right,var(--ta-grid) 1px,transparent 1px),linear-gradient(to bottom,var(--ta-grid) 1px,transparent 1px);background-size:44px 44px;font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4;text-align:left}
 .shell__main{flex:1;min-width:0;display:flex;flex-direction:column}
 .tb{position:relative;flex:none;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:var(--ta-surface);border-bottom:1px solid var(--ta-line);z-index:5}
 .tb__title{font-size:14px;font-weight:600}

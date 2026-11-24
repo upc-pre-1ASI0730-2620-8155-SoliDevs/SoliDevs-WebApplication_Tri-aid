@@ -5,7 +5,7 @@
 .pp-view__head { display: grid; gap: 4px; }
 .pp-view__eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--ta-mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ta-muted); }
 .pp-view__eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--ta-brand); }
-.pp-view__title { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -.01em; color: var(--ta-text); }
+.pp-view__title { margin: 0!important; font-size: 26px!important; font-weight: 600; letter-spacing: -.01em; color: var(--ta-text); font-family: var(--ta-font); }
 .pp-view__sub { margin: 0; font-size: 13px; color: var(--ta-muted); }
 .pp-view__sub .mono { font-family: var(--ta-mono); font-size: 12.5px; }
 
@@ -122,7 +122,7 @@
 .pp-empty { padding: 16px; border-radius: 12px; background: #eef1ef; color: var(--ta-muted); font-size: 13.5px; }
 
 /* ── Acceso ── */
-.pp-login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--ta-bg); font-family: var(--ta-font); color: var(--ta-text); }
+.pp-login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; background-color: var(--ta-bg); background-image: linear-gradient(to right, var(--ta-grid) 1px, transparent 1px), linear-gradient(to bottom, var(--ta-grid) 1px, transparent 1px); background-size: 44px 44px; font-family: var(--ta-font); color: var(--ta-text); }
 .pp-login__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 48px; align-items: center; width: 100%; max-width: 1200px; }
 .pp-login__brand { display: inline-flex; align-items: center; gap: 10px; }
 .pp-login__brand .pp-login__mark { width: 26px; height: 26px; border-radius: 7px; background: var(--ta-brand); color: #eafff3; display: grid; place-items: center; }

@@ -77,7 +77,7 @@ async function submit() {
         </form>
 
         <p class="pp-login__below">
-          <router-link to="/" class="lnk">{{ t('portal.login.noAccess') }}</router-link>
+          <a class="pp-login__help" href="#admision">{{ t('portal.login.noAccess') }}</a>
         </p>
       </div>
 
