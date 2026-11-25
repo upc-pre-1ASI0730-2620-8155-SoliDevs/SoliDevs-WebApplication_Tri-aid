@@ -153,7 +153,11 @@ onMounted(async () => {
   const existing = await service.findByEpisode(id)
   if (existing) {
     referral.value = existing
-    selectedSymptom.value = { id: (existing.symptom || '').split(' — ')[0], es: (existing.symptom || '').split(' — ')[1] || '', en: '' }
+    // A stored symptom is catalogued as "code — name". Free text (legacy or API
+    // referrals) has no code: leave the selector empty instead of inventing a
+    // broken entry that renders as a bare check and dash.
+    const parts = String(existing.symptom || '').split(' — ')
+    selectedSymptom.value = parts.length >= 2 ? { id: parts[0], es: parts.slice(1).join(' — '), en: '' } : null
     suggestion.value = existing.specialty
     selected.value = existing.specialty
     consulted.value = true
