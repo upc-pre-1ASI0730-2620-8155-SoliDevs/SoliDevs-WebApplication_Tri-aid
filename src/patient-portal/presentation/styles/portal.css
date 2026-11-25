@@ -168,3 +168,7 @@
   .pp-qr { flex-direction: column; align-items: flex-start; gap: 14px; }
   .pp-qr__box { width: 112px; height: 112px; }
 }
+
+.pp-qr__dl{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 14px;border:1px solid var(--ta-line);border-radius:999px;background:#fff;color:var(--ta-brand);font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s,border-color .2s}
+.pp-qr__dl:hover{background:#d3f1d9;border-color:var(--ta-brand)}
+.pp-qr__dl .pi{font-size:14px}

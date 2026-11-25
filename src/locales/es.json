@@ -720,5 +720,19 @@
   "reports.levelChart.empty": "Sin pacientes clasificados en el rango.",
   "referral.alreadyReferred": "Ya derivada a",
   "referral.keepCurrent": "Mantener derivación actual",
-  "panel.btnViewReferral": "Ver derivación"
+  "panel.btnViewReferral": "Ver derivación",
+  "pl.scan": "Escanear comprobante",
+  "scanner.title": "Escanear comprobante",
+  "scanner.sub": "Lee el QR del celular del paciente o escribe el código de episodio.",
+  "scanner.hint": "Apunta a la cámara del paciente",
+  "scanner.noCamera": "No se pudo abrir la cámara. Escribe el código abajo.",
+  "scanner.notFound": "Ese código no corresponde a ningún episodio.",
+  "scanner.error": "No se pudo verificar el código.",
+  "scanner.again": "Intentar de nuevo",
+  "scanner.typed": "O escribe el código",
+  "scanner.verify": "Verificar",
+  "scanner.openFile": "Abrir ficha del paciente",
+  "scanner.arrived": "llegó",
+  "scanner.temporary": "Perfil temporal",
+  "portal.voucher.download": "Guardar como imagen"
 }

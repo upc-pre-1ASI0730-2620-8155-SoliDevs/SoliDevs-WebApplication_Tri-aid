@@ -77,6 +77,9 @@ export class SpecialtyAssignmentApi extends BaseApi {
         return this.#symptomsEndpoint.getAll()
     }
 
+    /** Resolves a scanned voucher or episode code into its patient. */
+    verifyVoucher(code) { return this.http.get(`${this.#vouchersEndpoint.endpointPath}/verify/${encodeURIComponent(code)}`) }
+
     getVouchers() {
         return this.#vouchersEndpoint.getAll()
     }

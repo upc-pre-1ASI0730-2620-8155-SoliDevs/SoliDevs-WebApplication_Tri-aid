@@ -27,13 +27,24 @@ const shiftLabel = computed(() => {
   return h < 14 ? t('portal.voucher.morning') : t('portal.voucher.afternoon')
 })
 
-/** QR payload: the episode code the consulting room scans to verify. */
+/** QR payload: the same structured code the staff voucher carries, so the scanner resolves it. */
 const qrSvg = ref('')
 import { ref } from 'vue'
+const qrPayload = computed(() => referral.value
+  ? `TRI-AID|${episode.value?.id}|${referral.value.specialty}|${referral.value.room}|#`
+  : episodeCode.value)
+async function downloadQr() {
+  if (!episode.value) return
+  const url = await QRCode.toDataURL(qrPayload.value, { margin: 2, width: 640, color: { dark: '#0a2118', light: '#ffffff' } })
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `triaid-comprobante-${episodeCode.value}.png`
+  a.click()
+}
 onMounted(async () => {
   if (!store.isSignedIn) return
   if (!o.value) await store.loadOverview()
-  if (episode.value) qrSvg.value = await QRCode.toString(episodeCode.value, { type: 'svg', margin: 0, color: { dark: '#0a2118', light: '#ffffff' } })
+  if (episode.value) qrSvg.value = await QRCode.toString(qrPayload.value, { type: 'svg', margin: 0, color: { dark: '#0a2118', light: '#ffffff' } })
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const cards = document.querySelectorAll('.pp-cols > .pp-col > *')
   gsap.fromTo(cards, { opacity: 0, y: 18 }, { opacity: 1, y: 0, stagger: .07, duration: .45, ease: 'power3.out', clearProps: 'transform,opacity' })
@@ -78,6 +89,9 @@ onMounted(async () => {
                 <p class="pp-qr__t">{{ t('portal.voucher.verifyTitle') }}</p>
                 <p class="pp-qr__s">{{ t('portal.voucher.verifyText', { room: referral.room, code: episodeCode }) }}</p>
                 <div class="pp-qr__code">{{ episodeCode }}</div>
+                <button class="pp-qr__dl" type="button" @click="downloadQr">
+                  <i class="pi pi-download"></i>{{ t('portal.voucher.download') }}
+                </button>
               </div>
             </div>
             <!-- pie del ticket: el recorrido en una línea -->

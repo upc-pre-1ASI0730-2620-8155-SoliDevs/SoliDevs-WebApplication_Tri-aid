@@ -720,5 +720,19 @@
   "reports.levelChart.empty": "No classified patients in the range.",
   "referral.alreadyReferred": "Already referred to",
   "referral.keepCurrent": "Keep current referral",
-  "panel.btnViewReferral": "View referral"
+  "panel.btnViewReferral": "View referral",
+  "pl.scan": "Scan voucher",
+  "scanner.title": "Scan voucher",
+  "scanner.sub": "Read the QR on the patient's phone or type the episode code.",
+  "scanner.hint": "Point at the patient's screen",
+  "scanner.noCamera": "Could not open the camera. Type the code below.",
+  "scanner.notFound": "That code does not match any episode.",
+  "scanner.error": "The code could not be verified.",
+  "scanner.again": "Try again",
+  "scanner.typed": "Or type the code",
+  "scanner.verify": "Verify",
+  "scanner.openFile": "Open patient file",
+  "scanner.arrived": "arrived",
+  "scanner.temporary": "Temporary profile",
+  "portal.voucher.download": "Save as image"
 }
