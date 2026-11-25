@@ -3,7 +3,6 @@
  * Voucher scanner for the admission desk. Three ways in, one way out:
  *   1. the device camera reads the QR on the patient's phone,
  *   2. the staff uploads a photo or screenshot of the QR,
- *   3. the staff types the episode code.
  * Any of them resolves through the API and opens the patient file.
  */
 import { ref, onMounted, onBeforeUnmount } from 'vue'
@@ -23,7 +22,6 @@ const card = ref(null)
 const readerEl = ref(null)
 const fileInput = ref(null)
 const status = ref('starting')    // starting | scanning | found | notFound | error | noCamera
-const typedCode = ref('')
 const result = ref(null)
 const api = new SpecialtyAssignmentApi()
 
@@ -99,15 +97,9 @@ async function onFile(e) {
   }
 }
 
-async function submitTyped() {
-  if (!typedCode.value.trim()) return
-  await verify(typedCode.value.trim())
-}
-
 async function reset() {
   result.value = null
   lastCode = null
-  typedCode.value = ''
   await startCamera()
 }
 
@@ -162,16 +154,12 @@ onBeforeUnmount(stopCamera)
         </button>
       </div>
 
-      <!-- alternativas: subir imagen o escribir -->
+      <!-- alternativa sin cámara: subir la imagen del QR -->
       <div class="vs-alt">
         <button class="ta-btn ta-btn--ghost" type="button" @click="fileInput?.click()">
           <i class="pi pi-upload"></i>{{ t('scanner.upload') }}
         </button>
         <input ref="fileInput" type="file" accept="image/*" capture="environment" hidden @change="onFile" />
-        <form class="vs-typed" @submit.prevent="submitTyped">
-          <input v-model="typedCode" class="ta-input" :placeholder="t('scanner.typed')" aria-label="Código de episodio" />
-          <button class="ta-btn ta-btn--ghost" type="submit">{{ t('scanner.verify') }}</button>
-        </form>
       </div>
     </div>
   </div>
@@ -198,6 +186,5 @@ onBeforeUnmount(stopCamera)
 .vs-result .ta-btn{grid-column:1/-1;width:100%}
 .vs-alt{display:grid;gap:10px;padding-top:14px;border-top:1px solid var(--ta-line)}
 .vs-alt > .ta-btn{width:100%}
-.vs-typed{display:grid;grid-template-columns:1fr auto;gap:8px}
 @media(max-width:760px){.vs-backdrop{padding:10px}.vs-card{padding:18px}}
 </style>
