@@ -39,7 +39,7 @@ const blocks = computed(() => {
             <dl class="vd-dl">
                 <div><dt>{{ t('referral.vPatient') }}</dt><dd>{{ patientName }}</dd></div>
                 <div><dt>{{ t('referral.vEpisode') }}</dt><dd>{{ episodeId }}</dd></div>
-                <div><dt>{{ t('referral.vSpecialty') }}</dt><dd>{{ t('referral.spec.' + referral.specialty) }}</dd></div>
+                <div><dt>{{ t('referral.vSpecialty') }}</dt><dd>{{ referral.specialty }}</dd></div>
                 <div><dt>{{ t('referral.vRoom') }}</dt><dd>{{ referral.room }}</dd></div>
                 <div v-if="level"><dt>{{ t('referral.vPriority') }}</dt><dd>{{ level.code }} · {{ t('triage.level.' + level.code + '.name') }}</dd></div>
                 <div><dt>{{ t('referral.vQueue') }}</dt><dd>#{{ referral.queuePosition }}</dd></div>

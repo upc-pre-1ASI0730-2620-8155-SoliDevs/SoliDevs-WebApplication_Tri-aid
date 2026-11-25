@@ -67,7 +67,7 @@ const stats = computed(() => ([
   { key: 'critical', value: classifications.value.filter(c => /^(I|II)_/.test(String(c.level || ''))).length, icon: 'pi pi-exclamation-circle', label: t('panel.stat.critical') }
 ]))
 
-const specName = key => t('referral.spec.' + key)
+const specName = key => queues.value.find(q => q.key === key)?.name || key
 </script>
 
 <template>

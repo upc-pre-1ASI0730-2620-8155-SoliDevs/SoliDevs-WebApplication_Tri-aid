@@ -56,7 +56,16 @@ const consulting = ref(false)
 const suggestedSpecialty = computed(() => specialties.value.find(s => s.key === suggestion.value) || null)
 const selectedSpecialty = computed(() => specialties.value.find(s => s.key === selected.value) || null)
 const changed = computed(() => selected.value && selected.value !== suggestion.value)
-const specName = key => t('referral.spec.' + key)
+// The catalog uses keys (Traumatologia) but a stored referral carries the display
+// name (Traumatología). Resolve both so a referral never renders its raw key.
+const specName = key => {
+  if (!key) return ''
+  const byKey = specialties.value.find(s => s.key === key)
+  if (byKey) return byKey.name
+  const lower = String(key).toLowerCase()
+  const byName = specialties.value.find(s => s.name.toLowerCase() === lower)
+  return byName ? byName.name : String(key)
+}
 
 async function consult() {
   symptomErr.value = false; sugErr.value = ''
@@ -177,20 +186,20 @@ onMounted(async () => {
       <p v-if="symptomErr" class="ta-err">{{ t('referral.err.catalog') }}</p>
 
       <Transition name="sugg">
-        <div v-if="consulted" class="rc-sugg">
-          <span class="rc-arrow"><i class="pi pi-arrow-right"></i></span>
+        <div v-if="consulted" class="rc-sugg" :class="{ 'rc-sugg--existing': alreadyReferred }">
+          <span class="rc-arrow"><i class="pi" :class="alreadyReferred ? 'pi-check-circle' : 'pi-arrow-right'"></i></span>
           <div>
-            <small>{{ t('referral.suggested') }}</small>
+            <small>{{ alreadyReferred ? t('referral.alreadyReferred') : t('referral.suggested') }}</small>
             <b>{{ specName(suggestion) }}</b>
           </div>
-          <span class="rc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
+          <span v-if="!alreadyReferred" class="rc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
         </div>
       </Transition>
 
       <template v-if="consulted">
         <label class="ta-label" for="chg-spec">{{ t('referral.change') }}</label>
         <select id="chg-spec" class="ta-select rc-select" v-model="selected">
-          <option :value="suggestion" disabled>{{ t('referral.keepSuggested') }}</option>
+          <option :value="suggestion" disabled>{{ alreadyReferred ? t('referral.keepCurrent') : t('referral.keepSuggested') }}</option>
           <option v-for="s in specialties" :key="s.key" :value="s.key">{{ s.name }}</option>
         </select>
 

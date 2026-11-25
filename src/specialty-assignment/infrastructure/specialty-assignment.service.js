@@ -91,22 +91,12 @@ export class SpecialtyAssignmentService {
             const updated = await this.api.updateReferral(referral.id, ReferralAssembler.toResource(referral))
             return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
         }
-        const [specResponse, refResponse] = await Promise.all([this.api.getSpecialties(), this.api.getReferrals()])
-        const baseWaiting = (specResponse.data || []).find(sp => sp.key === specialty)?.waiting || 0
-        const liveReferrals = (refResponse.data || []).filter(r => r.specialty === specialty && r.state !== 'Attended' && String(r.episodeId) !== String(episodeId))
-        const position = baseWaiting + liveReferrals.length + 1
-
-        const resource = ReferralAssembler.toResource(new Referral({
-            id: null,
-            episodeId,
-            specialty,
-            room: ROOMS[specialty] || '',
-            queuePosition: position,
-            state: ReferralState.Referred,
-            referredAt: new Date().toISOString(),
-            symptom
-        }))
-        const response = await this.api.createReferral(resource)
+        if (!specialtyRef || specialtyRef.id === undefined || specialtyRef.id === null) {
+            return { ok: false, error: 'referral.err.catalog' }
+        }
+        // The API owns the flow: it resolves the room and computes the queue
+        // position from the live referrals of that specialty.
+        const response = await this.api.referEpisode(episodeId, specialtyRef.id, symptom)
         referral = ReferralAssembler.toEntity(response.data)
         return { ok: true, data: referral }
     }
