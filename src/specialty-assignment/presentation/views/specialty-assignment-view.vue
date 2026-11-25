@@ -8,7 +8,7 @@ import { t } from '../../../shared/application/i18n.js'
 import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
-import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
+import { IncidentsService } from '../../../incidents/infrastructure/incidents.service.js'
 import { releaseEpisodeDevices } from '../../../vital-signs-capture/application/vitals-store.js'
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import SymptomAutocomplete from '../components/symptom-autocomplete.vue'
@@ -19,7 +19,7 @@ import { SpecialtyAssignmentService } from '../../infrastructure/specialty-assig
 const route = useRoute()
 const router = useRouter()
 const service = new SpecialtyAssignmentService()
-const alertingService = new AlertingService()
+const incidentsService = new IncidentsService()
 const triageApi = new TriageApi()
 
 const id = route.params.episode
@@ -100,7 +100,7 @@ async function refer() {
   ep.value.referred = true
   saveEpisode(ep.value)
   try {
-    await alertingService.resolveByEpisode(ep.value.id)
+    await incidentsService.resolveByEpisode(ep.value.id)
     releaseEpisodeDevices(ep.value.id)
   } catch (e) { console.error(e) }
   await loadQueues()

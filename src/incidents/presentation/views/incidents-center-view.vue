@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { gsap } from 'gsap';
-import { AlertingService } from '../../infrastructure/alerting.service.js';
+import { IncidentsService } from '../../infrastructure/incidents.service.js';
 import { SpecialtyAssignmentService } from '../../../specialty-assignment/infrastructure/specialty-assignment.service.js';
 import { findEpisode, saveEpisode } from '../../../patient-registration/application/patient-store.js';
 import { releaseEpisodeDevices } from '../../../vital-signs-capture/application/vitals-store.js';
@@ -12,7 +12,7 @@ import { notify } from '../../../shared/application/toast-store.js';
 
 const { t } = useI18n();
 const activeAlerts = ref([]);
-const alertingService = new AlertingService();
+const incidentsService = new IncidentsService();
 const router = useRouter();
 const doneId = ref(null);
 const pendingId = ref(null);
@@ -43,7 +43,7 @@ function playAlertSound() {
 
 onMounted(async () => {
   try {
-    const response = await alertingService.getActiveAlerts();
+    const response = await incidentsService.getActiveIncidents();
     activeAlerts.value = response.data;
     if (activeAlerts.value.some(a => a.severity === 'critical')) playAlertSound();
   } catch (error) {
@@ -103,12 +103,12 @@ const confirmEscalate = async () => {
       const ep = findEpisode(alert.episode);
       if (ep) { ep.referred = true; saveEpisode(ep); }
     }
-    const up = await alertingService.escalateAlert(alert.id, { userId: session.name || null, to: 'Trauma Shock' });
+    const up = await incidentsService.escalateIncident(alert.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
       const i = activeAlerts.value.findIndex(a => String(a.id) === String(alert.id));
       if (i !== -1) activeAlerts.value[i] = up.data;
     }
-    await alertingService.resolveByEpisode(alert.episode);
+    await incidentsService.resolveByEpisode(alert.episode);
     releaseEpisodeDevices(alert.episode);
     notify({ type: 'success', title: t('alerting.escDone'), detail: 'Trauma Shock · TS-1' });
   } catch (e) { console.error(e); notify({ type: 'error', title: t('alerting.escError') }); }
@@ -124,15 +124,14 @@ const confirmAcknowledge = async (directId = null) => {
   await new Promise(r => setTimeout(r, 1500));
 
   try {
-    const r = await alertingService.acknowledgeAlert(id, session.name || null);
+    const r = await incidentsService.acknowledgeIncident(id, session.name || null);
     if (r.ok) {
       const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
       if (i !== -1) {
         activeAlerts.value[i] = r.data;
-        if (!r.data.value.includes(t('alerting.backToNormal'))) {
-          activeAlerts.value[i].value = `${t('alerting.backToNormal')} · ${r.data.value}`;
-        }
-      }
+        if (!r.data.value.includes(t('incidents.backToNormal'))) {
+          activeAlerts.value[i].value = `${t('incidents.backToNormal')} · ${r.data.value}`;
+        }      }
     } else {
       notify({ type: 'error', title: t('alerting.ackError') });
     }

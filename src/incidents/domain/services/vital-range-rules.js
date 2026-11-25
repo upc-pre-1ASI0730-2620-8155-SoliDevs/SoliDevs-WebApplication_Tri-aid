@@ -1,5 +1,5 @@
 /**
- * Clinical safe ranges of the vital signs evaluated by the alerting rules.
+ * Clinical safe ranges of the vital signs evaluated by the incident rules.
  * Ranges follow the reference values used by the triage norm of the
  * platform (systolic blood pressure, oxygen saturation, heart rate and
  * body temperature).

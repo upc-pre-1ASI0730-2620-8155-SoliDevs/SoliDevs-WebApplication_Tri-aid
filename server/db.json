@@ -736,7 +736,7 @@
       "specialty": "MedicinaInterna"
     }
   ],
-  "alerts": [
+  "incidents": [
     {
       "id": 1,
       "patientName": "Rojas Nunez, Elena",

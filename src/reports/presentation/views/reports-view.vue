@@ -4,13 +4,13 @@ import { store, fmtTime } from '../../../patient-registration/application/patien
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
 import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
-import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
+import { IncidentsService } from '../../../incidents/infrastructure/incidents.service.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const triageApi = new TriageApi()
 const specialtyApi = new SpecialtyAssignmentApi()
-const alertingService = new AlertingService()
+const incidentsService = new IncidentsService()
 
 const fromDate = ref('')
 const toDate = ref('')
@@ -22,7 +22,7 @@ const queues = ref([])
 
 onMounted(async () => {
   try {
-    const [rc, ra, rr] = await Promise.all([triageApi.getClassifications(), alertingService.getAudit(), specialtyApi.getReferrals()])
+    const [rc, ra, rr] = await Promise.all([triageApi.getClassifications(), incidentsService.getAudit(), specialtyApi.getReferrals()])
     classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) }))
     alerts.value = ra.data || []
     referrals.value = rr.data || []
