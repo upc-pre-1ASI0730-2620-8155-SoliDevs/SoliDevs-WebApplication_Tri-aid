@@ -719,5 +719,6 @@
   "reports.levelChart.unclassified": "+{n} sin clasificar",
   "reports.levelChart.empty": "Sin pacientes clasificados en el rango.",
   "referral.alreadyReferred": "Ya derivada a",
-  "referral.keepCurrent": "Mantener derivación actual"
+  "referral.keepCurrent": "Mantener derivación actual",
+  "panel.btnViewReferral": "Ver derivación"
 }

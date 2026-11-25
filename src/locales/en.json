@@ -719,5 +719,6 @@
   "reports.levelChart.unclassified": "+{n} unclassified",
   "reports.levelChart.empty": "No classified patients in the range.",
   "referral.alreadyReferred": "Already referred to",
-  "referral.keepCurrent": "Keep current referral"
+  "referral.keepCurrent": "Keep current referral",
+  "panel.btnViewReferral": "View referral"
 }

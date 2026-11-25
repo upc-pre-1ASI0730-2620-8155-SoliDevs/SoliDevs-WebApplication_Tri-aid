@@ -13,6 +13,9 @@ const specialtyApi = new SpecialtyAssignmentApi()
 
 const classifications = ref([])
 const queues = ref([])
+// Episodes that have a referral record. The episode state alone is not enough:
+// a referral may exist while the episode still reads Waiting.
+const referredEpisodes = ref(new Set())
 
 onMounted(async () => {
   try {
@@ -23,6 +26,7 @@ onMounted(async () => {
     // Waiting patients per specialty, counted from the live referrals. The API
     // returns the specialty by name, so match on name (not on the catalog key).
     const [rs, rr] = await Promise.all([specialtyApi.getSpecialties(), specialtyApi.getReferrals()])
+    referredEpisodes.value = new Set((rr.data || []).map(r => String(r.episodeId)))
     const count = new Map()
     for (const r of (rr.data || [])) {
       if (String(r.state).toLowerCase() !== 'waiting') continue
@@ -56,7 +60,7 @@ const recent = computed(() => episodes.value.slice(0, 6).map(e => {
     color: l?.color || null,
     confirmed,
     classificationConfirmed: confirmed,
-    referred: !!e.referred
+    referred: !!e.referred || referredEpisodes.value.has(String(e.id))
   }
 }))
 
@@ -93,7 +97,12 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
           <span class="pn-status" :class="{ ok: e.referred }">
             {{ e.referred ? t('panel.referred') : (e.confirmed ? t('panel.toRefer') : t('panel.toClassify')) }}
           </span>
-          <router-link v-if="e.classificationConfirmed" class="ta-btn ta-btn--sm" :to="`/specialty-assignment/${e.id}`">
+          <!-- The action follows the state: already referred opens the referral, else
+               classified goes to referral, else to classification. -->
+          <router-link v-if="e.referred" class="ta-btn ta-btn--sm ta-btn--ghost" :to="`/specialty-assignment/${e.id}`">
+            <i class="pi pi-qrcode"></i>{{ t('panel.btnViewReferral') }}
+          </router-link>
+          <router-link v-else-if="e.confirmed" class="ta-btn ta-btn--sm" :to="`/specialty-assignment/${e.id}`">
             <i class="pi pi-directions"></i>{{ t('panel.btnRefer') }}
           </router-link>
           <router-link v-else class="ta-btn ta-btn--sm ta-btn--ghost" :to="`/triage-classification/${e.id}`">
