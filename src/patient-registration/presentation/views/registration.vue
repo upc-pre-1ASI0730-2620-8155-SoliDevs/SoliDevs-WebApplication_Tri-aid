@@ -60,6 +60,7 @@ const saving = ref(false)
 // Render puts the API to sleep after idle time; the first request of the day can take about a minute.
 const wakingUp = ref(false)
 const issuedCode = ref(null)
+const { card: issuedCard, backdrop: issuedBackdrop, close: closeIssued } = useModalMotion(() => { issuedCode.value = null })
 function goToFile() { router.push(`/patient-registration/${issuedCode.value?.episodeId || ''}`) }
 async function submit() {
   if (!validate() || saving.value) return
@@ -189,9 +190,8 @@ function reset() {
     </section>
   </div>
   <!-- Código de portal recién emitido: se muestra una sola vez -->
-  <transition name="fade">
-    <div v-if="issuedCode" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
-      <div class="rg-modal__card ta-card">
+  <div v-if="issuedCode" ref="issuedBackdrop" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
+      <div ref="issuedCard" class="rg-modal__card ta-card">
         <span class="rg-modal__ic"><i class="pi pi-qrcode"></i></span>
         <h3 id="rg-issued-title" class="ta-h">{{ t('rg.issued.title') }}</h3>
         <p class="ta-sub">{{ t('rg.issued.sub') }}</p>
@@ -200,10 +200,9 @@ function reset() {
           <div><dt>{{ t('rg.issued.code') }}</dt><dd class="rg-issued__code">{{ issuedCode.code }}</dd></div>
         </dl>
         <p class="rg-modal__note">{{ t('rg.issued.note') }}</p>
-        <button class="ta-btn rg-modal__btn" type="button" @click="goToFile">{{ t('rg.issued.go') }}</button>
+        <button class="ta-btn rg-modal__btn" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
       </div>
-    </div>
-  </transition>
+  </div>
 </template>
 
 <style>

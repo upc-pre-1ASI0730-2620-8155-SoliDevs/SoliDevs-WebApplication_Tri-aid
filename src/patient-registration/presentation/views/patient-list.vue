@@ -100,8 +100,9 @@ const fullName = p => `${p.surnames}, ${p.names}`
         <p>{{ rows.length ? t('pl.noResults.hint') : t('pl.empty.hint') }}</p>
       </div>
     </section>
+
+    <VoucherScanner v-if="scannerOpen" @close="scannerOpen = false" />
   </div>
-  <VoucherScanner v-if="scannerOpen" @close="scannerOpen = false" />
 </template>
 
 <style>

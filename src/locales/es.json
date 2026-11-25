@@ -734,5 +734,8 @@
   "scanner.openFile": "Abrir ficha del paciente",
   "scanner.arrived": "llegó",
   "scanner.temporary": "Perfil temporal",
-  "portal.voucher.download": "Guardar como imagen"
+  "portal.voucher.download": "Guardar como imagen",
+  "scanner.starting": "Abriendo la cámara…",
+  "scanner.upload": "Subir imagen del QR",
+  "scanner.notReadable": "No se pudo leer un QR en esa imagen. Prueba con una más nítida."
 }

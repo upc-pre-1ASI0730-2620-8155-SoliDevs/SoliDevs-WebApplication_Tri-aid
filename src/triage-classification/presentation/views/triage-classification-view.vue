@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 import { useRoute, useRouter } from 'vue-router'
 import { findEpisode, ageOf, fmtTime } from '../../../patient-registration/application/patient-store.js'
 import { DeviceType as vitalTypes } from '../../../vital-signs-capture/domain/model/device-type.js'
@@ -99,6 +100,7 @@ async function resetSuggestion() {
 
 /* ---------- Change level ---------- */
 const showModify = ref(false)
+const { card: modifyCard, backdrop: modifyBackdrop, close: closeModify } = useModalMotion(() => { showModify.value = false })
 const modLevel = ref('')
 const modReason = ref('')
 const modErr = ref('')
@@ -246,8 +248,8 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
       <router-link class="ta-btn ta-btn--ghost" :to="`/patient-registration/${ep.id}`"><i class="pi pi-arrow-left"></i>{{ t('triage.backFile') }}</router-link>
     </div>
 
-    <div v-if="showModify" class="tc-overlay" @click.self="showModify = false">
-      <div class="ta-card tc-modal">
+    <div v-if="showModify" ref="modifyBackdrop" class="tc-overlay" @click.self="closeModify">
+      <div ref="modifyCard" class="ta-card tc-modal">
         <h3 class="ta-h">{{ t('triage.modifyTitle') }}</h3>
         <p class="ta-sub">{{ t('triage.modifySub') }}</p>
 
@@ -263,7 +265,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
         <p v-if="modErr" class="ta-err">{{ modErr }}</p>
 
         <div class="tc-modal__actions">
-          <button class="ta-btn ta-btn--ghost" @click="showModify = false">{{ t('triage.cancel') }}</button>
+          <button class="ta-btn ta-btn--ghost" @click="closeModify">{{ t('triage.cancel') }}</button>
           <button class="ta-btn" @click="saveModify"><i class="pi pi-save"></i>{{ t('triage.save') }}</button>
         </div>
       </div>

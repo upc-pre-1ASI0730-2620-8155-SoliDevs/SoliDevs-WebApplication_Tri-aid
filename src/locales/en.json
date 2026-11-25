@@ -734,5 +734,8 @@
   "scanner.openFile": "Open patient file",
   "scanner.arrived": "arrived",
   "scanner.temporary": "Temporary profile",
-  "portal.voucher.download": "Save as image"
+  "portal.voucher.download": "Save as image",
+  "scanner.starting": "Opening the camera…",
+  "scanner.upload": "Upload QR image",
+  "scanner.notReadable": "Could not read a QR from that image. Try a sharper one."
 }

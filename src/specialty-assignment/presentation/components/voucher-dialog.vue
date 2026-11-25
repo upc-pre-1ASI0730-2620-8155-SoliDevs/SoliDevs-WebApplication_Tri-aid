@@ -1,6 +1,7 @@
 <script setup>
 /** Digital referral voucher: QR, destination details and SMS delivery. */
 import { computed } from 'vue'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const props = defineProps({
@@ -10,7 +11,8 @@ const props = defineProps({
     episodeId: { type: String, required: true },
     level: { type: Object, default: null }       // { code, name }
 })
-defineEmits(['close', 'send'])
+const emit = defineEmits(['close', 'send'])
+const { card, backdrop, close } = useModalMotion(() => emit('close'))
 
 // deterministic pseudo-QR generated from the voucher code (demo)
 const blocks = computed(() => {
@@ -26,8 +28,8 @@ const blocks = computed(() => {
 </script>
 
 <template>
-    <div class="vd-overlay" @click.self="$emit('close')">
-        <div class="ta-card vd-modal">
+    <div ref="backdrop" class="vd-overlay" @click.self="close">
+        <div ref="card" class="ta-card vd-modal">
             <span class="vd-kicker">{{ t('referral.voucherKicker') }}</span>
             <h3 class="ta-h">{{ t('referral.voucherTitle') }}</h3>
 
@@ -49,7 +51,7 @@ const blocks = computed(() => {
                 <button class="ta-btn ta-btn--ghost" @click="$emit('send', 'Sms')">
                     <i class="pi pi-mobile"></i>{{ t('referral.sendSms') }}
                 </button>
-                <button class="ta-btn" @click="$emit('close')"><i class="pi pi-check"></i>{{ t('referral.done') }}</button>
+                <button class="ta-btn" @click="close()"><i class="pi pi-check"></i>{{ t('referral.done') }}</button>
             </div>
         </div>
     </div>
