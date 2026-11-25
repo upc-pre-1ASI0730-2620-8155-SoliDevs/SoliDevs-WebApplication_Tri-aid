@@ -11,7 +11,7 @@ import { session } from '../../../shared/application/demo-session.js';
 import { notify } from '../../../shared/application/toast-store.js';
 
 const { t } = useI18n();
-const activeAlerts = ref([]);
+const activeIncidents = ref([]);
 const incidentsService = new IncidentsService();
 const router = useRouter();
 const doneId = ref(null);
@@ -26,7 +26,7 @@ const auditFrom = ref('');
 const auditTo = ref('');
 
 /** Real sound notification: two-tone beep played via WebAudio. */
-function playAlertSound() {
+function playIncidentSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -44,17 +44,17 @@ function playAlertSound() {
 onMounted(async () => {
   try {
     const response = await incidentsService.getActiveIncidents();
-    activeAlerts.value = response.data;
-    if (activeAlerts.value.some(a => a.severity === 'critical')) playAlertSound();
+    activeIncidents.value = response.data;
+    if (activeIncidents.value.some(a => a.severity === 'critical')) playIncidentSound();
   } catch (error) {
-    console.error("Error al cargar alertas:", error);
+    console.error("Error al cargar incidencias:", error);
   }
 });
 
-const criticalCount = computed(() => activeAlerts.value.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated').length);
+const criticalCount = computed(() => activeIncidents.value.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated').length);
 
-const displayAlerts = computed(() => {
-  let filtered = activeAlerts.value;
+const displayIncidents = computed(() => {
+  let filtered = activeIncidents.value;
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
   } else if (activeFilter.value === 'unresolved') {
@@ -78,40 +78,40 @@ const displayAlerts = computed(() => {
   });
 });
 
-const acknowledgeAlert = async (id) => {
+const acknowledgeIncident = async (id) => {
   await confirmAcknowledge(id);
 };
 
 const pendingEsc = ref(null);
-const escalateAlertPrompt = (id) => { pendingEsc.value = id; };
+const escalateIncidentPrompt = (id) => { pendingEsc.value = id; };
 const cancelEscalate = () => { pendingEsc.value = null; };
 const specialtyService = new SpecialtyAssignmentService();
 
 const confirmEscalate = async () => {
-  const alert = activeAlerts.value.find(a => String(a.id) === String(pendingEsc.value));
+  const incident = activeIncidents.value.find(a => String(a.id) === String(pendingEsc.value));
   pendingEsc.value = null;
-  if (!alert) return;
+  if (!incident) return;
   try {
     const specs = await specialtyService.getSpecialties();
     const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
     if (trauma) {
-      const r = await specialtyService.refer(alert.episode, {
+      const r = await specialtyService.refer(incident.episode, {
         specialtyRef: trauma,
-        symptom: `EMERGENCIA — ${alert.vitalSign} ${alert.value}`
+        symptom: `EMERGENCIA — ${incident.vitalSign} ${incident.value}`
       });
       if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
-      const ep = findEpisode(alert.episode);
+      const ep = findEpisode(incident.episode);
       if (ep) { ep.referred = true; saveEpisode(ep); }
     }
-    const up = await incidentsService.escalateIncident(alert.id, { userId: session.name || null, to: 'Trauma Shock' });
+    const up = await incidentsService.escalateIncident(incident.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
-      const i = activeAlerts.value.findIndex(a => String(a.id) === String(alert.id));
-      if (i !== -1) activeAlerts.value[i] = up.data;
+      const i = activeIncidents.value.findIndex(a => String(a.id) === String(incident.id));
+      if (i !== -1) activeIncidents.value[i] = up.data;
     }
-    await incidentsService.resolveByEpisode(alert.episode);
-    releaseEpisodeDevices(alert.episode);
-    notify({ type: 'success', title: t('alerting.escDone'), detail: 'Trauma Shock · TS-1' });
-  } catch (e) { console.error(e); notify({ type: 'error', title: t('alerting.escError') }); }
+    await incidentsService.resolveByEpisode(incident.episode);
+    releaseEpisodeDevices(incident.episode);
+    notify({ type: 'success', title: t('incidents.escDone'), detail: 'Trauma Shock · TS-1' });
+  } catch (e) { console.error(e); notify({ type: 'error', title: t('incidents.escError') }); }
 };
 
 const cancelAcknowledge = () => { pendingId.value = null; };
@@ -126,24 +126,25 @@ const confirmAcknowledge = async (directId = null) => {
   try {
     const r = await incidentsService.acknowledgeIncident(id, session.name || null);
     if (r.ok) {
-      const i = activeAlerts.value.findIndex(a => String(a.id) === String(id));
+      const i = activeIncidents.value.findIndex(a => String(a.id) === String(id));
       if (i !== -1) {
-        activeAlerts.value[i] = r.data;
+        activeIncidents.value[i] = r.data;
         if (!r.data.value.includes(t('incidents.backToNormal'))) {
-          activeAlerts.value[i].value = `${t('incidents.backToNormal')} · ${r.data.value}`;
-        }      }
+          activeIncidents.value[i].value = `${t('incidents.backToNormal')} · ${r.data.value}`;
+        }
+      }
     } else {
-      notify({ type: 'error', title: t('alerting.ackError') });
+      notify({ type: 'error', title: t('incidents.ackError') });
     }
   } catch (e) {
-    // The API rejects the transition when the alert was already escalated.
+    // The API rejects the transition when the incident was already escalated.
     console.error(e);
-    notify({ type: 'error', title: t('alerting.ackError') });
+    notify({ type: 'error', title: t('incidents.ackError') });
   }
   setTimeout(() => { if (String(doneId.value) === String(id)) doneId.value = null; }, 400);
 };
 
-/* ---- Animaciones GSAP (repositorio gsap-alert-animation) ---- */
+/* ---- Animaciones GSAP del centro de incidencias ---- */
 const onCardEnter = (el, done) => {
   if (reduce()) { done(); return; }
   gsap.fromTo(el, { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', clearProps: 'transform,opacity', onComplete: done });
@@ -207,94 +208,94 @@ const onDoneEnter = (el, done) => {
     <!-- Cabecera: titulo, filtros, auditoria y enfermera de turno -->
     <section class="ta-card al-head al-in" style="--d:0">
       <div class="al-head__main">
-        <h3 class="ta-h">{{ t('alerting.title') }}</h3>
+        <h3 class="ta-h">{{ t('incidents.title') }}</h3>
 
         <div class="al-filters">
           <button class="al-pill" :class="{ on: activeFilter === 'all' }" @click="activeFilter = 'all'">
-            {{ t('alerting.filterAll') }}
+            {{ t('incidents.filterAll') }}
           </button>
           <button class="al-pill al-pill--critical" :class="{ on: activeFilter === 'critical' }" @click="activeFilter = 'critical'">
-            {{ t('alerting.filterCritical') }}
+            {{ t('incidents.filterCritical') }}
           </button>
           <button class="al-pill" :class="{ on: activeFilter === 'unresolved' }" @click="activeFilter = 'unresolved'">
-            {{ t('alerting.filterUnresolved') }}
+            {{ t('incidents.filterUnresolved') }}
           </button>
         </div>
 
         <div class="al-audit">
-          <input type="date" v-model="auditFrom" class="ta-input al-date" :aria-label="t('alerting.auditFrom')" />
+          <input type="date" v-model="auditFrom" class="ta-input al-date" :aria-label="t('incidents.auditFrom')" />
           <span class="al-audit-arrow">→</span>
-          <input type="date" v-model="auditTo" class="ta-input al-date" :aria-label="t('alerting.auditTo')" />
+          <input type="date" v-model="auditTo" class="ta-input al-date" :aria-label="t('incidents.auditTo')" />
         </div>
       </div>
 
       <div class="al-status">
-        <span class="al-count" :class="{ crit: criticalCount > 0 }">{{ criticalCount }} {{ t('alerting.active') }}</span>
+        <span class="al-count" :class="{ crit: criticalCount > 0 }">{{ criticalCount }} {{ t('incidents.active') }}</span>
       </div>
     </section>
 
-    <!-- Tarjetas de alertas -->
+    <!-- Tarjetas de incidencias -->
     <TransitionGroup :css="false" tag="div" class="al-stack" @enter="onCardEnter" @leave="onCardLeave">
-      <article v-for="alert in displayAlerts" :key="alert.id"
+      <article v-for="incident in displayIncidents" :key="incident.id"
                class="ta-card al-card"
-               :class="'sev--' + alert.severity">
+               :class="'sev--' + incident.severity">
 
         <div class="al-row">
           <i class="pi pi-circle-fill al-dot"></i>
-          <span class="al-name">{{ alert.patientName }}</span>
-          <span class="al-prio">{{ alert.priority }}</span>
-          <span v-if="alert.severity === 'critical'" class="al-sound">
-            <i class="pi pi-volume-up"></i>{{ t('alerting.soundActive') }}
+          <span class="al-name">{{ incident.patientName }}</span>
+          <span class="al-prio">{{ incident.priority }}</span>
+          <span v-if="incident.severity === 'critical'" class="al-sound">
+            <i class="pi pi-volume-up"></i>{{ t('incidents.soundActive') }}
           </span>
-          <span v-if="alert.severity === 'escalated'" class="al-esc">{{ alert.escalatedTo }}</span>
-          <span v-if="alert.severity === 'resolved'" class="al-res">{{ t('alerting.resolved') }}</span>
+          <span v-if="incident.severity === 'escalated'" class="al-esc">{{ incident.escalatedTo }}</span>
+          <span v-if="incident.severity === 'resolved'" class="al-res">{{ t('incidents.resolved') }}</span>
         </div>
 
         <div class="al-meta">
-          {{ alert.vitalSign }} · DNI {{ alert.dni }} · {{ alert.episode }} · {{ t('alerting.generated') }} {{ alert.time }}
+          {{ incident.vitalSign }} · DNI {{ incident.dni }} · {{ incident.episode }} · {{ t('incidents.generated') }} {{ incident.time }}
         </div>
 
         <div class="al-value">
-          <span v-if="alert.severity === 'resolved'" class="al-ok"><i class="pi pi-check-circle"></i> {{ alert.value }}</span>
+          <span v-if="incident.severity === 'resolved'" class="al-ok"><i class="pi pi-check-circle"></i> {{ incident.value }}</span>
           <template v-else>
-            <b class="al-val">{{ alert.value }}</b>
-            <span class="al-safe">· {{ t('alerting.safeRange') }} {{ alert.safeRange }}</span>
+            <b class="al-val">{{ incident.value }}</b>
+            <span class="al-safe">· {{ t('incidents.safeRange') }} {{ incident.safeRange }}</span>
           </template>
         </div>
 
-        <div class="al-actions" v-if="alert.severity !== 'resolved'">
-          <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeAlert(alert.id)">
-            {{ t('alerting.acknowledge') }}
+        <div class="al-actions" v-if="incident.severity !== 'resolved'">
+          <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeIncident(incident.id)">
+            {{ t('incidents.acknowledge') }}
           </button>
-          <button v-if="alert.severity !== 'escalated'" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateAlertPrompt(alert.id)">
-            {{ t('alerting.escalate') }}
+          <button v-if="incident.severity !== 'escalated'" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
+            {{ t('incidents.escalate') }}
           </button>
         </div>
 
         <Transition :css="false" @enter="onDoneEnter">
-          <div v-if="doneId === alert.id" class="al-done" aria-hidden="true">
+          <div v-if="doneId === incident.id" class="al-done" aria-hidden="true">
             <svg class="al-done__svg" viewBox="0 0 72 72">
               <circle class="al-done__pulse" cx="36" cy="36" r="30" />
               <circle class="al-done__disc" cx="36" cy="36" r="30" />
               <path class="al-done__tick" d="M23 37l9 9 18-21" pathLength="1" />
             </svg>
-            <span class="al-done__txt">{{ t('alerting.resolved') }}</span>
+            <span class="al-done__txt">{{ t('incidents.resolved') }}</span>
           </div>
         </Transition>
       </article>
     </TransitionGroup>
 
-    <p v-if="!displayAlerts.length" class="ta-card al-none">{{ t('bell.empty') }}</p>
+    <p v-if="!displayIncidents.length" class="ta-card al-none">{{ t('bell.empty') }}</p>
 
     <Transition :css="false" @enter="onModalEnter" @leave="onModalLeave">
       <div v-if="pendingEsc !== null" class="al-modal" @click.self="cancelEscalate()">
         <div class="al-dialog" role="alertdialog" aria-modal="true" aria-labelledby="al-dlg-title">
           <span class="al-dialog__ico" :class="{ danger: pendingEsc !== null }"><i class="pi" :class="pendingEsc !== null ? 'pi-bolt' : 'pi-bell-slash'"></i></span>
-          <h3 id="al-dlg-title" class="al-dialog__title">{{ pendingEsc !== null ? t('alerting.escTitle') : t('alerting.confirmTitle') }}</h3>
-          <p class="al-dialog__msg">{{ pendingEsc !== null ? t('alerting.escMsg') : t('alerting.confirmMsg') }}</p>
+          <h3 id="al-dlg-title" class="al-dialog__title">{{ pendingEsc !== null ? t('incidents.escTitle') : t('incidents.confirmTitle') }}</h3>
+          <p class="al-dialog__msg">{{ pendingEsc !== null ? t('incidents.escMsg') : t('incidents.confirmMsg') }}</p>
           <div class="al-dialog__actions">
-            <button class="ta-btn ta-btn--ghost" @click="cancelEscalate()">{{ t('alerting.no') }}</button>
-            <button class="ta-btn" :class="{ 'al-btn-esc': pendingEsc !== null }" @click="confirmEscalate()">{{ t('alerting.escYes') }}</button>
+            <button class="ta-btn ta-btn--ghost" @click="cancelEscalate()">{{ t('incidents.no') }}</button>
+            <button class="ta-btn" :class="{ 'al-btn-esc': pendingEsc !== null }" @click="confirmEscalate()">{{ t('incidents.escYes') }}</button>
           </div>
         </div>
       </div>
