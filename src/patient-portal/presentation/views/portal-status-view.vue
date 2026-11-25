@@ -113,7 +113,7 @@ onMounted(async () => {
                 <span class="pp-tl-step__t">{{ t(`portal.timeline.${s.key}`) }}</span>
                 <span class="pp-tl-step__s">{{ t(`portal.timeline.${s.key}Sub`) }}</span>
               </span>
-              <span class="pp-tl-step__h">{{ s.now ? t('portal.timeline.now') : s.time || '—' }}</span>
+              <span class="pp-tl-step__h">{{ s.now ? t('portal.timeline.now') : s.time }}</span>
             </div>
           </div>
         </section>
