@@ -1,6 +1,6 @@
 /**
  * Domain event raised when the staff confirms the vital signs of an
- * episode. Downstream bounded contexts (Triage Classification, Alerting)
+ * episode. Downstream bounded contexts (Triage Classification, Incidents)
  * react to this event.
  */
 export class VitalsConfirmedEvent {

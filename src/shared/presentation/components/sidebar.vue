@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import logo from '../../../assets/tri-aid-logo.png'
 import { session } from '../../application/demo-session.js'
-import { unreadCount } from '../../../alerting/application/alert-store.js'
+import { unreadCount } from '../../../incidents/application/incident-store.js'
 import { t } from '../../application/i18n.js'
 import { iamStore } from '../../../iam/application/iam-store.js'
 
@@ -15,7 +15,7 @@ async function signOut() {
 const allItems = [
   { key: 'nav.panel', icon: 'pi pi-home', to: '/panel' },
   { key: 'nav.patients', icon: 'pi pi-users', to: '/patient-registration' },
-  { key: 'nav.alerts', icon: 'pi pi-bell', to: '/alerting', alerts: true },
+  { key: 'nav.incidents', icon: 'pi pi-bell', to: '/incidents', incidents: true },
   { key: 'nav.reports', icon: 'pi pi-file', to: '/reports' },
   { key: 'nav.devices', icon: 'pi pi-desktop', to: '/devices' },
   { key: 'nav.profile', icon: 'pi pi-user', to: '/profile' },
@@ -35,7 +35,7 @@ const items = computed(() => allItems.filter(it => !it.adminOnly || iamStore.isA
     <nav class="sb__nav">
       <router-link v-for="it in items" :key="it.key" :to="it.to" class="sb__link">
         <i :class="it.icon"></i><span>{{ t(it.key) }}</span>
-        <span v-if="it.alerts && unreadCount" class="sb__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+        <span v-if="it.incidents && unreadCount" class="sb__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
       </router-link>
     </nav>
 

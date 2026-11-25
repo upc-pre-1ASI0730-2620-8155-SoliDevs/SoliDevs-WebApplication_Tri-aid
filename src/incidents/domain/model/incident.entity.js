@@ -1,9 +1,9 @@
 /**
- * Alert entity of the Alerting bounded context. An alert is raised when a
- * vital sign falls outside its habitual range or when a patient is
+ * Incident entity of the Incidents bounded context. An incident is raised
+ * when a vital sign falls outside its habitual range or when a patient is
  * classified under a high-priority level.
  */
-export class Alert {
+export class Incident {
     constructor({
         id = null,
         patientName,

@@ -4,29 +4,28 @@ import { store, fmtTime } from '../../../patient-registration/application/patien
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
 import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
-import { AlertingService } from '../../../alerting/infrastructure/alerting.service.js'
+import { IncidentsService } from '../../../incidents/infrastructure/incidents.service.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const triageApi = new TriageApi()
 const specialtyApi = new SpecialtyAssignmentApi()
-const alertingService = new AlertingService()
+const incidentsService = new IncidentsService()
 
 const fromDate = ref('')
 const toDate = ref('')
 const episodes = ref([])
 const classifications = ref([])
-const alerts = ref([])
+const incidents = ref([])
 const referrals = ref([])
 const queues = ref([])
 
 onMounted(async () => {
   try {
-    const [rc, ra, rr] = await Promise.all([triageApi.getClassifications(), alertingService.getAudit(), specialtyApi.getReferrals()])
+    const [rc, ra, rr] = await Promise.all([triageApi.getClassifications(), incidentsService.getAudit(), specialtyApi.getReferrals()])
     classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) }))
-    alerts.value = ra.data || []
-    referrals.value = rr.data || []
-  } catch (e) { console.error(e) }
+    incidents.value = ra.data || []
+    referrals.value = rr.data || []  } catch (e) { console.error(e) }
   episodes.value = [...store.episodes]
   try {
     const rs = await specialtyApi.getSpecialties()
@@ -64,7 +63,7 @@ const careLog = computed(() => inRangeEpisodes.value.map(e => {
   }
 }).sort((a, b) => (a.date + a.arrivalTime).localeCompare(b.date + b.arrivalTime)))
 
-const alertsInRange = computed(() => alerts.value.filter(a => {
+const incidentsInRange = computed(() => incidents.value.filter(a => {
   const d = String(a.createdAt).slice(0, 10)
   if (fromDate.value && d < fromDate.value) return false
   if (toDate.value && d > toDate.value) return false
@@ -81,7 +80,7 @@ const metrics = computed(() => {
     critical: classified.filter(x => x.level === 'I' || x.level === 'II').length,
     avgCycle: cycles.length ? Math.round(cycles.reduce((a, b) => a + b, 0) / cycles.length) : null,
     maxCycle: cycles.length ? Math.max(...cycles) : null,
-    alerts: alertsInRange.value.length
+    incidents: incidentsInRange.value.length
   }
 })
 </script>
@@ -104,7 +103,7 @@ const metrics = computed(() => {
       <div class="rp-stat"><b>{{ metrics.admissions }}</b><span>{{ t('reports.mAdmissions') }}</span></div>
       <div class="rp-stat"><b>{{ metrics.classified }}</b><span>{{ t('reports.mClassified') }}</span></div>
       <div class="rp-stat crit"><b>{{ metrics.critical }}</b><span>{{ t('reports.mCritical') }}</span></div>
-      <div class="rp-stat"><b>{{ metrics.alerts }}</b><span>{{ t('reports.mAlerts') }}</span></div>
+      <div class="rp-stat"><b>{{ metrics.incidents }}</b><span>{{ t('reports.mIncidents') }}</span></div>
       <div class="rp-stat"><b>{{ metrics.avgCycle === null ? '—' : metrics.avgCycle + ' min' }}</b><span>{{ t('reports.mAvgCycle') }}</span></div>
       <div class="rp-stat"><b>{{ metrics.maxCycle === null ? '—' : metrics.maxCycle + ' min' }}</b><span>{{ t('reports.mMaxCycle') }}</span></div>
     </section>
@@ -150,7 +149,7 @@ const metrics = computed(() => {
     </section>
 
     <section class="ta-card rp-card">
-      <h3 class="ta-h">{{ t('reports.alertLog') }}</h3>
+      <h3 class="ta-h">{{ t('reports.incidentLog') }}</h3>
       <div class="rp-twrap">
       <table class="rp-table">
         <thead>
@@ -163,15 +162,15 @@ const metrics = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(a, i) in alertsInRange" :key="i">
+          <tr v-for="(a, i) in incidentsInRange" :key="i">
             <td class="rp-ep">{{ a.time }}</td>
             <td class="rp-patient">{{ a.patientName }}</td>
             <td>{{ a.vitalSign }}</td>
             <td>{{ a.value }}</td>
             <td><span class="rp-sev" :class="'sev--' + a.severity">{{ t('reports.sev.' + a.severity) }}</span></td>
           </tr>
-          <tr v-if="!alertsInRange.length">
-            <td colspan="5" class="rp-empty">{{ t('reports.noAlerts') }}</td>
+          <tr v-if="!incidentsInRange.length">
+            <td colspan="5" class="rp-empty">{{ t('reports.noIncidents') }}</td>
           </tr>
         </tbody>
       </table>
