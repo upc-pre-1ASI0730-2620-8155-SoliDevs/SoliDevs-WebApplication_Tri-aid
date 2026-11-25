@@ -82,12 +82,13 @@ export class PortalClassification {
 }
 
 export class PortalReferral {
-    constructor({ id, specialty, room, referredAt, state }) {
+    constructor({ id, specialty, room, referredAt, state, voucherToken }) {
         this.id = id
         this.specialty = specialty
         this.room = room
         this.referredAt = referredAt
         this.state = state
+        this.voucherToken = voucherToken || null
     }
 
     get isWaiting() { return this.state === 'waiting' }

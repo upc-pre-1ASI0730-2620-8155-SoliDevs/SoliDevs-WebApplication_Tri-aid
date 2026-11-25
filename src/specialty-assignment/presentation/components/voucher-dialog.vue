@@ -39,7 +39,7 @@ async function downloadQr() {
             <h3 class="ta-h">{{ t('referral.voucherTitle') }}</h3>
 
             <div class="vd-qr" v-html="qrSvg"></div>
-            <code class="vd-code">{{ voucher.qrCode }}</code>
+            <code class="vd-code">EP-{{ String(voucher.episodeId || '').padStart(4, '0') }}</code>
 
             <dl class="vd-dl">
                 <div><dt>{{ t('referral.vPatient') }}</dt><dd>{{ patientName }}</dd></div>

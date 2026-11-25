@@ -30,9 +30,9 @@ const shiftLabel = computed(() => {
 /** QR payload: the same structured code the staff voucher carries, so the scanner resolves it. */
 const qrSvg = ref('')
 import { ref } from 'vue'
-const qrPayload = computed(() => referral.value
-  ? `TRI-AID|${episode.value?.id}|${referral.value.specialty}|${referral.value.room}|#`
-  : episodeCode.value)
+// Sealed token issued by the API: the QR carries no readable patient data.
+// Falls back to the plain episode code only while the voucher has not been issued.
+const qrPayload = computed(() => referral.value?.voucherToken || episodeCode.value)
 async function downloadQr() {
   if (!episode.value) return
   const url = await QRCode.toDataURL(qrPayload.value, { margin: 2, width: 640, color: { dark: '#0a2118', light: '#ffffff' } })

@@ -114,21 +114,22 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: ReferralAssembler.toEntity(updated.data) }
     }
 
-    /** Genera (o reutiliza y actualiza) el comprobante digital de la derivacion. */
+    /**
+     * Issues the digital voucher of a referral. The API builds the payload from
+     * the stored data and seals it: the client never sees readable patient data
+     * in the QR, only the opaque token to render.
+     */
     async generateVoucher(referral) {
         await delay(150)
-        const qrCode = `TRI-AID|${referral.episodeId}|${referral.specialty}|${referral.room}|#${referral.queuePosition}`
-
-        const existing = ((await this.api.getVouchers()).data || []).find(v => String(v.referralId) === String(referral.id))
-        if (existing) {
-            existing.qrCode = qrCode
-            const response = await this.api.updateVoucher(existing.id, VoucherAssembler.toResource(new Voucher({ ...existing })))
-            return { ok: true, data: VoucherAssembler.toEntity(response.data) }
-        }
-
-        const voucher = new Voucher({ id: null, referralId: referral.id, qrCode, channel: DeliveryChannel.QrPortal })
-        const response = await this.api.createVoucher(VoucherAssembler.toResource(voucher))
-        return { ok: true, data: VoucherAssembler.toEntity(response.data) }
+        const r = await this.api.issueVoucher(referral.id)
+        const voucher = new Voucher({
+            id: null,
+            referralId: referral.id,
+            qrCode: r.data.token,
+            channel: DeliveryChannel.QrPortal,
+            episodeId: referral.episodeId
+        })
+        return { ok: true, data: voucher }
     }
 
     /** Updates the voucher after a clinical re-evaluation. */
