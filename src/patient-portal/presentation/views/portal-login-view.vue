@@ -56,14 +56,16 @@ async function submit() {
           <span class="pp__brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 17h5l2-6 4 10 2-6h7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="pp__brand-name">Tri-Aid</span>
         </span>
-        <span class="pp__portal-tag">{{ t('portal.login.tag') }}</span>
+        <span class="pp__head-right pp__head-right--login">
+          <LangSwitch />
+        </span>
       </div>
     </header>
 
     <main class="pp-login">
-      <LangSwitch class="ls--float" />
       <div class="pp-login__grid">
       <div>
+        <span class="pp-view__eyebrow">{{ t('portal.login.eyebrow') }}</span>
         <h1 class="pp-login__title">{{ t('portal.login.title') }}</h1>
         <p class="pp-login__lead">{{ t('portal.login.lead') }}</p>
 

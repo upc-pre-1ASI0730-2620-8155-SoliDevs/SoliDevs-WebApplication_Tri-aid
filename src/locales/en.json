@@ -576,7 +576,7 @@
   "portal.error.required": "Enter your DNI or e-mail and your code.",
   "portal.error.network": "Could not connect. Try again.",
   "portal.error.sessionExpired": "Your session expired. Please sign in again.",
-  "portal.login.title": "Check your care",
+  "portal.login.title": "Sign in",
   "portal.login.lead": "Sign in with your DNI or the e-mail you gave at admission, and the access code you were handed.",
   "portal.login.identifier": "DNI or e-mail",
   "portal.login.identifierPlaceholder": "8 digits or your e-mail",
@@ -738,5 +738,7 @@
   "scanner.starting": "Opening the camera…",
   "scanner.upload": "Upload QR image",
   "scanner.notReadable": "Could not read a QR from that image. Try a sharper one.",
-  "referral.downloadQr": "Save QR"
+  "referral.downloadQr": "Save QR",
+  "portal.login.tag": "Patient portal",
+  "portal.login.eyebrow": "Patient portal"
 }

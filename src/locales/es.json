@@ -576,7 +576,7 @@
   "portal.error.required": "Ingresa tu DNI o e-mail y tu código.",
   "portal.error.network": "No se pudo conectar. Intenta nuevamente.",
   "portal.error.sessionExpired": "Tu sesión expiró. Vuelve a ingresar.",
-  "portal.login.title": "Consulta tu atención",
+  "portal.login.title": "Iniciar sesión",
   "portal.login.lead": "Ingresa con tu DNI o el e-mail que diste en admisión, y el código de acceso que te entregaron.",
   "portal.login.identifier": "DNI o e-mail",
   "portal.login.identifierPlaceholder": "8 dígitos o tu correo",
@@ -738,5 +738,7 @@
   "scanner.starting": "Abriendo la cámara…",
   "scanner.upload": "Subir imagen del QR",
   "scanner.notReadable": "No se pudo leer un QR en esa imagen. Prueba con una más nítida.",
-  "referral.downloadQr": "Guardar QR"
+  "referral.downloadQr": "Guardar QR",
+  "portal.login.tag": "Portal del paciente",
+  "portal.login.eyebrow": "Portal del paciente"
 }

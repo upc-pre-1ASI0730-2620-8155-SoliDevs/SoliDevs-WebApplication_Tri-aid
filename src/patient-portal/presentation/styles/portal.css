@@ -177,7 +177,7 @@
 .pp-qr__dl .pi{font-size:14px}
 
 .pp__head-in.pp__head-in--login { grid-template-columns: auto 1fr; }
-.pp__head-in--login .pp__portal-tag { justify-self: end; margin-right: 140px; font-family: var(--ta-mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ta-muted); }
+.pp__head-in--login .pp__portal-tag { font-family: var(--ta-mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ta-muted); }
 
 /* ==========================================================================
    Portal shell (compartido por el layout y el sign-in)
@@ -214,3 +214,7 @@
   .pp__out span{display:none}
   .pp__main{padding:18px 18px calc(96px + env(safe-area-inset-bottom))}
 }
+
+.pp__head-in--login .pp__head-right { justify-self: end; }
+/* título del login: mismo eyebrow que las vistas internas, sin margen raro del h1 global */
+.pp-login__title.pp-login__title { margin: 6px 0 8px !important; }
