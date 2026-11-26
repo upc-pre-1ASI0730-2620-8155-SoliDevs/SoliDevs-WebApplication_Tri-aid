@@ -751,5 +751,8 @@
   "um.people": "Institution staff",
   "um.peopleSub": "Every account inherits your hospital; its role decides what it can do.",
   "um.self": "You",
-  "um.adminNote": "Manages the platform"
+  "um.adminNote": "Manages the platform",
+  "um.search": "Search by name, username, e-mail or role",
+  "um.count": "{n} of {total}",
+  "um.noResults": "No account matches the search."
 }
