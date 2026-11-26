@@ -92,7 +92,8 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
         <li v-for="e in recent" :key="e.id">
           <span class="pn-time">{{ e.time }}</span>
           <b>{{ e.name }}</b>
-          <span v-if="e.level" class="pn-lv" :style="{ background: e.color }">{{ e.level }}</span>
+          <!-- Always occupy the level column so unclassified rows stay aligned. -->
+          <span class="pn-lv" :class="{ 'pn-lv--empty': !e.level }" :style="e.level ? { background: e.color } : {}">{{ e.level || '·' }}</span>
           <span class="pn-id">{{ e.id }}</span>
           <span class="pn-status" :class="{ ok: e.referred }">
             {{ e.referred ? t('panel.referred') : (e.confirmed ? t('panel.toRefer') : t('panel.toClassify')) }}
@@ -136,6 +137,7 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
 .pn-time{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted)}
 .pn-list b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pn-lv{color:#fff;font-weight:700;font-size:11px;border-radius:999px;padding:2px 0;justify-self:center;text-align:center;width:28px;box-sizing:border-box}
+.pn-lv--empty{background:transparent;color:var(--ta-line);font-weight:600}
 .pn-id{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
 .pn-status{font-size:10.5px;padding:3px 0;border-radius:999px;background:#fff4e5;color:#b45309;justify-self:center;text-align:center;width:136px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pn-status.ok{background:#e3f3ea;color:var(--ta-brand)}
