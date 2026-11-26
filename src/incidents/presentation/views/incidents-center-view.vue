@@ -126,13 +126,10 @@ const confirmAcknowledge = async (directId = null) => {
   try {
     const r = await incidentsService.acknowledgeIncident(id, session.name || null);
     if (r.ok) {
+      // The card stays on the board as resolved: the "hide resolved" filter and
+      // the actions row (hidden for terminal states) take it from here.
       const i = activeIncidents.value.findIndex(a => String(a.id) === String(id));
-      if (i !== -1) {
-        activeIncidents.value[i] = r.data;
-        if (!r.data.value.includes(t('incidents.backToNormal'))) {
-          activeIncidents.value[i].value = `${t('incidents.backToNormal')} · ${r.data.value}`;
-        }
-      }
+      if (i !== -1) activeIncidents.value[i] = r.data;
     } else {
       notify({ type: 'error', title: t('incidents.ackError') });
     }
@@ -263,14 +260,16 @@ const onDoneEnter = (el, done) => {
           </template>
         </div>
 
-        <div class="al-actions" v-if="incident.severity !== 'resolved'">
+        <!-- Resolved and escalated are terminal: nothing left to acknowledge or escalate. -->
+        <div class="al-actions" v-if="incident.severity !== 'resolved' && incident.severity !== 'escalated'">
           <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeIncident(incident.id)">
             {{ t('incidents.acknowledge') }}
           </button>
-          <button v-if="incident.severity !== 'escalated'" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
+          <button class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
             {{ t('incidents.escalate') }}
           </button>
         </div>
+
 
         <Transition :css="false" @enter="onDoneEnter">
           <div v-if="doneId === incident.id" class="al-done" aria-hidden="true">
@@ -304,6 +303,7 @@ const onDoneEnter = (el, done) => {
 </template>
 
 <style scoped>
+
 .al-page{display:grid;gap:16px}
 .al-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 20px;flex-wrap:wrap}
 .al-head__main{display:grid;gap:12px}
@@ -322,19 +322,19 @@ const onDoneEnter = (el, done) => {
 .al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line);position:relative;overflow:hidden}
 .al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
 .al-card.sev--warning{border-left-color:#d97706}
-.al-card.sev--escalated{border-left-color:#6d28d9}
-.al-card.sev--resolved{border-left-color:var(--ta-brand)}
+.al-card.sev--escalated{border-left-color:#b25410;background:var(--ta-surface)}
+.al-card.sev--resolved{border-left-color:var(--ta-brand);background:var(--ta-surface);opacity:.85}
 .al-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .al-dot{font-size:8px;color:var(--ta-muted)}
 .sev--critical .al-dot{color:#b42318;animation:al-pulse 1.6s infinite}
 .sev--warning .al-dot{color:#d97706}
-.sev--escalated .al-dot{color:#6d28d9}
+.sev--escalated .al-dot{color:#b25410}
 .sev--resolved .al-dot{color:var(--ta-brand)}
 @keyframes al-pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 .al-name{font-size:14px;font-weight:600;color:var(--ta-text)}
 .al-prio{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
 .al-sound{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#b42318;background:#fee4e2;border-radius:999px;padding:3px 9px}
-.al-esc{font-size:10.5px;font-weight:600;color:#6d28d9;background:#ede9fe;border-radius:999px;padding:3px 9px}
+.al-esc{font-size:10.5px;font-weight:600;color:#b25410;background:#fdf0e3;border-radius:999px;padding:3px 9px}
 .al-res{font-size:10.5px;color:var(--ta-muted)}
 .al-meta{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
 .al-value{font-size:13px;display:flex;align-items:center;gap:6px}

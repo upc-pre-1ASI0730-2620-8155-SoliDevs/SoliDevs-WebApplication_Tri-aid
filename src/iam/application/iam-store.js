@@ -2,6 +2,7 @@ import { reactive, markRaw } from 'vue'
 import { User } from '../domain/model/user.entity.js'
 import { IamService } from '../infrastructure/iam.service.js'
 import { session } from '../../shared/application/demo-session.js'
+import { clearStaffToken } from '../../shared/application/staff-token.js'
 
 /**
  * Reactive state of the IAM bounded context. Holds the signed-in user
@@ -78,6 +79,7 @@ export const iamStore = reactive({
     /** Signs out and clears the session state. */
     async signOut() {
         await this.service.signOut()
+        clearStaffToken()
         this.user = null
         session.name = ''
         session.initials = ''

@@ -1,7 +1,7 @@
 {
   "name": "solidevs-web-application_triaid",
   "private": true,
-  "version": "3.4.0",
+  "version": "3.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,9 +14,12 @@
     "@primeuix/themes": "^3.0.1",
     "axios": "^1.20.0",
     "gsap": "^3.15.0",
+    "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
     "primeflex": "^4.0.0",
     "primeicons": "^8.0.2",
     "primevue": "^5.0.1",
+    "qrcode": "^1.5.4",
     "vue": "^3.5.42",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1"

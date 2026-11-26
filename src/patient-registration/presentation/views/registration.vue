@@ -5,6 +5,7 @@ import { registerEpisode, findPatient } from '../../application/patient-store.js
 import { docTypes, docTypeOf } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 
 const router = useRouter()
 const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '', email: '' })
@@ -59,6 +60,9 @@ function validate() {
 const saving = ref(false)
 // Render puts the API to sleep after idle time; the first request of the day can take about a minute.
 const wakingUp = ref(false)
+const issuedCode = ref(null)
+const { card: issuedCard, backdrop: issuedBackdrop, close: closeIssued } = useModalMotion(() => { issuedCode.value = null })
+function goToFile() { router.push(`/patient-registration/${issuedCode.value?.episodeId || ''}`) }
 async function submit() {
   if (!validate() || saving.value) return
   saving.value = true
@@ -73,8 +77,16 @@ async function submit() {
       birth: f.birth,
       sex: f.sex,
       phone: f.phone,
-      address: f.address.trim()
+      address: f.address.trim(),
+      email: (f.email || '').trim()
     })
+    // The API returns the one-time portal code only on creation: show it now,
+    // before leaving, so admission can hand it to the patient.
+    const issued = ep.patient?.portalPassword
+    if (issued) {
+      issuedCode.value = { code: issued, email: ep.patient?.email || '', episodeId: ep.id, dni: ep.patient?.dni || '' }
+      return
+    }
     router.push(`/patient-registration/${ep.id}`)
   } catch (e) {
     notify({ type: 'error', title: t('rg.e.save'), detail: e.response?.data?.message })
@@ -152,15 +164,19 @@ function reset() {
           <small v-if="err.sex" class="ta-err">{{ err.sex }}</small>
         </div>
         <div class="rg-f">
-          <label class="ta-label" for="phone">{{ t('rg.phone') }}</label>
+          <label class="ta-label" for="phone">{{ t('rg.phone') }} <small class="opt">{{ t('rg.optional') }}</small></label>
           <input id="phone" class="ta-input" :class="{ bad: err.phone }" v-model="f.phone" inputmode="numeric" maxlength="9" placeholder="987654321" @keyup.enter="submit" />
           <small v-if="err.phone" class="ta-err">{{ err.phone }}</small>
         </div>
-        <div class="rg-f rg-wide">
-          <label class="ta-label" for="address">{{ t('rg.address') }}</label>
+        <div class="rg-f">
+          <label class="ta-label" for="address">{{ t('rg.address') }} <small class="opt">{{ t('rg.optional') }}</small></label>
           <input id="address" class="ta-input" v-model="f.address" @keyup.enter="submit" />
-          <div class="field"><label for="email">{{ t('rg.email') }} <small class="opt">{{ t('rg.optional') }}</small></label>
-            <input id="email" type="email" class="ta-input" v-model="f.email" @keyup.enter="submit" /></div>
+          <small v-if="err.address" class="ta-err">{{ err.address }}</small>
+        </div>
+        <div class="rg-f">
+          <label class="ta-label" for="email">{{ t('rg.email') }} <small class="opt">{{ t('rg.optional') }}</small></label>
+          <input id="email" type="email" class="ta-input" v-model="f.email" placeholder="correo@ejemplo.com" @keyup.enter="submit" />
+          <small v-if="err.email" class="ta-err">{{ err.email }}</small>
         </div>
       </div>
 
@@ -173,10 +189,37 @@ function reset() {
         <button class="ta-btn" :disabled="saving" @click="submit">{{ wakingUp ? t('rg.wakingUp') : t('rg.submit') }}</button>
       </div>
     </section>
+
+    <!-- Código de portal recién emitido: se muestra una sola vez -->
+    <div v-if="issuedCode" ref="issuedBackdrop" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
+        <div ref="issuedCard" class="rg-modal__card ta-card">
+          <span class="rg-modal__ic"><i class="pi pi-qrcode"></i></span>
+          <h3 id="rg-issued-title" class="ta-h">{{ t('rg.issued.title') }}</h3>
+          <p class="ta-sub">{{ t('rg.issued.sub') }}</p>
+          <dl class="fi-dl rg-issued">
+            <div><dt>{{ t('rg.issued.user') }}</dt><dd>{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</dd></div>
+            <div><dt>{{ t('rg.issued.code') }}</dt><dd class="rg-issued__code">{{ issuedCode.code }}</dd></div>
+          </dl>
+          <p class="rg-modal__note">{{ t('rg.issued.note') }}</p>
+          <button class="ta-btn rg-modal__btn" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
+        </div>
+    </div>
   </div>
 </template>
 
 <style>
+/* Código de portal recién emitido */
+.rg-modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(10,33,24,.45);backdrop-filter:blur(3px)}
+.rg-modal__card{width:min(420px,100%);display:grid;gap:6px;padding:26px 28px;text-align:center}
+.rg-modal__ic{width:52px;height:52px;margin:0 auto 6px;border-radius:14px;background:#d6eedd;color:var(--ta-brand);display:grid;place-items:center;font-size:22px}
+.rg-modal__card .ta-sub{margin:0}
+.rg-issued{margin:16px 0 0;text-align:left;display:grid;gap:10px}
+.rg-issued > div{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:baseline}
+.rg-issued dt{font-size:.8rem;color:var(--ta-muted)}
+.rg-issued dd{margin:0;font-size:.9rem;font-weight:500;word-break:break-all}
+.rg-issued__code{font-family:var(--ta-mono);font-weight:700;font-size:22px;letter-spacing:.14em;color:var(--ta-brand)}
+.rg-modal__note{margin:4px 0 10px;font-size:.78rem;color:var(--ta-muted)}
+.rg-modal__btn{width:100%}
 .rg-field{display:grid;gap:8px;margin-bottom:18px}
 .rg-seg{display:inline-flex;align-items:center;gap:2px;padding:4px;border-radius:12px;background:#fff;border:1px solid var(--ta-line);width:fit-content;max-width:100%;flex-wrap:wrap;transition:opacity .2s}
 .rg-seg.off{opacity:.45}

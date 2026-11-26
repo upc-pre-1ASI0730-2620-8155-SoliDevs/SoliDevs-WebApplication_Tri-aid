@@ -5,6 +5,7 @@ import { docLabel } from '../../application/document-types.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
+import VoucherScanner from '../../../shared/presentation/components/voucher-scanner.vue'
 
 const q = ref('')
 const triageApi = new TriageApi()
@@ -14,6 +15,7 @@ const specialtyApi = new SpecialtyAssignmentApi()
 // to a specialty, loaded once so every row can show its triage status.
 const confirmedEpisodes = ref(new Set())
 const referredEpisodes = ref(new Set())
+const scannerOpen = ref(false)
 
 onMounted(async () => {
   try {
@@ -60,7 +62,10 @@ const fullName = p => `${p.surnames}, ${p.names}`
           <h3 class="ta-h">{{ t('nav.patients') }}</h3>
           <p class="ta-sub">{{ count }}</p>
         </div>
-        <router-link to="/patient-registration/new" class="ta-btn"><i class="pi pi-plus"></i>{{ t('pl.new') }}</router-link>
+        <div class="pl-actions">
+          <button class="ta-btn ta-btn--ghost" type="button" @click="scannerOpen = true"><i class="pi pi-qrcode"></i>{{ t('pl.scan') }}</button>
+          <router-link to="/patient-registration/new" class="ta-btn"><i class="pi pi-plus"></i>{{ t('pl.new') }}</router-link>
+        </div>
       </div>
 
       <div v-if="rows.length" class="pl-search">
@@ -95,12 +100,15 @@ const fullName = p => `${p.surnames}, ${p.names}`
         <p>{{ rows.length ? t('pl.noResults.hint') : t('pl.empty.hint') }}</p>
       </div>
     </section>
+
+    <VoucherScanner v-if="scannerOpen" @close="scannerOpen = false" />
   </div>
 </template>
 
 <style>
 .pl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .pl-top .ta-btn{text-decoration:none}
+.pl-actions{display:flex;gap:8px}
 .pl-search{position:relative;margin-bottom:14px}
 .pl-search i{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ta-muted);pointer-events:none}
 .pl-search .ta-input{padding-left:36px}
@@ -127,5 +135,5 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-empty b{font-size:14px;font-weight:600}
 .pl-empty p{margin:0 0 10px;font-size:12px;color:var(--ta-muted)}
 .pl-empty .ta-btn{text-decoration:none}
-@media(max-width:760px){.pl-row{grid-template-columns:36px minmax(0,1fr) 14px}.pl-ep,.pl-visits,.pl-meta{display:none}.pl-top{flex-direction:column;align-items:stretch}.pl-top .ta-btn{width:100%}}
+@media(max-width:760px){.pl-row{grid-template-columns:36px minmax(0,1fr) 14px}.pl-ep,.pl-visits,.pl-meta{display:none}.pl-top{flex-direction:column;align-items:stretch;gap:12px}.pl-actions{flex-direction:row;gap:8px}.pl-actions .ta-btn{flex:1;padding-left:10px;padding-right:10px;font-size:12px}.pl-search{margin-top:14px}}
 </style>

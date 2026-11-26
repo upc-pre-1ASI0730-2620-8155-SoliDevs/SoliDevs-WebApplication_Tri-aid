@@ -43,7 +43,10 @@ export async function registerEpisode(data) {
     const r = data.sinDni
       ? await api.createTemporaryProfile(PatientAssembler.toTemporaryProfileResource(data))
       : await api.createPatient(PatientAssembler.toCreateResource(data))
-    patient = PatientAssembler.toStoreModel(r.data)
+    // The API returns { patient, portalAccessCode } on creation. The code is shown
+    // once so admission can hand it over; it is never returned again afterwards.
+    const created = r.data?.patient ?? r.data
+    patient = PatientAssembler.toStoreModel({ ...created, portalAccessCode: r.data?.portalAccessCode })
     store.patients.push(patient)
   }
 

@@ -25,6 +25,8 @@ export class PatientRegistrationApi extends BaseApi {
     createPatient(resource) { return this.#patientsEndpoint.create(resource) }
     createTemporaryProfile(resource) { return this.http.post(`${patientsPath}/temporary`, resource) }
     updatePatientContact(id, resource) { return this.http.put(`${patientsPath}/${id}/contact`, resource) }
+    /** Enables the portal (or rotates the access code). Returns the plain code once. */
+    enablePortal(id, resource) { return this.http.post(`${patientsPath}/${id}/portal`, resource) }
 
     getEpisodes() { return this.#episodesEndpoint.getAll() }
     openEpisode(resource) { return this.#episodesEndpoint.create(resource) }

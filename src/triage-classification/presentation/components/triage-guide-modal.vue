@@ -4,14 +4,16 @@
  */
 import { TRIAGE_LEVELS } from '../../../shared/domain/shared-kernel/triage-level.js'
 import { t } from '../../../shared/application/i18n.js'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 
 defineProps({ title: String, sub: String, closeLabel: String })
-defineEmits(['close'])
+const emit = defineEmits(['close'])
+const { card, backdrop, close } = useModalMotion(() => emit('close'))
 </script>
 
 <template>
-    <div class="tg-overlay" @click.self="$emit('close')">
-        <div class="ta-card tg-modal">
+    <div ref="backdrop" class="tg-overlay" @click.self="close">
+        <div ref="card" class="ta-card tg-modal">
             <h3 class="ta-h">{{ title }}</h3>
             <p class="ta-sub">{{ sub }}</p>
             <ul>
@@ -24,7 +26,7 @@ defineEmits(['close'])
                 </li>
             </ul>
             <div class="tg-actions">
-                <button class="ta-btn" @click="$emit('close')">{{ closeLabel }}</button>
+                <button class="ta-btn" @click="close()">{{ closeLabel }}</button>
             </div>
         </div>
     </div>
