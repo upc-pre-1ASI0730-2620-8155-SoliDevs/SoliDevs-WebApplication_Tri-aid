@@ -189,20 +189,21 @@ function reset() {
         <button class="ta-btn" :disabled="saving" @click="submit">{{ wakingUp ? t('rg.wakingUp') : t('rg.submit') }}</button>
       </div>
     </section>
-  </div>
-  <!-- Código de portal recién emitido: se muestra una sola vez -->
-  <div v-if="issuedCode" ref="issuedBackdrop" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
-      <div ref="issuedCard" class="rg-modal__card ta-card">
-        <span class="rg-modal__ic"><i class="pi pi-qrcode"></i></span>
-        <h3 id="rg-issued-title" class="ta-h">{{ t('rg.issued.title') }}</h3>
-        <p class="ta-sub">{{ t('rg.issued.sub') }}</p>
-        <dl class="fi-dl rg-issued">
-          <div><dt>{{ t('rg.issued.user') }}</dt><dd>{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</dd></div>
-          <div><dt>{{ t('rg.issued.code') }}</dt><dd class="rg-issued__code">{{ issuedCode.code }}</dd></div>
-        </dl>
-        <p class="rg-modal__note">{{ t('rg.issued.note') }}</p>
-        <button class="ta-btn rg-modal__btn" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
-      </div>
+
+    <!-- Código de portal recién emitido: se muestra una sola vez -->
+    <div v-if="issuedCode" ref="issuedBackdrop" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
+        <div ref="issuedCard" class="rg-modal__card ta-card">
+          <span class="rg-modal__ic"><i class="pi pi-qrcode"></i></span>
+          <h3 id="rg-issued-title" class="ta-h">{{ t('rg.issued.title') }}</h3>
+          <p class="ta-sub">{{ t('rg.issued.sub') }}</p>
+          <dl class="fi-dl rg-issued">
+            <div><dt>{{ t('rg.issued.user') }}</dt><dd>{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</dd></div>
+            <div><dt>{{ t('rg.issued.code') }}</dt><dd class="rg-issued__code">{{ issuedCode.code }}</dd></div>
+          </dl>
+          <p class="rg-modal__note">{{ t('rg.issued.note') }}</p>
+          <button class="ta-btn rg-modal__btn" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
+        </div>
+    </div>
   </div>
 </template>
 
