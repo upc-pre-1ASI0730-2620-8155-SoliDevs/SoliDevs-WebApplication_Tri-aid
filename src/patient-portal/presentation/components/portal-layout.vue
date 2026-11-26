@@ -9,6 +9,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { patientPortalStore } from '../../application/patient-portal-store.js'
+import '../styles/portal.css'
 import LangSwitch from '../../../shared/presentation/components/lang-switch.vue'
 
 const route = useRoute()
@@ -79,32 +80,7 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
 </template>
 
 <style scoped>
-.pp{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background-color:var(--ta-bg);background-image:linear-gradient(to right,var(--ta-grid) 1px,transparent 1px),linear-gradient(to bottom,var(--ta-grid) 1px,transparent 1px);background-size:44px 44px;color:var(--ta-text);font-family:var(--ta-font);letter-spacing:0;line-height:1.45}
-.pp__head{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--ta-line);background:color-mix(in srgb,var(--ta-surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.pp__head-in{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:28px;padding:10px 40px}
-.pp__brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
-.pp__brand-mark{width:26px;height:26px;border-radius:7px;background:var(--ta-brand);color:#eafff3;display:grid;place-items:center}
-.pp__brand-mark svg{width:22px;height:22px}
-.pp__brand-name{font-family:var(--ta-font);font-weight:600;font-size:15.5px;color:var(--ta-text)}
-.pp__tabs{display:flex;gap:4px}
-.pp__tab{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--ta-muted);text-decoration:none;transition:color .2s,background .2s}
-.pp__tab .pi{font-size:15px}
-.pp__tab:focus{outline:none}.pp__tab:focus-visible{outline:2px solid var(--ta-accent);outline-offset:2px}
-.pp__tab:hover{color:var(--ta-text);background:#e7f0ea}
-.pp__tab--active{color:var(--ta-brand);background:#d3f1d9}
-.pp__head-right{justify-self:end;display:inline-flex;align-items:center;gap:14px}
-.pp__user{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 5px;border:1px solid var(--ta-line);border-radius:999px;background:var(--ta-surface);font-size:13.5px}
-.pp__av{width:28px;height:28px;border-radius:50%;background:#d3f1d9;color:var(--ta-brand);display:grid;place-items:center;font-family:var(--ta-font);font-weight:600;font-size:12.5px}
-.pp__nm{padding-right:4px;font-weight:500}
-.pp__out{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:0;border-radius:999px;background:transparent;color:var(--ta-muted);font-size:13px;cursor:pointer;transition:background .2s,color .2s;font-family:inherit}
-.pp__out:hover{background:#e7f0ea;color:var(--ta-text)}
-.pp__out .pi{font-size:13px}
-.pp__main{flex:1;width:100%;max-width:1360px;margin:0 auto;padding:28px 40px 40px}
-.pp__tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ta-line);background:color-mix(in srgb,var(--ta-surface) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px -16px rgba(16,46,36,.18)}
 .pp__tabbar-link:focus{outline:none}.pp__tabbar-link:focus-visible{outline:2px solid var(--ta-accent);outline-offset:-2px}
-.pp__tabbar-link{display:grid;justify-items:center;gap:4px;min-height:56px;padding:9px 0 8px;font-size:12px;font-weight:500;color:var(--ta-muted);text-decoration:none;white-space:nowrap}
-.pp__tabbar-link .pi{font-size:19px}
-.pp__tabbar-link--active{color:var(--ta-brand)}
 
 /* page transition between tabs */
 .pp-page-enter-active,.pp-page-leave-active{transition:opacity .18s ease,transform .18s ease}
@@ -112,9 +88,6 @@ watch(() => route.fullPath, () => window.scrollTo({ top: 0 }))
 .pp-page-leave-to{opacity:0;transform:translateY(-6px)}
 
 @media (max-width:879px){
-  .pp__head-in{grid-template-columns:auto 1fr;gap:14px;padding:10px 18px}
-  .pp__nm{display:none}
-  .pp__out span{display:none}
-  .pp__main{padding:18px 18px calc(96px + env(safe-area-inset-bottom))}
-}
+      .pp__out span{display:none}
+  }
 </style>

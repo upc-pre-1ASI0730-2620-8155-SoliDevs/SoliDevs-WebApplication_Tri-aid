@@ -49,14 +49,21 @@ async function submit() {
 </script>
 
 <template>
-  <div class="pp-login">
-    <LangSwitch class="ls--float" />
-    <div class="pp-login__grid">
-      <div>
-        <span class="pp-login__brand">
-          <span class="pp-login__mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 17h5l2-6 4 10 2-6h7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <b>Tri-Aid</b>
+  <div class="pp">
+    <header class="pp__head">
+      <div class="pp__head-in pp__head-in--login">
+        <span class="pp__brand">
+          <span class="pp__brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 17h5l2-6 4 10 2-6h7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="pp__brand-name">Tri-Aid</span>
         </span>
+        <span class="pp__portal-tag">{{ t('portal.login.tag') }}</span>
+      </div>
+    </header>
+
+    <main class="pp-login">
+      <LangSwitch class="ls--float" />
+      <div class="pp-login__grid">
+      <div>
         <h1 class="pp-login__title">{{ t('portal.login.title') }}</h1>
         <p class="pp-login__lead">{{ t('portal.login.lead') }}</p>
 
@@ -98,5 +105,6 @@ async function submit() {
         </div>
       </aside>
     </div>
+    </main>
   </div>
 </template>
