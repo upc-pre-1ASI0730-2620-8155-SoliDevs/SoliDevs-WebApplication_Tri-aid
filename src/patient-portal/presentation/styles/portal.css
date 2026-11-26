@@ -141,7 +141,7 @@
 .pp-login__demo { margin: 8px 0 0; font-family: var(--ta-mono); font-size: 12px; color: var(--ta-muted); }
 .pp-login__aside { position: relative; overflow: hidden; padding: 40px 44px; border-radius: 20px; color: #e0ebe3; background: linear-gradient(160deg, #0a221a 0%, #193026 100%); }
 .pp-login__kicker { font-family: var(--ta-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #9eb0a3; }
-.pp-login__aside h2 { margin: 12px 0 28px; font-size: 26px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; color: #eafff3; }
+.pp-login__aside h2 { color: #eafff3 !important; font-weight: 600 !important; margin: 12px 0 28px; font-size: 26px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; color: #eafff3; }
 .pp-la-step { display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: start; }
 .pp-la-step + .pp-la-step { margin-top: 22px; padding-top: 22px; border-top: 1px solid rgba(234,255,243,.12); }
 .pp-la-step__ic { width: 44px; height: 44px; border-radius: 12px; background: rgba(234,255,243,.08); border: 1px solid rgba(234,255,243,.16); display: grid; place-items: center; }
@@ -217,4 +217,5 @@
 
 .pp__head-in--login .pp__head-right { justify-self: end; }
 /* título del login: mismo eyebrow que las vistas internas, sin margen raro del h1 global */
-.pp-login__title.pp-login__title { margin: 6px 0 8px !important; }
+/* The landing's global h1 sets its own color and weight; the portal titles use the app ink. */
+.pp-login__title.pp-login__title { margin: 6px 0 8px !important; color: var(--ta-text) !important; font-weight: 600 !important; font-family: var(--ta-font) !important; }
