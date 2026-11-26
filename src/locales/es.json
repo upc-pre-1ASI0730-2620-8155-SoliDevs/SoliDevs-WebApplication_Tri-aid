@@ -503,7 +503,7 @@
   "register.ft2.d": "Solo tú creas las cuentas del personal de tu institución.",
   "register.ft3.t": "Listo en minutos",
   "register.ft3.d": "Registra tu institución y empieza a clasificar pacientes hoy.",
-  "um.seatsUnlimited": "Ilimitado",
+  "um.seatsUnlimited": "Sin límite de cuentas",
   "um.seatsHint": "Cuentas de tu institución según el plan contratado",
   "um.limitReachedTitle": "Límite del plan alcanzado",
   "um.limitReached": "Tu plan permite hasta {limit} cuentas de personal. Mejora de plan para agregar más.",
@@ -740,5 +740,16 @@
   "scanner.notReadable": "No se pudo leer un QR en esa imagen. Prueba con una más nítida.",
   "referral.downloadQr": "Guardar QR",
   "portal.login.tag": "Portal del paciente",
-  "portal.login.eyebrow": "Portal del paciente"
+  "portal.login.eyebrow": "Portal del paciente",
+  "role.Triage Administrator": "Administrador de triaje",
+  "role.Triage Nurse": "Enfermero de triaje",
+  "role.Emergency Physician": "Médico de emergencia",
+  "shift.Morning": "Mañana",
+  "shift.Evening": "Tarde",
+  "shift.Night": "Noche",
+  "um.seats": "{used} de {total} cuentas",
+  "um.people": "Personal de la institución",
+  "um.peopleSub": "Cada cuenta hereda tu hospital y su rol define qué puede hacer.",
+  "um.self": "Tú",
+  "um.adminNote": "Gestiona la plataforma"
 }

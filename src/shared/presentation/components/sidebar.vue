@@ -29,7 +29,7 @@ const items = computed(() => allItems.filter(it => !it.adminOnly || iamStore.isA
   <aside class="sb">
     <header class="sb__brand">
       <img :src="logo" alt="Tri-Aid" />
-      <div><strong>Tri-Aid</strong><small>{{ t('brand.sub') }}<span v-if="session.shift"> · {{ session.shift }}</span></small></div>
+      <div><strong>Tri-Aid</strong><small>{{ t('brand.sub') }}<span v-if="session.shift"> · {{ t('shift.' + session.shift, session.shift) }}</span></small></div>
     </header>
 
     <nav class="sb__nav">
@@ -42,7 +42,7 @@ const items = computed(() => allItems.filter(it => !it.adminOnly || iamStore.isA
     <footer v-if="session.name" class="sb__foot">
       <router-link to="/profile" class="sb__user" :title="t('nav.profile')">
         <span class="sb__av">{{ session.initials }}</span>
-        <div><b>{{ session.name }}</b><small>{{ session.unit }}</small></div>
+        <div><b>{{ session.name }}</b><small>{{ t('role.' + session.unit, session.unit) }}</small></div>
       </router-link>
       <a href="/login" class="sb__out" @click.prevent="signOut"><i class="pi pi-sign-out"></i><span>{{ t('nav.signOut') }}</span></a>
     </footer>

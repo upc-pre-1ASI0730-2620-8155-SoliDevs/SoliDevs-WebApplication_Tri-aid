@@ -503,7 +503,7 @@
   "register.ft2.d": "Only you create staff accounts for your institution.",
   "register.ft3.t": "Ready in minutes",
   "register.ft3.d": "Register your institution and start triaging patients today.",
-  "um.seatsUnlimited": "Unlimited",
+  "um.seatsUnlimited": "Unlimited accounts",
   "um.seatsHint": "Institution accounts allowed by the contracted plan",
   "um.limitReachedTitle": "Plan limit reached",
   "um.limitReached": "Your plan allows up to {limit} staff accounts. Upgrade your plan to add more.",
@@ -740,5 +740,16 @@
   "scanner.notReadable": "Could not read a QR from that image. Try a sharper one.",
   "referral.downloadQr": "Save QR",
   "portal.login.tag": "Patient portal",
-  "portal.login.eyebrow": "Patient portal"
+  "portal.login.eyebrow": "Patient portal",
+  "role.Triage Administrator": "Triage administrator",
+  "role.Triage Nurse": "Triage nurse",
+  "role.Emergency Physician": "Emergency physician",
+  "shift.Morning": "Morning",
+  "shift.Evening": "Evening",
+  "shift.Night": "Night",
+  "um.seats": "{used} of {total} accounts",
+  "um.people": "Institution staff",
+  "um.peopleSub": "Every account inherits your hospital; its role decides what it can do.",
+  "um.self": "You",
+  "um.adminNote": "Manages the platform"
 }
