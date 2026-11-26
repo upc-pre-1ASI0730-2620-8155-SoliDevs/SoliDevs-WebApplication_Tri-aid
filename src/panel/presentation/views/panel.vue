@@ -141,7 +141,7 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
 .pn-id{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
 .pn-status{font-size:10.5px;padding:3px 0;border-radius:999px;background:#fff4e5;color:#b45309;justify-self:center;text-align:center;width:136px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pn-status.ok{background:#e3f3ea;color:var(--ta-brand)}
-.pn-list .ta-btn{justify-self:end;width:114px;box-sizing:border-box;justify-content:center;padding-left:6px;padding-right:6px}
+.pn-list .ta-btn{justify-self:end;text-decoration:none;width:114px;box-sizing:border-box;justify-content:center;padding-left:6px;padding-right:6px}
 .pn-empty{margin:14px 0 0;font-size:12.5px;color:var(--ta-muted);text-align:center}
 @media(max-width:760px){.pn-list li{grid-template-columns:44px minmax(0,1fr) 32px 122px;grid-auto-rows:auto;row-gap:6px}.pn-status,.pn-list .ta-btn{grid-column:span 2;justify-self:start;width:auto;max-width:100%}}
 .rc-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
