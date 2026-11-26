@@ -135,5 +135,5 @@ const fullName = p => `${p.surnames}, ${p.names}`
 .pl-empty b{font-size:14px;font-weight:600}
 .pl-empty p{margin:0 0 10px;font-size:12px;color:var(--ta-muted)}
 .pl-empty .ta-btn{text-decoration:none}
-@media(max-width:760px){.pl-row{grid-template-columns:36px minmax(0,1fr) 14px}.pl-ep,.pl-visits,.pl-meta{display:none}.pl-top{flex-direction:column;align-items:stretch}.pl-actions{flex-direction:column;gap:10px}.pl-actions .ta-btn{width:100%}}
+@media(max-width:760px){.pl-row{grid-template-columns:36px minmax(0,1fr) 14px}.pl-ep,.pl-visits,.pl-meta{display:none}.pl-top{flex-direction:column;align-items:stretch;gap:12px}.pl-actions{flex-direction:row;gap:8px}.pl-actions .ta-btn{flex:1;padding-left:10px;padding-right:10px;font-size:12px}.pl-search{margin-top:14px}}
 </style>
