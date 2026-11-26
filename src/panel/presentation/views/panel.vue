@@ -88,7 +88,7 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
       <p class="ta-sub">{{ t('panel.recentSub') }}</p>
 
       <p v-if="!recent.length" class="pn-empty">{{ t('pl.count.none') }}</p>
-      <ul v-else class="pn-list">
+      <div v-else class="pn-scroll"><ul class="pn-list">
         <li v-for="e in recent" :key="e.id">
           <span class="pn-time">{{ e.time }}</span>
           <b>{{ e.name }}</b>
@@ -110,7 +110,7 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
             <i class="pi pi-sort-amount-up"></i>{{ t('panel.btnClassify') }}
           </router-link>
         </li>
-      </ul>
+      </ul></div>
     </section>
 
     <section class="ta-card pn-card pn-in" style="--d:2">
@@ -136,14 +136,22 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
 .pn-list li{display:grid;grid-template-columns:40px minmax(0,1fr) 30px 110px 148px 114px;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--ta-line);border-radius:10px;background:#fff;font-size:12.5px}
 .pn-time{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-muted)}
 .pn-list b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pn-lv{color:#fff;font-weight:700;font-size:11px;border-radius:999px;padding:2px 0;justify-self:center;text-align:center;width:28px;box-sizing:border-box}
+.pn-lv{color:#fff;font-weight:700;font-size:11px;line-height:1;padding:7px 0;border-radius:8px;justify-self:center;text-align:center;width:30px;box-sizing:border-box}
 .pn-lv--empty{background:transparent;color:var(--ta-line);font-weight:600}
 .pn-id{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
-.pn-status{font-size:10.5px;padding:3px 0;border-radius:999px;background:#fff4e5;color:#b45309;justify-self:center;text-align:center;width:136px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pn-status{font-size:10.5px;font-weight:500;line-height:1;padding:8px 0;border-radius:8px;background:#fff4e5;color:#b45309;justify-self:center;text-align:center;width:136px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pn-status.ok{background:#e3f3ea;color:var(--ta-brand)}
 .pn-list .ta-btn{justify-self:end;text-decoration:none;width:114px;box-sizing:border-box;justify-content:center;padding-left:6px;padding-right:6px}
 .pn-empty{margin:14px 0 0;font-size:12.5px;color:var(--ta-muted);text-align:center}
-@media(max-width:760px){.pn-list li{grid-template-columns:44px minmax(0,1fr) 32px 122px;grid-auto-rows:auto;row-gap:6px}.pn-status,.pn-list .ta-btn{grid-column:span 2;justify-self:start;width:auto;max-width:100%}}
+/* Móvil: la fila conserva su grid y la lista se desliza en horizontal. */
+.pn-scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--ta-brand) transparent;margin:12px 0 0 -4px;padding:0 4px 6px}
+.pn-scroll::-webkit-scrollbar{height:6px}
+.pn-scroll::-webkit-scrollbar-thumb{background:var(--ta-brand);border-radius:6px}
+.pn-list{margin:0}
+@media(max-width:760px){
+  .pn-list li{grid-template-columns:40px minmax(160px,1fr) 30px 60px 136px 120px;min-width:620px}
+  .pn-list b{white-space:nowrap}
+}
 .rc-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .rc-chip{border:1px solid var(--ta-line);border-radius:999px;padding:6px 14px;font-size:12.5px;background:#fff;display:inline-flex;gap:8px}
 .rc-chip b{color:var(--ta-brand)}
