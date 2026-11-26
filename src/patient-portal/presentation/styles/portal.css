@@ -135,6 +135,9 @@
 .pp-login__form .field + .field { margin-top: 14px; }
 .pp-login__form .ta-btn { margin-top: 18px; height: 46px; font-size: 15px; width: 100%; }
 .pp-login__below { max-width: 440px; margin-top: 18px; font-size: 13px; }
+/* Design-system link: brand green, no underline until hover. */
+.pp-login__help { color: var(--ta-brand) !important; text-decoration: none; font-weight: 500; }
+.pp-login__help:hover { text-decoration: underline; text-underline-offset: 4px; }
 .pp-login__demo { margin: 8px 0 0; font-family: var(--ta-mono); font-size: 12px; color: var(--ta-muted); }
 .pp-login__aside { position: relative; overflow: hidden; padding: 40px 44px; border-radius: 20px; color: #e0ebe3; background: linear-gradient(160deg, #0a221a 0%, #193026 100%); }
 .pp-login__kicker { font-family: var(--ta-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #9eb0a3; }
