@@ -183,7 +183,7 @@
    Portal shell (compartido por el layout y el sign-in)
    ========================================================================== */
 .pp{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background-color:var(--ta-bg);background-image:linear-gradient(to right,var(--ta-grid) 1px,transparent 1px),linear-gradient(to bottom,var(--ta-grid) 1px,transparent 1px);background-size:44px 44px;color:var(--ta-text);font-family:var(--ta-font);letter-spacing:0;line-height:1.45}
-.pp__head{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--ta-line);background:color-mix(in srgb,var(--ta-surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.pp__head{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--ta-line);background:var(--ta-surface)}
 .pp__head-in{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:28px;padding:10px 40px}
 .pp__brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
 .pp__brand-mark{width:26px;height:26px;border-radius:7px;background:var(--ta-brand);color:#eafff3;display:grid;place-items:center}
@@ -203,7 +203,7 @@
 .pp__out:hover{background:#e7f0ea;color:var(--ta-text)}
 .pp__out .pi{font-size:13px}
 .pp__main{flex:1;width:100%;max-width:1360px;margin:0 auto;padding:28px 40px 40px}
-.pp__tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ta-line);background:color-mix(in srgb,var(--ta-surface) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px -16px rgba(16,46,36,.18)}
+.pp__tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ta-line);background:var(--ta-surface);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px -16px rgba(16,46,36,.18)}
 .pp__tabbar-link{display:grid;justify-items:center;gap:4px;min-height:56px;padding:9px 0 8px;font-size:12px;font-weight:500;color:var(--ta-muted);text-decoration:none;white-space:nowrap}
 .pp__tabbar-link .pi{font-size:19px}
 .pp__tabbar-link--active{color:var(--ta-brand)}
