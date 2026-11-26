@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.1.0] - 2026-11-23
+## [3.5.0] - 2026-11-26
+
+### Added
+- **Patient portal:** sign-in, my status, my turn and my voucher views with a tabbed layout, session guard, Spanish/English copy and a 45-second live queue poll.
+- **Voucher QR:** the referral voucher renders a real scannable QR carrying the sealed token, with PNG download for the patient and the staff.
+- **Voucher scanner:** the admission desk scans the voucher with the camera or an uploaded image and opens the patient file directly.
+- **Staff sign-in:** the staff logs in against the API and every request carries the real JWT.
+- Reports: NT-158 level distribution chart, each report source loaded independently.
+
+### Changed
+- Personal is laid out as a searchable list like Pacientes, with localized role and shift chips.
+- Monitor-paper grid background across the staff shell and the patient portal; issued-code dialog animated with the shared modal motion.
+- Incidents endpoint moved to `/incidents` to follow the renamed bounded context.
+
+### Fixed
+- Registration and dialog rendering (single root under the router transition), referral lookup through the episode endpoint, panel counts derived from live referrals, and responsive spacing on Pacientes and the episodes list.
+
+## [3.1.0] - 2026-11-21
 
 ### Added
 - Registration shows a "waking up the server" notice when the API takes long to answer.
@@ -15,18 +32,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The trial subscription is created with its renewal date and grace period.
 
-## [3.2.0] - 2026-11-23
+## [3.2.0] - 2026-11-21
 
 ### Added
 - Patient list marks each patient as classified or referred from the persisted classifications and referrals.
 - Reports: referral status in the care log, UTC-safe cycle time and translated severity in the alert log.
 
-## [3.3.0] - 2026-11-23
+## [3.3.0] - 2026-11-21
 
 ### Fixed
 - Acknowledge failures on escalated incidents are reported to the user.
 
-## [3.4.0] - 2026-11-25
+## [3.4.0] - 2026-11-22
 
 ### Changed
 - **Breaking — Bounded context rename (Alerting → Incidents):** aligned with the `feature/incident-refactor` branch of the TriAid Platform API.
