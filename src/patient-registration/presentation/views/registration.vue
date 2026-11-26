@@ -5,6 +5,7 @@ import { registerEpisode, findPatient } from '../../application/patient-store.js
 import { docTypes, docTypeOf } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 
 const router = useRouter()
 const blank = () => ({ sinDni: false, docType: 'dni', dni: '', names: '', surnames: '', birth: '', sex: '', phone: '', address: '', email: '' })
