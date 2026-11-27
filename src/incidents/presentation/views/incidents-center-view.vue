@@ -12,6 +12,9 @@ import { notify } from '../../../shared/application/toast-store.js';
 
 const { t } = useI18n();
 const activeIncidents = ref([]);
+// Escalation moves the whole episode to Trauma Shock, so it is offered once per episode.
+const episodeAlreadyEscalated = (incident) => activeIncidents.value
+  .some(a => String(a.episode) === String(incident.episode) && a.severity === 'escalated' && String(a.id) !== String(incident.id));
 const incidentsService = new IncidentsService();
 const router = useRouter();
 const doneId = ref(null);
@@ -93,16 +96,23 @@ const confirmEscalate = async () => {
   if (!incident) return;
   try {
     const specs = await specialtyService.getSpecialties();
-    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
-    if (trauma) {
-      const r = await specialtyService.refer(incident.episode, {
-        specialtyRef: trauma,
-        symptom: `EMERGENCIA — ${incident.vitalSign} ${incident.value}`
-      });
-      if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
-      const ep = findEpisode(incident.episode);
-      if (ep) { ep.referred = true; saveEpisode(ep); }
+    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock' || s.name === 'Trauma Shock');
+    if (!trauma) { notify({ type: 'error', title: t('incidents.escError') }); return; }
+    // The episode usually already carries a triage referral (e.g. Traumatología). Escalating
+    // must move that referral to Trauma Shock, not just rewrite its symptom.
+    const reason = `EMERGENCIA — ${incident.vitalSign} ${incident.value}`;
+    const existing = await specialtyService.findByEpisode(incident.episode);
+    let r;
+    if (existing && existing.specialty !== trauma.name) {
+      r = await specialtyService.changeSpecialty(existing.id, { specialty: trauma.name, reason });
+    } else if (existing) {
+      r = { ok: true, data: existing };
+    } else {
+      r = await specialtyService.refer(incident.episode, { specialtyRef: trauma, symptom: reason });
     }
+    if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
+    const ep = findEpisode(incident.episode);
+    if (ep) { ep.referred = true; saveEpisode(ep); }
     const up = await incidentsService.escalateIncident(incident.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
       const i = activeIncidents.value.findIndex(a => String(a.id) === String(incident.id));
@@ -265,7 +275,7 @@ const onDoneEnter = (el, done) => {
           <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeIncident(incident.id)">
             {{ t('incidents.acknowledge') }}
           </button>
-          <button class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
+          <button v-if="!episodeAlreadyEscalated(incident)" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
             {{ t('incidents.escalate') }}
           </button>
         </div>
