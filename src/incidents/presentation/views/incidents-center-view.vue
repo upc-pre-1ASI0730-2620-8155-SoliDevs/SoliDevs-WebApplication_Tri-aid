@@ -61,7 +61,9 @@ const displayIncidents = computed(() => {
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
   } else if (activeFilter.value === 'unresolved') {
-    filtered = filtered.filter(a => a.severity !== 'resolved');
+    // Resolved and escalated are both terminal: once the patient was referred or
+    // acknowledged, the card is closed and this filter takes it off the board.
+    filtered = filtered.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated');
   }
 
   const localDay = a => new Date(a.createdAt).toLocaleDateString('en-CA');

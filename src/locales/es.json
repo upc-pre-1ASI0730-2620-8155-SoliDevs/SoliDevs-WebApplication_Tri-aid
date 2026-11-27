@@ -12,7 +12,7 @@
   "incidents.escError": "No se pudo completar el escalamiento",
   "incidents.filterAll": "Todas",
   "incidents.filterCritical": "Solo críticas",
-  "incidents.filterUnresolved": "Ocultar resueltas",
+  "incidents.filterUnresolved": "Ocultar cerradas",
   "incidents.generated": "generada",
   "incidents.no": "Cancelar",
   "incidents.nurse": "Enf. de turno",

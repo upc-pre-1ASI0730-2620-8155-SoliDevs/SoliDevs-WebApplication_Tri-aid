@@ -12,7 +12,7 @@
   "incidents.escError": "Escalation could not be completed",
   "incidents.filterAll": "All",
   "incidents.filterCritical": "Critical only",
-  "incidents.filterUnresolved": "Hide resolved",
+  "incidents.filterUnresolved": "Hide closed",
   "incidents.generated": "generated",
   "incidents.no": "Cancel",
   "incidents.nurse": "On-duty nurse",
