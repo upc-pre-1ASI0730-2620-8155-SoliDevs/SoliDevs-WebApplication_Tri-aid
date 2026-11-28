@@ -18,6 +18,8 @@ const episodeAlreadyEscalated = (incident) => activeIncidents.value
 const incidentsService = new IncidentsService();
 const router = useRouter();
 const doneId = ref(null);
+// Which closing animation the card plays: the green tick with 'Resuelta' or with the Trauma Shock destination.
+const doneKind = ref('resolve');
 const pendingId = ref(null);
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -96,6 +98,9 @@ const confirmEscalate = async () => {
   const incident = activeIncidents.value.find(a => String(a.id) === String(pendingEsc.value));
   pendingEsc.value = null;
   if (!incident) return;
+  doneKind.value = 'escalate';
+  doneId.value = incident.id;
+  await new Promise(r => setTimeout(r, 1500));
   try {
     const specs = await specialtyService.getSpecialties();
     const trauma = (specs.data || []).find(s => s.key === 'TraumaShock' || s.name === 'Trauma Shock');
@@ -124,6 +129,7 @@ const confirmEscalate = async () => {
     releaseEpisodeDevices(incident.episode);
     notify({ type: 'success', title: t('incidents.escDone'), detail: 'Trauma Shock · TS-1' });
   } catch (e) { console.error(e); notify({ type: 'error', title: t('incidents.escError') }); }
+  setTimeout(() => { if (String(doneId.value) === String(incident.id)) doneId.value = null; }, 400);
 };
 
 const cancelAcknowledge = () => { pendingId.value = null; };
@@ -132,6 +138,7 @@ const confirmAcknowledge = async (directId = null) => {
   const id = directId ?? pendingId.value;
   pendingId.value = null;
 
+  doneKind.value = 'resolve';
   doneId.value = id;
   await new Promise(r => setTimeout(r, 1500));
 
@@ -290,7 +297,7 @@ const onDoneEnter = (el, done) => {
               <circle class="al-done__disc" cx="36" cy="36" r="30" />
               <path class="al-done__tick" d="M23 37l9 9 18-21" pathLength="1" />
             </svg>
-            <span class="al-done__txt">{{ t('incidents.resolved') }}</span>
+            <span class="al-done__txt">{{ doneKind === 'escalate' ? t('incidents.escalatedDone') : t('incidents.resolved') }}</span>
           </div>
         </Transition>
       </article>

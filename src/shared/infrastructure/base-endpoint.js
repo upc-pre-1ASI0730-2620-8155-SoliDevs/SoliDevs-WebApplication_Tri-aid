@@ -26,7 +26,8 @@ export class BaseEndpoint {
     #tenant(list) {
         if (!this.tenantScoped || !session.institution) return list
         const mine = String(session.institution).trim().toLowerCase()
-        return list.filter(r => String(r.institution || '').trim().toLowerCase() === mine)
+        // Records created before tenancy (no institution) are shown rather than hidden.
+        return list.filter(r => { const inst = String(r.institution || '').trim().toLowerCase(); return inst === '' || inst === mine })
     }
 
     /** GET collection: json-server returns an array; RTDB a map { id: item }. */
