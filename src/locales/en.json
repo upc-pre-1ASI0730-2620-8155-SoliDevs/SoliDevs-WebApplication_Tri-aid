@@ -12,7 +12,7 @@
   "incidents.escError": "Escalation could not be completed",
   "incidents.filterAll": "All",
   "incidents.filterCritical": "Critical only",
-  "incidents.filterUnresolved": "Hide resolved",
+  "incidents.filterUnresolved": "Hide closed",
   "incidents.generated": "generated",
   "incidents.no": "Cancel",
   "incidents.nurse": "On-duty nurse",
@@ -754,5 +754,6 @@
   "um.adminNote": "Manages the platform",
   "um.search": "Search by name, username, e-mail or role",
   "um.count": "{n} of {total}",
-  "um.noResults": "No account matches the search."
+  "um.noResults": "No account matches the search.",
+  "incidents.escalatedDone": "Referred to Trauma Shock"
 }

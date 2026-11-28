@@ -12,9 +12,14 @@ import { notify } from '../../../shared/application/toast-store.js';
 
 const { t } = useI18n();
 const activeIncidents = ref([]);
+// Escalation moves the whole episode to Trauma Shock, so it is offered once per episode.
+const episodeAlreadyEscalated = (incident) => activeIncidents.value
+  .some(a => String(a.episode) === String(incident.episode) && a.severity === 'escalated' && String(a.id) !== String(incident.id));
 const incidentsService = new IncidentsService();
 const router = useRouter();
 const doneId = ref(null);
+// Which closing animation the card plays: the green tick with 'Resuelta' or with the Trauma Shock destination.
+const doneKind = ref('resolve');
 const pendingId = ref(null);
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -58,7 +63,9 @@ const displayIncidents = computed(() => {
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
   } else if (activeFilter.value === 'unresolved') {
-    filtered = filtered.filter(a => a.severity !== 'resolved');
+    // Resolved and escalated are both terminal: once the patient was referred or
+    // acknowledged, the card is closed and this filter takes it off the board.
+    filtered = filtered.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated');
   }
 
   const localDay = a => new Date(a.createdAt).toLocaleDateString('en-CA');
@@ -91,18 +98,28 @@ const confirmEscalate = async () => {
   const incident = activeIncidents.value.find(a => String(a.id) === String(pendingEsc.value));
   pendingEsc.value = null;
   if (!incident) return;
+  doneKind.value = 'escalate';
+  doneId.value = incident.id;
+  await new Promise(r => setTimeout(r, 1500));
   try {
     const specs = await specialtyService.getSpecialties();
-    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
-    if (trauma) {
-      const r = await specialtyService.refer(incident.episode, {
-        specialtyRef: trauma,
-        symptom: `EMERGENCIA — ${incident.vitalSign} ${incident.value}`
-      });
-      if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
-      const ep = findEpisode(incident.episode);
-      if (ep) { ep.referred = true; saveEpisode(ep); }
+    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock' || s.name === 'Trauma Shock');
+    if (!trauma) { notify({ type: 'error', title: t('incidents.escError') }); return; }
+    // The episode usually already carries a triage referral (e.g. Traumatología). Escalating
+    // must move that referral to Trauma Shock, not just rewrite its symptom.
+    const reason = `EMERGENCIA — ${incident.vitalSign} ${incident.value}`;
+    const existing = await specialtyService.findByEpisode(incident.episode);
+    let r;
+    if (existing && existing.specialty !== trauma.name) {
+      r = await specialtyService.changeSpecialty(existing.id, { specialty: trauma.name, reason });
+    } else if (existing) {
+      r = { ok: true, data: existing };
+    } else {
+      r = await specialtyService.refer(incident.episode, { specialtyRef: trauma, symptom: reason });
     }
+    if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
+    const ep = findEpisode(incident.episode);
+    if (ep) { ep.referred = true; saveEpisode(ep); }
     const up = await incidentsService.escalateIncident(incident.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
       const i = activeIncidents.value.findIndex(a => String(a.id) === String(incident.id));
@@ -112,6 +129,7 @@ const confirmEscalate = async () => {
     releaseEpisodeDevices(incident.episode);
     notify({ type: 'success', title: t('incidents.escDone'), detail: 'Trauma Shock · TS-1' });
   } catch (e) { console.error(e); notify({ type: 'error', title: t('incidents.escError') }); }
+  setTimeout(() => { if (String(doneId.value) === String(incident.id)) doneId.value = null; }, 400);
 };
 
 const cancelAcknowledge = () => { pendingId.value = null; };
@@ -120,6 +138,7 @@ const confirmAcknowledge = async (directId = null) => {
   const id = directId ?? pendingId.value;
   pendingId.value = null;
 
+  doneKind.value = 'resolve';
   doneId.value = id;
   await new Promise(r => setTimeout(r, 1500));
 
@@ -265,7 +284,7 @@ const onDoneEnter = (el, done) => {
           <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeIncident(incident.id)">
             {{ t('incidents.acknowledge') }}
           </button>
-          <button class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
+          <button v-if="!episodeAlreadyEscalated(incident)" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
             {{ t('incidents.escalate') }}
           </button>
         </div>
@@ -278,7 +297,7 @@ const onDoneEnter = (el, done) => {
               <circle class="al-done__disc" cx="36" cy="36" r="30" />
               <path class="al-done__tick" d="M23 37l9 9 18-21" pathLength="1" />
             </svg>
-            <span class="al-done__txt">{{ t('incidents.resolved') }}</span>
+            <span class="al-done__txt">{{ doneKind === 'escalate' ? t('incidents.escalatedDone') : t('incidents.resolved') }}</span>
           </div>
         </Transition>
       </article>

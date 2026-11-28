@@ -46,7 +46,14 @@ const vitalsRows = computed(() => vitalTypes.map(vt => ({
   value: ep.value.vitals[vt.key]?.value ?? '—'
 })))
 
-const outOfRange = computed(() => nt158Engine.outOfRange(ep.value.vitals))
+const outOfRangeRaw = computed(() => nt158Engine.outOfRange(ep.value.vitals))
+// Systolic and diastolic come as separate readings; show them as one blood pressure value.
+const outOfRange = computed(() => {
+  const list = outOfRangeRaw.value.filter(o => !['pas', 'pad'].includes(o.metric))
+  const sys = outOfRangeRaw.value.find(o => o.metric === 'pas'), dia = outOfRangeRaw.value.find(o => o.metric === 'pad')
+  if (sys || dia) list.push({ metric: 'pa', value: `${sys?.value ?? '?'}/${dia?.value ?? '?'}` })
+  return list
+})
 const missing = computed(() => nt158Engine.missingMetrics(ep.value.vitals))
 const hasAllVitals = computed(() => !missing.value.length)
 
@@ -195,7 +202,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
         <p v-if="outOfRange.length" class="tc-warn">
           <i class="pi pi-exclamation-triangle"></i>
           <span>{{ t('triage.warning', { n: outOfRange.length }) }}
-            {{ outOfRange.map(o => `${vLabel(o.metric === 'pas' ? 'pa' : o.metric)} ${o.value}${o.metric === 'spo2' ? ' %' : ''}`).join(' · ') }}</span>
+            {{ outOfRange.map(o => `${vLabel(o.metric)} ${o.value}${o.metric === 'spo2' ? ' %' : ''}`).join(' · ') }}</span>
         </p>
         <p v-else class="tc-ok"><i class="pi pi-check-circle"></i> {{ t('triage.allNormal') }}</p>
       </section>
@@ -208,7 +215,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
 
           <p v-if="reasons.length" class="tc-reasons">
             <b>{{ t('triage.reasons') }}</b>
-            <span v-for="(r, i) in reasons" :key="i">{{ t('vital.' + (r.metric === 'pas' ? 'pa' : r.metric) + '.label') }}<template v-if="r.value !== null"> {{ r.value }}</template></span>
+            <span v-for="(r, i) in reasons" :key="i">{{ t('vital.' + (['pas', 'pad'].includes(r.metric) ? 'pa' : r.metric) + '.label') }}<template v-if="r.value !== null"> {{ r.value }}</template></span>
           </p>
 
           <span class="tc-state" :class="'st--' + state">{{ stateLabel }}</span>

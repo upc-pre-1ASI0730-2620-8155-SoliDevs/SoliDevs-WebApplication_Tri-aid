@@ -1,4 +1,5 @@
 import { BaseApi } from '../../shared/infrastructure/base-api.js'
+import { session } from '../../shared/application/demo-session.js'
 import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint.js'
 
 const referralsEndpointPath = import.meta.env.VITE_REFERRALS_ENDPOINT_PATH
@@ -62,7 +63,8 @@ export class SpecialtyAssignmentApi extends BaseApi {
      */
     referEpisode(episodeId, specialtyId, symptom) {
         const base = this.#referralsEndpoint.endpointPath.replace(/\/referrals$/, '')
-        return this.http.post(`${base}/episode/${episodeId}/refer`, { specialtyId, symptom })
+        // The referral is tagged with the signed-in institution so tenant-scoped reads keep it visible.
+        return this.http.post(`${base}/episode/${episodeId}/refer`, { specialtyId, symptom, institution: session.institution || undefined })
     }
 
     updateReferral(id, resource) {
