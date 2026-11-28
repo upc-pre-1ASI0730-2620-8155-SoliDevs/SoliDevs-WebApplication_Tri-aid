@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.5.0] - 2026-11-24
+## [3.6.0] - 2026-11-27
+
+### Fixed
+- Escalating an incident moves the patient's referral to Trauma Shock (also when a triage referral already existed), raises one incident per patient listing every altered vital sign and the triage priority, is offered once per patient and plays the closing tick animation.
+- The closed filter hides escalated cards as well as resolved ones, and an episode keeps a single open incident.
+- Referrals created before tenancy (no institution) stay visible in the panel, patients and reports; referral resources send the episode id as the API expects.
+- The out-of-range notice shows the blood pressure as one value instead of a raw label per reading.
+
+## [3.5.0] - 2026-11-26
 
 ### Added
 - **Patient portal:** sign-in, my status, my turn and my voucher views with a tabbed layout, session guard, Spanish/English copy and a 45-second live queue poll.
