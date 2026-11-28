@@ -754,5 +754,6 @@
   "um.adminNote": "Gestiona la plataforma",
   "um.search": "Buscar por nombre, usuario, correo o rol",
   "um.count": "{n} de {total}",
-  "um.noResults": "Ninguna cuenta coincide con la búsqueda."
+  "um.noResults": "Ninguna cuenta coincide con la búsqueda.",
+  "vital.general.label": "Sin criterios de urgencia"
 }
