@@ -61,10 +61,14 @@ export const patientPortalStore = reactive({
         this.loading = true
         try {
             const result = await this.service.getOverview()
-            if (!result.ok) return result
+            if (!result.ok) { this.loadError = result.error || 'network'; return result }
             this.overview = new PortalOverview(result.data)
             this.queue = this.overview.queue
+            this.loadError = null
             return { ok: true }
+        } catch (e) {
+            this.loadError = 'network'
+            return { ok: false, error: 'network' }
         } finally {
             this.loading = false
         }

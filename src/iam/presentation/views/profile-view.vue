@@ -108,7 +108,7 @@ onMounted(async () => {
             <span class="pr-avatar">{{ initials }}</span>
             <div class="pr-head__id">
                 <h3 class="ta-h">{{ user.names }} {{ user.surnames }}</h3>
-                <p class="ta-sub">@{{ user.username }} · {{ user.role }}</p>
+                <p class="ta-sub">@{{ user.username }} · {{ t('role.' + user.role, user.role) }}</p>
             </div>
             <button v-if="!editing" class="ta-btn pr-head__edit" @click="startEdit">
                 <i class="pi pi-pencil"></i> {{ t('pr.edit') }}
@@ -118,8 +118,8 @@ onMounted(async () => {
         <section v-if="!editing" class="ta-card pr-facts pr-in">
             <div class="pr-fact"><span>{{ t('um.email') }}</span><b>{{ user.email || '—' }}</b></div>
             <div class="pr-fact"><span>{{ t('um.institution') }}</span><b>{{ user.institution }}</b></div>
-            <div class="pr-fact"><span>{{ t('um.role') }}</span><b>{{ user.role }}</b></div>
-            <div class="pr-fact"><span>{{ t('um.shift') }}</span><b>{{ user.shift }}</b></div>
+            <div class="pr-fact"><span>{{ t('um.role') }}</span><b>{{ t('role.' + user.role, user.role) }}</b></div>
+            <div class="pr-fact"><span>{{ t('um.shift') }}</span><b>{{ t('shift.' + user.shift, user.shift) }}</b></div>
         </section>
 
         <section v-else class="ta-card pr-form">

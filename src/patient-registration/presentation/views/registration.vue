@@ -1,10 +1,12 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { registerEpisode, findPatient } from '../../application/patient-store.js'
 import { docTypes, docTypeOf } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
+import { gsap } from 'gsap'
+import QRCode from 'qrcode'
 import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 
 const router = useRouter()
@@ -62,6 +64,39 @@ const saving = ref(false)
 const wakingUp = ref(false)
 const issuedCode = ref(null)
 const { card: issuedCard, backdrop: issuedBackdrop, close: closeIssued } = useModalMotion(() => { issuedCode.value = null })
+const copied = ref(false)
+// The admission desk scans this to open the patient file (EP-<episode>, a form the API resolves).
+const issuedQr = ref('')
+async function copyCode() {
+  try { await navigator.clipboard.writeText(issuedCode.value.code) } catch { /* clipboard unavailable: the code stays visible */ }
+  copied.value = true; setTimeout(() => { copied.value = false }, 1800)
+}
+
+// The dialog is rendered through v-if, so its entrance is choreographed here on
+// every appearance: backdrop, badge with a pulse ring, copy cascading up, and the
+// code flipping in tile by tile under a light sweep.
+watch(issuedCode, async (code) => {
+  if (!code) return
+  await nextTick()
+  issuedQr.value = await QRCode.toDataURL(`EP-${code.episodeId}`, { margin: 1, width: 220 })
+  const card = issuedCard.value, backdrop = issuedBackdrop.value
+  if (!card || !backdrop) return
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  gsap.killTweensOf([card, backdrop])
+  const badge = card.querySelector('.rg-issued-badge'), ring = card.querySelector('.rg-issued-ring')
+  const tiles = card.querySelectorAll('.rg-issued__ch'), els = card.querySelectorAll('.rg-issued-el')
+  gsap.set(card, { opacity: 0, y: 28, scale: .94 })
+  gsap.set(badge, { scale: 0, rotation: -30 })
+  gsap.set(els, { opacity: 0, y: 14 })
+  gsap.set(tiles, { opacity: 0, rotationX: -90, y: 10, transformPerspective: 400 })
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+  tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: .28 })
+    .to(card, { opacity: 1, y: 0, scale: 1, duration: .5, ease: 'back.out(1.4)' }, .05)
+    .to(badge, { scale: 1, rotation: 0, duration: .55, ease: 'back.out(2.2)' }, .22)
+    .fromTo(ring, { scale: .6, opacity: .55 }, { scale: 2.1, opacity: 0, duration: .9, ease: 'power2.out' }, .45)
+    .to(els, { opacity: 1, y: 0, duration: .38, stagger: .07 }, .3)
+    .to(tiles, { opacity: 1, rotationX: 0, y: 0, duration: .45, stagger: .045, ease: 'back.out(1.6)' }, .5)
+})
 function goToFile() { router.push(`/patient-registration/${issuedCode.value?.episodeId || ''}`) }
 async function submit() {
   if (!validate() || saving.value) return
@@ -192,16 +227,31 @@ function reset() {
 
     <!-- Código de portal recién emitido: se muestra una sola vez -->
     <div v-if="issuedCode" ref="issuedBackdrop" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
-        <div ref="issuedCard" class="rg-modal__card ta-card">
-          <span class="rg-modal__ic"><i class="pi pi-qrcode"></i></span>
-          <h3 id="rg-issued-title" class="ta-h">{{ t('rg.issued.title') }}</h3>
-          <p class="ta-sub">{{ t('rg.issued.sub') }}</p>
-          <dl class="fi-dl rg-issued">
-            <div><dt>{{ t('rg.issued.user') }}</dt><dd>{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</dd></div>
-            <div><dt>{{ t('rg.issued.code') }}</dt><dd class="rg-issued__code">{{ issuedCode.code }}</dd></div>
-          </dl>
-          <p class="rg-modal__note">{{ t('rg.issued.note') }}</p>
-          <button class="ta-btn rg-modal__btn" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
+      <div ref="issuedCard" class="rg-modal__card ta-card rg-issued-card">
+        <span class="rg-issued-badge"><i class="pi pi-qrcode"></i><span class="rg-issued-ring"></span></span>
+        <h3 id="rg-issued-title" class="ta-h rg-issued-el">{{ t('rg.issued.title') }}</h3>
+        <p class="ta-sub rg-issued-el">{{ t('rg.issued.sub') }}</p>
+        <div class="rg-issued">
+          <div class="rg-issued-row rg-issued-el">
+            <span class="rg-issued-label">{{ t('rg.issued.user') }}</span>
+            <b class="rg-issued-value">{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</b>
+          </div>
+          <div class="rg-issued-row rg-issued-el">
+            <span class="rg-issued-label">{{ t('rg.issued.code') }}</span>
+            <div class="rg-issued-code">
+              <div class="rg-issued__code">
+                <span v-for="(ch, i) in issuedCode.code" :key="i" class="rg-issued__ch" :style="{ '--i': i }">{{ ch }}</span>
+              </div>
+              <button class="ta-btn ta-btn--ghost ta-btn--sm" type="button" @click="copyCode"><i class="pi" :class="copied ? 'pi-check' : 'pi-copy'"></i>{{ copied ? t('rg.issued.copied') : t('rg.issued.copy') }}</button>
+            </div>
+            <figure v-if="issuedQr" class="rg-issued-qr rg-issued-el">
+              <img :src="issuedQr" :alt="t('rg.issued.qr')" />
+              <figcaption>{{ t('rg.issued.qrHint') }}</figcaption>
+            </figure>
+          </div>
+        </div>
+        <p class="rg-modal__note rg-issued-el">{{ t('rg.issued.note') }}</p>
+        <button class="ta-btn rg-modal__btn rg-issued-el" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
         </div>
     </div>
   </div>
@@ -213,11 +263,19 @@ function reset() {
 .rg-modal__card{width:min(420px,100%);display:grid;gap:6px;padding:26px 28px;text-align:center}
 .rg-modal__ic{width:52px;height:52px;margin:0 auto 6px;border-radius:14px;background:#d6eedd;color:var(--ta-brand);display:grid;place-items:center;font-size:22px}
 .rg-modal__card .ta-sub{margin:0}
-.rg-issued{margin:16px 0 0;text-align:left;display:grid;gap:10px}
-.rg-issued > div{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:baseline}
-.rg-issued dt{font-size:.8rem;color:var(--ta-muted)}
-.rg-issued dd{margin:0;font-size:.9rem;font-weight:500;word-break:break-all}
-.rg-issued__code{font-family:var(--ta-mono);font-weight:700;font-size:22px;letter-spacing:.14em;color:var(--ta-brand)}
+.rg-issued{margin:14px 0 0;display:grid;gap:12px}
+.rg-issued-row{display:grid;gap:6px;padding:10px 12px;border:1px solid var(--ta-line);border-radius:12px;background:#fafcfb}
+.rg-issued-label{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ta-muted)}
+.rg-issued-value{font-size:14px;font-weight:600;word-break:break-all}
+.rg-issued-code{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rg-issued-row:has(.rg-issued-qr){display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+.rg-issued-row:has(.rg-issued-qr) > .rg-issued-label{grid-column:1/-1}
+.rg-issued-qr{margin:0;display:grid;gap:4px;justify-items:center}
+.rg-issued-qr img{width:104px;height:104px;border-radius:10px;background:#fff;padding:6px;border:1px solid var(--ta-line)}
+.rg-issued-qr figcaption{font-size:10.5px;color:var(--ta-muted);text-align:center;max-width:120px;line-height:1.25}
+.rg-issued__code{position:relative;display:flex;flex-wrap:wrap;gap:5px;font-family:var(--ta-mono)}
+.rg-issued__ch{display:inline-grid;place-items:center;min-width:24px;height:34px;padding:0 6px;border-radius:8px;background:var(--ta-brand-soft,#e8f3ec);color:var(--ta-brand);font-weight:700;font-size:19px;line-height:1;transform-style:preserve-3d;box-shadow:inset 0 -2px 0 rgba(0,0,0,.04)}
+
 .rg-modal__note{margin:4px 0 10px;font-size:.78rem;color:var(--ta-muted)}
 .rg-modal__btn{width:100%}
 .rg-field{display:grid;gap:8px;margin-bottom:18px}
