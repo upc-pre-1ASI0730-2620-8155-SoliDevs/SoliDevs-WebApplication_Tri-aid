@@ -575,7 +575,7 @@
   "portal.error.portalNotEnabled": "The portal is not enabled for you yet. Ask at admission.",
   "portal.error.required": "Enter your DNI or e-mail and your code.",
   "portal.error.network": "Could not connect. Try again.",
-  "portal.error.sessionExpired": "Your session expired. Please sign in again.",
+  "portal.error.sessionExpired": "Your session ended. Please sign in again.",
   "portal.login.title": "Sign in",
   "portal.login.lead": "Sign in with your DNI or the e-mail you gave at admission, and the access code you were handed.",
   "portal.login.identifier": "DNI or e-mail",
@@ -759,5 +759,9 @@
   "rg.issued.copy": "Copy code",
   "rg.issued.copied": "Copied",
   "rg.issued.qr": "Admission QR",
-  "rg.issued.qrHint": "Admission scans it to open the patient file."
+  "rg.issued.qrHint": "Admission scans it to open the patient file.",
+  "portal.error.title": "We could not load your information",
+  "portal.error.notFound": "We could not load your information.",
+  "portal.error.retry": "Try again",
+  "portal.error.signIn": "Sign in"
 }

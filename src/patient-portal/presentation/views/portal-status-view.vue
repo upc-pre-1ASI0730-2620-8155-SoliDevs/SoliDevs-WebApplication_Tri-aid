@@ -6,6 +6,7 @@
  */
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import PortalLoadError from '../components/portal-load-error.vue'
 import { gsap } from 'gsap'
 import { patientPortalStore } from '../../application/patient-portal-store.js'
 import '../styles/portal.css'
@@ -143,4 +144,5 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+  <portal-load-error v-else-if="store.loadError" />
 </template>

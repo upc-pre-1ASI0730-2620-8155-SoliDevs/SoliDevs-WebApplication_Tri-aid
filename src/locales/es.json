@@ -575,7 +575,7 @@
   "portal.error.portalNotEnabled": "El portal aún no está habilitado para ti. Solicítalo en admisión.",
   "portal.error.required": "Ingresa tu DNI o e-mail y tu código.",
   "portal.error.network": "No se pudo conectar. Intenta nuevamente.",
-  "portal.error.sessionExpired": "Tu sesión expiró. Vuelve a ingresar.",
+  "portal.error.sessionExpired": "Tu sesión terminó. Vuelve a iniciar sesión.",
   "portal.login.title": "Iniciar sesión",
   "portal.login.lead": "Ingresa con tu DNI o el e-mail que diste en admisión, y el código de acceso que te entregaron.",
   "portal.login.identifier": "DNI o e-mail",
@@ -759,5 +759,9 @@
   "rg.issued.copy": "Copiar código",
   "rg.issued.copied": "Copiado",
   "rg.issued.qr": "QR de admisión",
-  "rg.issued.qrHint": "Admisión lo escanea para abrir la ficha del paciente."
+  "rg.issued.qrHint": "Admisión lo escanea para abrir la ficha del paciente.",
+  "portal.error.title": "No pudimos cargar tu información",
+  "portal.error.notFound": "No pudimos cargar tu información.",
+  "portal.error.retry": "Reintentar",
+  "portal.error.signIn": "Iniciar sesión"
 }
