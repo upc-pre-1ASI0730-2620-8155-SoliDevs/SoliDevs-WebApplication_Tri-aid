@@ -231,12 +231,12 @@ onMounted(async () => {
                             </div>
                             <div class="um-field"><label>{{ t('um.role') }}</label>
                                 <select class="ta-select" v-model="form.role">
-                                    <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
+                                    <option v-for="r in roles" :key="r" :value="r">{{ roleLabel(r) }}</option>
                                 </select>
                             </div>
                             <div class="um-field"><label>{{ t('um.shift') }}</label>
                                 <select class="ta-select" v-model="form.shift">
-                                    <option v-for="s in shifts" :key="s" :value="s">{{ s }}</option>
+                                    <option v-for="s in shifts" :key="s" :value="s">{{ shiftLabel(s) }}</option>
                                 </select>
                             </div>
                         </div>
