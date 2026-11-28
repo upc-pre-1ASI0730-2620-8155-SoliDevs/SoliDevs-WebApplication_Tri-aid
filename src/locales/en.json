@@ -764,5 +764,21 @@
   "portal.error.title": "We could not load your information",
   "portal.error.notFound": "We could not load your information.",
   "portal.error.retry": "Try again",
-  "portal.error.signIn": "Sign in"
+  "portal.error.signIn": "Sign in",
+  "referral.emailSend": "Send by e-mail",
+  "referral.emailTitle": "Send the voucher by e-mail",
+  "referral.emailPrompt": "{name} has no e-mail on file. Enter one to send the voucher:",
+  "referral.emailPlaceholder": "name{'@'}example.com",
+  "referral.emailInvalid": "Enter a valid e-mail address.",
+  "referral.emailAccept": "Accept",
+  "referral.emailConfirm": "The voucher will be sent to {email}.",
+  "referral.emailLinkTitle": "Link this address to the patient?",
+  "referral.emailLinkText": "We will store {email} as the e-mail of {name}, so the next vouchers go there without asking again.",
+  "referral.emailLinkYes": "Yes, link and send",
+  "referral.emailLinkNo": "Just send for now",
+  "referral.emailSent": "Voucher sent to {email}",
+  "referral.emailAttached": "E-mail linked to {name}",
+  "referral.emailError": "The voucher could not be sent. Try again.",
+  "referral.emailNotConfigured": "E-mail delivery is not configured on this deployment.",
+  "referral.cancel": "Cancel"
 }

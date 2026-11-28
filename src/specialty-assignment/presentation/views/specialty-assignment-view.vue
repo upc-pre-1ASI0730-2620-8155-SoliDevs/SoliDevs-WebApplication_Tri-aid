@@ -13,6 +13,7 @@ import { releaseEpisodeDevices } from '../../../vital-signs-capture/application/
 import PatientBanner from '../../../shared/presentation/components/patient-banner.vue'
 import SymptomAutocomplete from '../components/symptom-autocomplete.vue'
 import QueueChips from '../components/queue-chips.vue'
+import VoucherEmailDialog from '../components/voucher-email-dialog.vue'
 import VoucherDialog from '../components/voucher-dialog.vue'
 import { SpecialtyAssignmentService } from '../../infrastructure/specialty-assignment.service.js'
 
@@ -119,6 +120,7 @@ async function refer() {
 /* ---------- Comprobante ---------- */
 const voucher = ref(null)
 const showVoucher = ref(false)
+const emailOpen = ref(false)
 
 async function makeVoucher() {
   if (!referral.value) return
@@ -229,6 +231,8 @@ onMounted(async () => {
       <h3 class="ta-h">{{ t('referral.queuesTitle') }}</h3>
       <p class="ta-sub">{{ t('referral.queuesSub') }}</p>
       <QueueChips :queues="queues" :label="specName" />
+
+      <VoucherEmailDialog v-if="emailOpen" :referral="referral" :patient="p" @close="emailOpen = false" />
     </section>
 
     <VoucherDialog
@@ -239,6 +243,7 @@ onMounted(async () => {
         :episode-id="ep.id"
         :level="level"
         @close="closeVoucher"
+        @email="emailOpen = true; showVoucher = false"
         @send="sendVoucher"
     />
   </div>

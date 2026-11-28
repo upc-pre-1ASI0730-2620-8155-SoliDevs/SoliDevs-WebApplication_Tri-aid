@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Status chips on the panel, patients, reports and the patient file show a skeleton until classifications and referrals have loaded instead of flashing intermediate states; the panel loads its sources in parallel.
 
+## [3.10.0] - 2026-11-28
+
+### Added
+- The referral voucher can be sent by e-mail from the voucher dialog. If the patient has no e-mail on file the dialog asks for one, and then whether to link that address to the patient's account; the server delivers the message with the QR through Resend.
+
+### Changed
+- Queue tiles fit full specialty names.
+
 ## [3.9.0] - 2026-11-28
 
 ### Fixed

@@ -12,7 +12,7 @@ const props = defineProps({
     episodeId: { type: String, required: true },
     level: { type: Object, default: null }       // { code, name }
 })
-const emit = defineEmits(['close', 'send'])
+const emit = defineEmits(['close', 'send', 'email'])
 const { card, backdrop, close } = useModalMotion(() => emit('close'))
 
 // Real, scannable QR carrying the voucher payload (the same code the admission
@@ -54,6 +54,7 @@ async function downloadQr() {
                 <button class="ta-btn ta-btn--ghost" type="button" @click="downloadQr">
                     <i class="pi pi-download"></i>{{ t('referral.downloadQr') }}
                 </button>
+                <button class="ta-btn ta-btn--ghost" type="button" @click="emit('email')"><i class="pi pi-envelope"></i>{{ t('referral.emailSend') }}</button>
                 <button class="ta-btn" @click="close()"><i class="pi pi-check"></i>{{ t('referral.done') }}</button>
             </div>
         </div>

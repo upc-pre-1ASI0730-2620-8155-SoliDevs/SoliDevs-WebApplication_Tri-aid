@@ -138,6 +138,23 @@ export class SpecialtyAssignmentService {
         return { ok: true, data: VoucherAssembler.toEntity(response.data) }
     }
 
+    /**
+     * E-mails the voucher of a referral. The server delivers the message and, when asked,
+     * stores the address as the patient's e-mail so later vouchers go there without asking.
+     * @returns {Promise<{ok: boolean, data?: {email: string, attached: boolean}, error?: string}>}
+     */
+    async emailVoucher(referral, { email, attachToPatient = false }) {
+        try {
+            const r = await this.api.emailVoucher(referral.id, email, attachToPatient)
+            return { ok: true, data: r.data }
+        } catch (e) {
+            const status = e?.response?.status
+            if (status === 503) return { ok: false, error: 'referral.emailNotConfigured' }
+            if (status === 400) return { ok: false, error: 'referral.emailInvalid' }
+            return { ok: false, error: 'referral.emailError' }
+        }
+    }
+
     /** Envia el comprobante por el canal elegido. */
     /**
      * Delivers the voucher through the chosen channel and stamps the sent time.

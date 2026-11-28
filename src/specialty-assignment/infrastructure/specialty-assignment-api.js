@@ -80,6 +80,9 @@ export class SpecialtyAssignmentApi extends BaseApi {
     }
 
     /** Asks the API to issue the sealed voucher token of a referral. */
+    /** E-mails the sealed voucher; optionally stores the address as the patient's e-mail. */
+    emailVoucher(referralId, email, attachToPatient) { return this.http.post(`${this.#vouchersEndpoint.endpointPath}/referral/${referralId}/email`, { email, attachToPatient }) }
+
     issueVoucher(referralId) { return this.http.post(`${this.#vouchersEndpoint.endpointPath}/referral/${referralId}/issue`) }
 
     /** Resolves a scanned voucher or episode code into its patient. */
