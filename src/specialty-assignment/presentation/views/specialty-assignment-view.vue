@@ -184,7 +184,7 @@ onMounted(async () => {
       <div class="rc-symrow">
         <SymptomAutocomplete v-model="selectedSymptom" :error="symptomErr" />
         <button class="ta-btn" :disabled="consulting" @click="consult">
-          <i class="pi" :class="consulting ? 'pi-spin pi-spinner' : 'pi-sparkles'"></i>{{ t('referral.suggestBtn') }}
+          <i v-if="consulting" class="pi pi-spin pi-spinner"></i>{{ t('referral.suggestBtn') }}
         </button>
       </div>
       <p v-if="symptomErr" class="ta-err">{{ t('referral.err.catalog') }}</p>
@@ -196,7 +196,7 @@ onMounted(async () => {
             <small>{{ alreadyReferred ? t('referral.alreadyReferred') : t('referral.suggested') }}</small>
             <b>{{ specName(suggestion) }}</b>
           </div>
-          <span v-if="!alreadyReferred" class="rc-tag"><i class="pi pi-sparkles"></i>{{ t('triage.suggested') }}</span>
+          <span v-if="!alreadyReferred" class="rc-tag">{{ t('triage.suggested') }}</span>
         </div>
       </Transition>
 

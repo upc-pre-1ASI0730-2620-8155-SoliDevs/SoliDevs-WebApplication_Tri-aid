@@ -755,5 +755,7 @@
   "um.search": "Search by name, username, e-mail or role",
   "um.count": "{n} of {total}",
   "um.noResults": "No account matches the search.",
-  "vital.general.label": "No urgency criteria"
+  "vital.general.label": "No urgency criteria",
+  "rg.issued.copy": "Copy code",
+  "rg.issued.copied": "Copied"
 }
