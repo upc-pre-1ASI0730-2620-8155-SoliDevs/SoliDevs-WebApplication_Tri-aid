@@ -5,8 +5,7 @@ import { store, findEpisode, ageOf, fmtTime, fmtDateTime, saveEpisode } from '..
 import { docLabel } from '../../application/document-types.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
-import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
-import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
+import { TriageClassificationService } from '../../../triage-classification/infrastructure/triage-classification.service.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
 import { PatientRegistrationApi } from '../../infrastructure/patient-registration-api.js'
 import { notify } from '../../../shared/application/toast-store.js'
@@ -70,14 +69,15 @@ const tabsDef = computed(() => [
 
 /* ---------- Estado del flujo: clasificacion + derivacion ---------- */
 const classified = ref(null)
+const flowLoaded = ref(false)
 const classifiedConfirmed = ref(false)
 const referred = ref(false)
 
 async function loadFlowState() {
   if (!ep.value) return
   try {
-    const rc = await new TriageApi().getClassificationByEpisode(ep.value.id)
-    const c = ClassificationAssembler.toEntity((rc.data || [])[0] || null)
+    // The API answers with a single record (or a list on the legacy contract); the service accepts both.
+    const c = await new TriageClassificationService().findByEpisode(ep.value.id)
     if (c?.level) {
       const l = levelByCode(c.level.split('_')[0])
       classified.value = l ? { code: l.code, name: t('triage.level.' + l.code + '.name'), color: l.color } : null
@@ -85,7 +85,7 @@ async function loadFlowState() {
     } else { classified.value = null; classifiedConfirmed.value = false }
     const rr = await new SpecialtyAssignmentApi().getReferralsByEpisode(ep.value.id)
     referred.value = (rr.data || []).length > 0
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error(e) } finally { flowLoaded.value = true }
 }
 
 onMounted(() => loadFlowState())
@@ -104,7 +104,8 @@ function onVitalsConfirmed() {
         <div class="fi-name">{{ fullName }}</div>
         <div class="fi-meta">{{ meta }}</div>
       </div>
-      <span class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
+      <span v-if="!flowLoaded" class="ta-skel" aria-hidden="true"></span>
+      <span v-else class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
         <template v-if="classified">{{ classified.code }} · {{ classified.name }}</template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>

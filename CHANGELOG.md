@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Referrals created before tenancy (no institution) stay visible in the panel, patients and reports; referral resources send the episode id as the API expects.
 - The out-of-range notice shows the blood pressure as one value instead of a raw label per reading.
 
+## [3.7.0] - 2026-11-28
+
+### Fixed
+- Approving the triage suggestion stays approved when leaving and re-entering the view; the suggestion is only recalculated when the vital signs change the level.
+- The patient file shows the confirmed level; before, it read the classification answer as a list and always saw none.
+
+### Changed
+- Status chips on the panel, patients, reports and the patient file show a skeleton until classifications and referrals have loaded instead of flashing intermediate states; the panel loads its sources in parallel.
+
 ## [3.5.0] - 2026-11-26
 
 ### Added

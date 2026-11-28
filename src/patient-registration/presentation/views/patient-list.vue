@@ -16,13 +16,14 @@ const specialtyApi = new SpecialtyAssignmentApi()
 const confirmedEpisodes = ref(new Set())
 const referredEpisodes = ref(new Set())
 const scannerOpen = ref(false)
+const ready = ref(false)
 
 onMounted(async () => {
   try {
     const [rc, rr] = await Promise.all([triageApi.getClassifications(), specialtyApi.getReferrals()])
     confirmedEpisodes.value = new Set((rc.data || []).filter(c => c.state === 'Confirmed').map(c => String(c.episodeId)))
     referredEpisodes.value = new Set((rr.data || []).map(r => String(r.episodeId)))
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error(e) } finally { ready.value = true }
 })
 
 const rows = computed(() => {
@@ -86,7 +87,8 @@ const fullName = p => `${p.surnames}, ${p.names}`
           </div>
           <span class="pl-visits">{{ visitsText(r.visits) }}</span>
           <span class="pl-meta">
-            <span class="pl-st" :class="{ ok: r.referred, warn: r.confirmed && !r.referred }">
+            <span v-if="!ready" class="ta-skel" aria-hidden="true"></span>
+            <span v-else class="pl-st" :class="{ ok: r.referred, warn: r.confirmed && !r.referred }">
               {{ r.referred ? t('pl.status.referred') : (r.confirmed ? t('pl.status.toRefer') : t('pl.status.pending')) }}
             </span>
           </span>
