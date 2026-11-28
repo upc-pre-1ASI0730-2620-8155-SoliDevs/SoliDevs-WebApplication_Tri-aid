@@ -134,7 +134,7 @@ function onVitalsConfirmed() {
             <div v-if="p.portalPassword"><dt>{{ t('pf.portal.pass') }}</dt><dd class="pf-portal__pass">{{ p.portalPassword }}</dd></div>
           </dl>
           <p class="pf-portal__note">{{ p.portalPassword ? t('pf.portal.note') : t('pf.portal.noteActive') }}</p>
-          <button v-if="!p.portalPassword" class="ta-btn ta-btn--ghost ta-btn--sm" type="button" :disabled="regenerating" @click="regeneratePortalCode">
+          <button class="ta-btn ta-btn--ghost ta-btn--sm" type="button" :disabled="regenerating || !p.portalEnabled" @click="regeneratePortalCode">
             <i class="pi pi-refresh"></i> {{ t('pf.portal.regenerate') }}
           </button>
         </div>
