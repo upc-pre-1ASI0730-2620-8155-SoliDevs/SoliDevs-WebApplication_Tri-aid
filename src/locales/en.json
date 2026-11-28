@@ -757,5 +757,7 @@
   "um.noResults": "No account matches the search.",
   "vital.general.label": "No urgency criteria",
   "rg.issued.copy": "Copy code",
-  "rg.issued.copied": "Copied"
+  "rg.issued.copied": "Copied",
+  "rg.issued.qr": "Admission QR",
+  "rg.issued.qrHint": "Admission scans it to open the patient file."
 }

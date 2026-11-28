@@ -6,6 +6,7 @@ import { docTypes, docTypeOf } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
 import { gsap } from 'gsap'
+import QRCode from 'qrcode'
 import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 
 const router = useRouter()
@@ -64,6 +65,8 @@ const wakingUp = ref(false)
 const issuedCode = ref(null)
 const { card: issuedCard, backdrop: issuedBackdrop, close: closeIssued } = useModalMotion(() => { issuedCode.value = null })
 const copied = ref(false)
+// The admission desk scans this to open the patient file (EP-<episode>, a form the API resolves).
+const issuedQr = ref('')
 async function copyCode() {
   try { await navigator.clipboard.writeText(issuedCode.value.code) } catch { /* clipboard unavailable: the code stays visible */ }
   copied.value = true; setTimeout(() => { copied.value = false }, 1800)
@@ -75,6 +78,7 @@ async function copyCode() {
 watch(issuedCode, async (code) => {
   if (!code) return
   await nextTick()
+  issuedQr.value = await QRCode.toDataURL(`EP-${code.episodeId}`, { margin: 1, width: 220 })
   const card = issuedCard.value, backdrop = issuedBackdrop.value
   if (!card || !backdrop) return
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -240,6 +244,10 @@ function reset() {
               </div>
               <button class="ta-btn ta-btn--ghost ta-btn--sm" type="button" @click="copyCode"><i class="pi" :class="copied ? 'pi-check' : 'pi-copy'"></i>{{ copied ? t('rg.issued.copied') : t('rg.issued.copy') }}</button>
             </div>
+            <figure v-if="issuedQr" class="rg-issued-qr rg-issued-el">
+              <img :src="issuedQr" :alt="t('rg.issued.qr')" />
+              <figcaption>{{ t('rg.issued.qrHint') }}</figcaption>
+            </figure>
           </div>
         </div>
         <p class="rg-modal__note rg-issued-el">{{ t('rg.issued.note') }}</p>
@@ -260,8 +268,13 @@ function reset() {
 .rg-issued-label{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ta-muted)}
 .rg-issued-value{font-size:14px;font-weight:600;word-break:break-all}
 .rg-issued-code{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rg-issued-row:has(.rg-issued-qr){display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+.rg-issued-row:has(.rg-issued-qr) > .rg-issued-label{grid-column:1/-1}
+.rg-issued-qr{margin:0;display:grid;gap:4px;justify-items:center}
+.rg-issued-qr img{width:104px;height:104px;border-radius:10px;background:#fff;padding:6px;border:1px solid var(--ta-line)}
+.rg-issued-qr figcaption{font-size:10.5px;color:var(--ta-muted);text-align:center;max-width:120px;line-height:1.25}
 .rg-issued__code{position:relative;display:flex;flex-wrap:wrap;gap:5px;font-family:var(--ta-mono)}
-.rg-issued__ch{display:inline-grid;place-items:center;min-width:26px;height:36px;padding:0 7px;border-radius:8px;background:var(--ta-brand-soft,#e8f3ec);color:var(--ta-brand);font-weight:700;font-size:21px;line-height:1;transform-style:preserve-3d;box-shadow:inset 0 -2px 0 rgba(0,0,0,.04)}
+.rg-issued__ch{display:inline-grid;place-items:center;min-width:24px;height:34px;padding:0 6px;border-radius:8px;background:var(--ta-brand-soft,#e8f3ec);color:var(--ta-brand);font-weight:700;font-size:19px;line-height:1;transform-style:preserve-3d;box-shadow:inset 0 -2px 0 rgba(0,0,0,.04)}
 
 .rg-modal__note{margin:4px 0 10px;font-size:.78rem;color:var(--ta-muted)}
 .rg-modal__btn{width:100%}

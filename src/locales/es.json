@@ -757,5 +757,7 @@
   "um.noResults": "Ninguna cuenta coincide con la búsqueda.",
   "vital.general.label": "Sin criterios de urgencia",
   "rg.issued.copy": "Copiar código",
-  "rg.issued.copied": "Copiado"
+  "rg.issued.copied": "Copiado",
+  "rg.issued.qr": "QR de admisión",
+  "rg.issued.qrHint": "Admisión lo escanea para abrir la ficha del paciente."
 }
