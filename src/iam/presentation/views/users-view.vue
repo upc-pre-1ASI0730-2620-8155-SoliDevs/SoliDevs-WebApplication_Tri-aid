@@ -46,6 +46,19 @@ function validate() {
 const roles = ['Triage Administrator', 'Triage Nurse', 'Emergency Physician']
 const shifts = ['Morning', 'Evening', 'Night']
 
+// The API stores role and shift in English; show them in the UI language.
+const roleLabel = r => t('role.' + r, r)
+const shiftLabel = sh => t('shift.' + sh, sh)
+const initialsOf = u => `${(u.names || '')[0] || ''}${(u.surnames || '')[0] || ''}`.toUpperCase() || '?'
+const query = ref('')
+const filtered = computed(() => {
+    const q = query.value.trim().toLowerCase()
+    if (!q) return users.value
+    return users.value.filter(u => [u.names, u.surnames, u.username, u.email, roleLabel(u.role), shiftLabel(u.shift)]
+        .some(v => String(v || '').toLowerCase().includes(q)))
+})
+const roleKey = r => String(r || '').toLowerCase().includes('admin') ? 'admin' : String(r || '').toLowerCase().includes('nurse') ? 'nurse' : 'physician'
+
 const institution = computed(() => iamStore.user?.institution || '')
 
 /** Admins are symmetric: a peer admin can never edit another admin. */
@@ -150,64 +163,44 @@ onMounted(async () => {
 
 <template>
     <div ref="pageGrid" class="ta-page">
-        <section class="ta-card um-in um-head">
-            <div>
-                <h3 class="ta-h">{{ t('um.title') }}</h3>
-                <p class="ta-sub">{{ t('um.sub') }}</p>
+        <section class="ta-card">
+            <div class="um-top">
+                <div>
+                    <h3 class="ta-h">{{ t('um.people') }}</h3>
+                    <p class="ta-sub">{{ institution }} · {{ seatsLabel }}</p>
+                </div>
+                <button class="ta-btn" @click="startCreate">
+                    <i class="pi pi-plus"></i>{{ t('um.new') }}
+                </button>
             </div>
-            <div class="um-head__right">
-                <span class="um-seats" :class="{ 'um-seats--full': seats.atLimit, 'um-seats--near': seats.nearLimit && !seats.atLimit }" :title="t('um.seatsHint')">
-                    <i class="pi pi-users"></i>{{ seatsLabel }}
-                </span>
-                <button class="ta-btn" :disabled="seats.atLimit" @click="startCreate">{{ t('um.new') }}</button>
+
+            <div v-if="users.length" class="um-search">
+                <i class="pi pi-search"></i>
+                <input v-model="query" type="search" class="ta-input" :placeholder="t('um.search')" :aria-label="t('um.search')" />
             </div>
+
+            <TransitionGroup v-if="filtered.length" name="list" tag="div" class="um-list">
+                <div v-for="u in filtered" :key="u.id" class="um-row" :class="{ 'um-row--admin': isAdminRole(u.role) }">
+                    <span class="um-av" :class="`um-av--${roleKey(u.role)}`">{{ initialsOf(u) }}</span>
+                    <div class="um-who">
+                        <b>{{ u.names }} {{ u.surnames }} <span v-if="u.id === iamStore.user?.id" class="um-self">{{ t('um.self') }}</span></b>
+                        <small class="mono">{{ u.username }} · {{ u.email }}</small>
+                    </div>
+                    <span class="um-rolechip" :class="`um-rolechip--${roleKey(u.role)}`">{{ roleLabel(u.role) }}</span>
+                    <span class="um-shift">{{ shiftLabel(u.shift) }}</span>
+                    <button v-if="!isAdminRole(u.role)" class="ta-btn ta-btn--ghost ta-btn--sm um-edit" @click="startEdit(u)">
+                        <i class="pi pi-pencil"></i>{{ t('um.edit') }}
+                    </button>
+                    <span v-else class="um-locked" :title="t('um.adminProtected')">
+                        <i class="pi pi-lock"></i>{{ t('um.adminNote') }}
+                    </span>
+                </div>
+            </TransitionGroup>
+            <p v-else-if="users.length && query" class="um-empty">
+                <b>{{ t('um.noResults') }}</b>
+            </p>
         </section>
-
-        <p v-if="seats.atLimit" class="um-limit">
-            <i class="pi pi-exclamation-triangle"></i>{{ t('um.limitReached', { limit: seats.limit }) }}
-            <router-link to="/subscriptions">{{ t('um.upgrade') }}</router-link>
-        </p>
-
-        <p class="um-inst um-in">
-            <i class="pi pi-hospital"></i>
-            {{ t('um.institution') }}: <b>{{ institution }}</b>
-        </p>
-
-        <section class="ta-card um-in">
-            <table class="um-table">
-                <thead>
-                    <tr>
-                        <th>{{ t('um.username') }}</th>
-                        <th>{{ t('um.fullName') }}</th>
-                        <th>{{ t('um.email') }}</th>
-                        <th>{{ t('um.role') }}</th>
-                        <th>{{ t('um.shift') }}</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="u in users" :key="u.id">
-                        <td>{{ u.username }}</td>
-                        <td>
-                            {{ u.names }} {{ u.surnames }}
-                            <span v-if="isAdminRole(u.role)" class="um-badge">{{ t('um.adminBadge') }}</span>
-                        </td>
-                        <td>{{ u.email || '—' }}</td>
-                        <td>{{ u.role }}</td>
-                        <td>{{ u.shift }}</td>
-                        <td class="um-row-actions">
-                            <button v-if="!isAdminRole(u.role)" class="um-edit" @click="startEdit(u)">
-                                <i class="pi pi-pencil"></i> {{ t('um.edit') }}
-                            </button>
-                            <span v-else class="um-locked" :title="t('um.adminProtected')">
-                                <i class="pi pi-lock"></i> {{ t('um.adminProtected') }}
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <p v-if="!loading && !users.length" class="ta-sub">{{ t('um.empty') }}</p>
-        </section>
+        <p v-if="!loading && !users.length" class="ta-sub">{{ t('um.empty') }}</p>
 
         <Transition :css="false" @enter="onModalEnter" @leave="onModalLeave">
             <div v-if="editing !== null" class="um-modal" @click.self="cancel">
@@ -238,12 +231,12 @@ onMounted(async () => {
                             </div>
                             <div class="um-field"><label>{{ t('um.role') }}</label>
                                 <select class="ta-select" v-model="form.role">
-                                    <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
+                                    <option v-for="r in roles" :key="r" :value="r">{{ roleLabel(r) }}</option>
                                 </select>
                             </div>
                             <div class="um-field"><label>{{ t('um.shift') }}</label>
                                 <select class="ta-select" v-model="form.shift">
-                                    <option v-for="s in shifts" :key="s" :value="s">{{ s }}</option>
+                                    <option v-for="s in shifts" :key="s" :value="s">{{ shiftLabel(s) }}</option>
                                 </select>
                             </div>
                         </div>
@@ -287,4 +280,45 @@ onMounted(async () => {
 .um-field { display: grid; gap: 6px; }
 .um-field label { font-size: 11.5px; font-weight: 500; color: var(--ta-muted); }
 .um-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+.um-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.um-grid .um-full{grid-column:1/-1}
+
+/* ── Lista de personal: mismo patrón que la lista de pacientes ── */
+.um-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.um-top .ta-btn{text-decoration:none}
+.um-search{position:relative;margin-bottom:14px}
+.um-search i{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ta-muted);pointer-events:none}
+.um-search .ta-input{padding-left:36px}
+.um-list{display:grid;gap:8px}
+.um-row{display:grid;grid-template-columns:36px minmax(0,1.6fr) 170px 80px 150px;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--ta-line);border-radius:12px;background:#fff;transition:border-color .2s,transform .2s,box-shadow .2s}
+.um-row:hover{border-color:var(--ta-brand);transform:translateY(-1px);box-shadow:0 6px 18px -12px rgba(10,107,56,.35)}
+.um-row--admin{box-shadow:inset 3px 0 0 var(--ta-brand)}
+.um-av{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:12px;font-weight:600;color:#fff}
+.um-av--admin{background:var(--ta-brand)}
+.um-av--nurse{background:#2d6a8a}
+.um-av--physician{background:#6d28d9}
+.um-who{display:grid;min-width:0}
+.um-who b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px}
+.um-who small{font-size:11px;color:var(--ta-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.um-self{font-size:10px;font-weight:600;color:var(--ta-brand);background:#d3f1d9;border-radius:999px;padding:2px 8px;line-height:1.4}
+.um-rolechip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500;white-space:nowrap;justify-self:start}
+.um-rolechip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.um-rolechip--admin{background:#d3f1d9;color:var(--ta-brand)}
+.um-rolechip--nurse{background:#e3eef6;color:#2d6a8a}
+.um-rolechip--physician{background:#ede9fe;color:#6d28d9}
+.um-shift{font-size:12px;color:var(--ta-muted);white-space:nowrap}
+.um-edit{justify-self:end}
+.um-locked{display:inline-flex;align-items:center;justify-self:end;gap:6px;font-size:11px;color:var(--ta-muted);white-space:nowrap}
+.um-locked .pi{font-size:12px}
+.um-empty{display:grid;justify-items:center;gap:4px;padding:28px 12px;text-align:center;color:var(--ta-muted);font-size:12.5px}
+@media(max-width:760px){
+  .um-row{grid-template-columns:36px minmax(0,1fr) 14px;row-gap:8px}
+  .um-who{grid-column:2}
+  .um-rolechip{grid-column:2;justify-self:start}
+  .um-shift{grid-column:2;font-size:11px}
+  .um-edit,.um-locked{grid-column:1/-1;justify-self:start}
+  .um-top{flex-direction:column;align-items:stretch}
+  .um-top .ta-btn{width:100%}
+}
 </style>

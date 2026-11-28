@@ -1,4 +1,5 @@
 import { BaseApi } from '../../shared/infrastructure/base-api.js'
+import { session } from '../../shared/application/demo-session.js'
 import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint.js'
 
 const referralsEndpointPath = import.meta.env.VITE_REFERRALS_ENDPOINT_PATH
@@ -29,19 +30,41 @@ export class SpecialtyAssignmentApi extends BaseApi {
     }
 
     getReferralsByEpisode(episodeId) {
-        const params = this.isRtdb
-            ? { orderBy: '"episodeId"', equalTo: episodeId }
-            : { episodeId }
-        return this.http.get(`${this.#referralsEndpoint.endpointPath}${this.#referralsEndpoint.suffix}`, { params }).then(r => {
-            if (this.isRtdb && !Array.isArray(r.data)) {
-                r.data = Object.entries(r.data || {}).filter(([, v]) => v !== null).map(([k, v]) => ({ id: v.id !== undefined ? v.id : k, ...v }))
-            }
-            return r
-        })
+        if (this.isRtdb) {
+            const params = { orderBy: '"episodeId"', equalTo: episodeId }
+            return this.http.get(`${this.#referralsEndpoint.endpointPath}${this.#referralsEndpoint.suffix}`, { params }).then(r => {
+                if (!Array.isArray(r.data)) {
+                    r.data = Object.entries(r.data || {}).filter(([, v]) => v !== null).map(([k, v]) => ({ id: v.id !== undefined ? v.id : k, ...v }))
+                }
+                return r
+            })
+        }
+        // The API exposes a dedicated filtered endpoint: a bare list query would
+        // return every referral and leak another patient's record (ADR-010).
+        // The endpoint lives under the context root, not under /referrals.
+        const base = this.#referralsEndpoint.endpointPath.replace(/\/referrals$/, '')
+        return this.http.get(`${base}/episode/${episodeId}/referral`, { params: {} })
+            .then(r => ({ ...r, data: r.data ? [r.data] : [] }))
+            .catch(err => {
+                // 404 is the API contract for "this episode has no referral yet".
+                if (err?.response?.status === 404) return { data: [] }
+                throw err
+            })
     }
 
     createReferral(resource) {
         return this.#referralsEndpoint.create(resource)
+    }
+
+    /**
+     * Refers an episode through the API dedicated command endpoint. The API
+     * does not expose POST /referrals: creation goes through
+     * POST /specialty-assignment/episode/{id}/refer with the catalog id.
+     */
+    referEpisode(episodeId, specialtyId, symptom) {
+        const base = this.#referralsEndpoint.endpointPath.replace(/\/referrals$/, '')
+        // The referral is tagged with the signed-in institution so tenant-scoped reads keep it visible.
+        return this.http.post(`${base}/episode/${episodeId}/refer`, { specialtyId, symptom, institution: session.institution || undefined })
     }
 
     updateReferral(id, resource) {
@@ -55,6 +78,15 @@ export class SpecialtyAssignmentApi extends BaseApi {
     getSymptoms() {
         return this.#symptomsEndpoint.getAll()
     }
+
+    /** Asks the API to issue the sealed voucher token of a referral. */
+    /** E-mails the sealed voucher; optionally stores the address as the patient's e-mail. */
+    emailVoucher(referralId, email, attachToPatient) { return this.http.post(`${this.#vouchersEndpoint.endpointPath}/referral/${referralId}/email`, { email, attachToPatient }) }
+
+    issueVoucher(referralId) { return this.http.post(`${this.#vouchersEndpoint.endpointPath}/referral/${referralId}/issue`) }
+
+    /** Resolves a scanned voucher or episode code into its patient. */
+    verifyVoucher(code) { return this.http.get(`${this.#vouchersEndpoint.endpointPath}/verify/${encodeURIComponent(code)}`) }
 
     getVouchers() {
         return this.#vouchersEndpoint.getAll()

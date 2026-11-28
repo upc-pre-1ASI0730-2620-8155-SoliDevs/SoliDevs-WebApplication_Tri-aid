@@ -10,9 +10,12 @@ import LangSwitch from './shared/presentation/components/lang-switch.vue'
 import { t, locale } from './shared/application/i18n.js'
 import { session } from './shared/application/demo-session.js'
 import { subscriptionStore } from './subscription/application/subscription-store.js'
+import { patientPortalStore } from './patient-portal/application/patient-portal-store.js'
 
 const route = useRoute()
 const isAuth = computed(() => route.meta.layout === 'auth')
+// The patient portal renders bare: its own layout handles the header.
+const isPortal = computed(() => route.meta.layout === 'portal' || route.meta.layout === 'portal-public')
 const sbOpen = ref(false)
 function onKey(e) { if (e.key === 'Escape') sbOpen.value = false }
 onMounted(() => window.addEventListener('keydown', onKey))
@@ -51,11 +54,19 @@ watch(() => route.fullPath, () => {
 </script>
 
 <template>
-  <ToastHost />
+  <ToastHost v-if="!isPortal" />
   <LangSwitch v-if="isAuth" class="ls--float" />
-  <router-view v-if="isAuth" v-slot="{ Component, route: r }">
-    <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
-  </router-view>
+
+  <template v-if="isPortal">
+    <!-- Patient portal: the layout stays mounted; only its inner router-view transitions. -->
+    <router-view />
+  </template>
+  <template v-else-if="isAuth">
+    <!-- Staff auth pages (login, register, suspended). -->
+    <router-view v-slot="{ Component, route: r }">
+      <Transition name="page" mode="out-in"><component :is="Component" :key="r.path" /></Transition>
+    </router-view>
+  </template>
 
   <div v-else class="shell">
     <transition name="fade">
@@ -96,7 +107,7 @@ body { margin: 0; }
 .grace-banner--trial{background:#e8f1fb;border-color:#bcd4ef;color:#2c5d97}
 .grace-banner__link{margin-left:auto;color:#9a6d10;font-weight:600;text-decoration:underline;white-space:nowrap}
 #app { border-inline: 0; }
-.shell{display:flex;height:100vh;overflow:hidden;background:var(--ta-bg);font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4;text-align:left}
+.shell{display:flex;height:100vh;overflow:hidden;background-color:var(--ta-bg);background-image:linear-gradient(to right,var(--ta-grid) 1px,transparent 1px),linear-gradient(to bottom,var(--ta-grid) 1px,transparent 1px);background-size:44px 44px;font-family:var(--ta-font);color:var(--ta-text);letter-spacing:0;line-height:1.4;text-align:left}
 .shell__main{flex:1;min-width:0;display:flex;flex-direction:column}
 .tb{position:relative;flex:none;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:var(--ta-surface);border-bottom:1px solid var(--ta-line);z-index:5}
 .tb__title{font-size:14px;font-weight:600}

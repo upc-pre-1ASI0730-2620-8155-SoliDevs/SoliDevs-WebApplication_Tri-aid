@@ -5,9 +5,10 @@ import { store, findEpisode, ageOf, fmtTime, fmtDateTime, saveEpisode } from '..
 import { docLabel } from '../../application/document-types.js'
 import { t, sexLabel } from '../../../shared/application/i18n.js'
 import { levelByCode } from '../../../shared/domain/shared-kernel/triage-level.js'
-import { TriageApi } from '../../../triage-classification/infrastructure/triage-api.js'
-import { ClassificationAssembler } from '../../../triage-classification/infrastructure/classification.assembler.js'
+import { TriageClassificationService } from '../../../triage-classification/infrastructure/triage-classification.service.js'
 import { SpecialtyAssignmentApi } from '../../../specialty-assignment/infrastructure/specialty-assignment-api.js'
+import { PatientRegistrationApi } from '../../infrastructure/patient-registration-api.js'
+import { notify } from '../../../shared/application/toast-store.js'
 import VitalsPanel from '../../../vital-signs-capture/presentation/components/vitals-panel.vue'
 
 const route = useRoute()
@@ -17,6 +18,24 @@ const ep = computed(() => findEpisode(id))
 if (!ep.value) router.replace('/patient-registration')
 
 const p = computed(() => ep.value.patient)
+
+// Portal access: the API only returns the plain code on creation and on regeneration.
+const regenerating = ref(false)
+const patientApi = new PatientRegistrationApi()
+async function regeneratePortalCode() {
+  if (regenerating.value || !p.value?.id) return
+  regenerating.value = true
+  try {
+    const r = await patientApi.enablePortal(p.value.id, { email: p.value.email || null })
+    p.value.portalPassword = r.data?.accessCode || null
+    p.value.portalEnabled = true
+    notify({ type: 'success', title: t('pf.portal.title'), detail: t('pf.portal.regenerated') })
+  } catch (e) {
+    notify({ type: 'error', title: t('rg.e.save'), detail: e.response?.data?.message })
+  } finally {
+    regenerating.value = false
+  }
+}
 const initials = computed(() => ((p.value.names[0] || '') + (p.value.surnames[0] || '')).toUpperCase())
 const fullName = computed(() => `${p.value.surnames}, ${p.value.names}`)
 const meta = computed(() => [
@@ -39,7 +58,9 @@ const rows = computed(() => [
 const visits = computed(() => store.episodes.filter(e => e.key === ep.value.key).slice().reverse())
 
 /* ---------- Tabs ---------- */
-const tab = ref('vitals')
+// A freshly registered patient arrives with its one-time portal code: open the
+// data tab so admission sees it right away instead of the vitals panel.
+const tab = ref(p.value?.portalPassword ? 'data' : 'vitals')
 const tabsDef = computed(() => [
   { id: 'vitals', label: t('pf.tab.vitals') },
   { id: 'data', label: t('pf.tab.data') },
@@ -48,14 +69,15 @@ const tabsDef = computed(() => [
 
 /* ---------- Estado del flujo: clasificacion + derivacion ---------- */
 const classified = ref(null)
+const flowLoaded = ref(false)
 const classifiedConfirmed = ref(false)
 const referred = ref(false)
 
 async function loadFlowState() {
   if (!ep.value) return
   try {
-    const rc = await new TriageApi().getClassificationByEpisode(ep.value.id)
-    const c = ClassificationAssembler.toEntity((rc.data || [])[0] || null)
+    // The API answers with a single record (or a list on the legacy contract); the service accepts both.
+    const c = await new TriageClassificationService().findByEpisode(ep.value.id)
     if (c?.level) {
       const l = levelByCode(c.level.split('_')[0])
       classified.value = l ? { code: l.code, name: t('triage.level.' + l.code + '.name'), color: l.color } : null
@@ -63,7 +85,7 @@ async function loadFlowState() {
     } else { classified.value = null; classifiedConfirmed.value = false }
     const rr = await new SpecialtyAssignmentApi().getReferralsByEpisode(ep.value.id)
     referred.value = (rr.data || []).length > 0
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error(e) } finally { flowLoaded.value = true }
 }
 
 onMounted(() => loadFlowState())
@@ -82,7 +104,8 @@ function onVitalsConfirmed() {
         <div class="fi-name">{{ fullName }}</div>
         <div class="fi-meta">{{ meta }}</div>
       </div>
-      <span class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
+      <span v-if="!flowLoaded" class="ta-skel" aria-hidden="true"></span>
+      <span v-else class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
         <template v-if="classified">{{ classified.code }} · {{ classified.name }}</template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>
@@ -103,15 +126,18 @@ function onVitalsConfirmed() {
         <dl class="fi-dl">
           <div v-for="r in rows" :key="r[0]"><dt>{{ r[0] }}</dt><dd>{{ r[1] }}</dd></div>
         </dl>
-        <div v-if="!p.sinDni && p.portalPassword" class="pf-portal">
+        <div v-if="!p.sinDni && p.portalEnabled" class="pf-portal">
           <h4 class="ta-h">{{ t('pf.portal.title') }}</h4>
-          <p class="ta-sub">{{ t('pf.portal.sub') }}</p>
+          <p class="ta-sub">{{ p.portalPassword ? t('pf.portal.sub') : t('pf.portal.subActive') }}</p>
           <dl class="fi-dl">
             <div><dt>DNI</dt><dd>{{ p.dni }}</dd></div>
-            <div><dt>{{ t('rg.email') }}</dt><dd>{{ p.portalEmail || '—' }}</dd></div>
-            <div><dt>{{ t('pf.portal.pass') }}</dt><dd class="pf-portal__pass">{{ p.portalPassword }}</dd></div>
+            <div><dt>{{ t('rg.email') }}</dt><dd>{{ p.email || '—' }}</dd></div>
+            <div v-if="p.portalPassword"><dt>{{ t('pf.portal.pass') }}</dt><dd class="pf-portal__pass">{{ p.portalPassword }}</dd></div>
           </dl>
-          <p class="pf-portal__note">{{ t('pf.portal.note') }}</p>
+          <p class="pf-portal__note">{{ p.portalPassword ? t('pf.portal.note') : t('pf.portal.noteActive') }}</p>
+          <button class="ta-btn ta-btn--ghost ta-btn--sm" type="button" :disabled="regenerating || !p.portalEnabled" @click="regeneratePortalCode">
+            <i class="pi pi-refresh"></i> {{ t('pf.portal.regenerate') }}
+          </button>
         </div>
       </section>
 

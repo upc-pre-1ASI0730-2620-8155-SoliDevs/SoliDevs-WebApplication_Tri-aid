@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 import { useRoute, useRouter } from 'vue-router'
 import { findEpisode, ageOf, fmtTime } from '../../../patient-registration/application/patient-store.js'
 import { DeviceType as vitalTypes } from '../../../vital-signs-capture/domain/model/device-type.js'
@@ -45,7 +46,14 @@ const vitalsRows = computed(() => vitalTypes.map(vt => ({
   value: ep.value.vitals[vt.key]?.value ?? '—'
 })))
 
-const outOfRange = computed(() => nt158Engine.outOfRange(ep.value.vitals))
+const outOfRangeRaw = computed(() => nt158Engine.outOfRange(ep.value.vitals))
+// Systolic and diastolic come as separate readings; show them as one blood pressure value.
+const outOfRange = computed(() => {
+  const list = outOfRangeRaw.value.filter(o => !['pas', 'pad'].includes(o.metric))
+  const sys = outOfRangeRaw.value.find(o => o.metric === 'pas'), dia = outOfRangeRaw.value.find(o => o.metric === 'pad')
+  if (sys || dia) list.push({ metric: 'pa', value: `${sys?.value ?? '?'}/${dia?.value ?? '?'}` })
+  return list
+})
 const missing = computed(() => nt158Engine.missingMetrics(ep.value.vitals))
 const hasAllVitals = computed(() => !missing.value.length)
 
@@ -99,6 +107,7 @@ async function resetSuggestion() {
 
 /* ---------- Change level ---------- */
 const showModify = ref(false)
+const { card: modifyCard, backdrop: modifyBackdrop, close: closeModify } = useModalMotion(() => { showModify.value = false })
 const modLevel = ref('')
 const modReason = ref('')
 const modErr = ref('')
@@ -193,7 +202,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
         <p v-if="outOfRange.length" class="tc-warn">
           <i class="pi pi-exclamation-triangle"></i>
           <span>{{ t('triage.warning', { n: outOfRange.length }) }}
-            {{ outOfRange.map(o => `${vLabel(o.metric === 'pas' ? 'pa' : o.metric)} ${o.value}${o.metric === 'spo2' ? ' %' : ''}`).join(' · ') }}</span>
+            {{ outOfRange.map(o => `${vLabel(o.metric)} ${o.value}${o.metric === 'spo2' ? ' %' : ''}`).join(' · ') }}</span>
         </p>
         <p v-else class="tc-ok"><i class="pi pi-check-circle"></i> {{ t('triage.allNormal') }}</p>
       </section>
@@ -206,7 +215,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
 
           <p v-if="reasons.length" class="tc-reasons">
             <b>{{ t('triage.reasons') }}</b>
-            <span v-for="(r, i) in reasons" :key="i">{{ t('vital.' + (r.metric === 'pas' ? 'pa' : r.metric) + '.label') }}<template v-if="r.value !== null"> {{ r.value }}</template></span>
+            <span v-for="(r, i) in reasons" :key="i">{{ t('vital.' + (['pas', 'pad'].includes(r.metric) ? 'pa' : r.metric) + '.label') }}<template v-if="r.value !== null"> {{ r.value }}</template></span>
           </p>
 
           <span class="tc-state" :class="'st--' + state">{{ stateLabel }}</span>
@@ -246,8 +255,8 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
       <router-link class="ta-btn ta-btn--ghost" :to="`/patient-registration/${ep.id}`"><i class="pi pi-arrow-left"></i>{{ t('triage.backFile') }}</router-link>
     </div>
 
-    <div v-if="showModify" class="tc-overlay" @click.self="showModify = false">
-      <div class="ta-card tc-modal">
+    <div v-if="showModify" ref="modifyBackdrop" class="tc-overlay" @click.self="closeModify">
+      <div ref="modifyCard" class="ta-card tc-modal">
         <h3 class="ta-h">{{ t('triage.modifyTitle') }}</h3>
         <p class="ta-sub">{{ t('triage.modifySub') }}</p>
 
@@ -263,7 +272,7 @@ const levelDisplay = lvl => lvl ? { code: lvl.code, name: t('triage.level.' + lv
         <p v-if="modErr" class="ta-err">{{ modErr }}</p>
 
         <div class="tc-modal__actions">
-          <button class="ta-btn ta-btn--ghost" @click="showModify = false">{{ t('triage.cancel') }}</button>
+          <button class="ta-btn ta-btn--ghost" @click="closeModify">{{ t('triage.cancel') }}</button>
           <button class="ta-btn" @click="saveModify"><i class="pi pi-save"></i>{{ t('triage.save') }}</button>
         </div>
       </div>

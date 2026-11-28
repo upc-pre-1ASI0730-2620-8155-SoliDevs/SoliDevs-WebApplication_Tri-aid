@@ -26,9 +26,15 @@ export const subscriptionStore = reactive({
             ])
             this.plans = plans.data
             if (subscription.data) {
-                const settled = await this.service.autoChargeTrialEnd(subscription.data)
-                this.subscription = settled.data
-                this.trialJustCharged = settled.charged
+                // A failed auto-charge must never block sign-in: keep the stored
+                // subscription and let the subscriptions screen surface the error.
+                try {
+                    const settled = await this.service.autoChargeTrialEnd(subscription.data)
+                    this.subscription = settled.data
+                    this.trialJustCharged = settled.charged
+                } catch {
+                    this.subscription = subscription.data
+                }
             } else {
                 this.subscription = null
             }

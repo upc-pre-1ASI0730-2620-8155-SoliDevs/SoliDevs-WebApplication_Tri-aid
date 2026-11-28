@@ -4,7 +4,8 @@
 export class ReferralResource {
     constructor({ id, episodeId, specialty, room, queuePosition, state, changeReason, referredAt, symptom }) {
         this.id = id
-        this.episodeId = episodeId
+        // ADR-010: the API takes the episode identifier as a string.
+        this.episodeId = episodeId === undefined || episodeId === null ? episodeId : String(episodeId)
         this.specialty = specialty
         this.room = room
         this.queuePosition = queuePosition

@@ -7,7 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.1.0] - 2026-11-23
+## [3.6.0] - 2026-11-27
+
+### Fixed
+- Escalating an incident moves the patient's referral to Trauma Shock (also when a triage referral already existed), raises one incident per patient listing every altered vital sign and the triage priority, is offered once per patient and plays the closing tick animation.
+- The closed filter hides escalated cards as well as resolved ones, and an episode keeps a single open incident.
+- Referrals created before tenancy (no institution) stay visible in the panel, patients and reports; referral resources send the episode id as the API expects.
+- The out-of-range notice shows the blood pressure as one value instead of a raw label per reading.
+
+## [3.7.0] - 2026-11-28
+
+### Fixed
+- Approving the triage suggestion stays approved when leaving and re-entering the view; the suggestion is only recalculated when the vital signs change the level.
+- The patient file shows the confirmed level; before, it read the classification answer as a list and always saw none.
+
+### Changed
+- Status chips on the panel, patients, reports and the patient file show a skeleton until classifications and referrals have loaded instead of flashing intermediate states; the panel loads its sources in parallel.
+
+## [3.10.0] - 2026-11-28
+
+### Added
+- The referral voucher can be sent by e-mail from the voucher dialog. If the patient has no e-mail on file the dialog asks for one, and then whether to link that address to the patient's account; the server delivers the message with the QR through Resend.
+
+### Changed
+- Queue tiles fit full specialty names.
+
+## [3.9.0] - 2026-11-28
+
+### Fixed
+- Each institution only sees its own patients, episodes, classifications, referrals and incidents, and its queue positions.
+- The subscription page shows the trial renewal date instead of "Invalid Date".
+- The staff voucher shows the episode code; readings cannot be confirmed with empty values.
+- The referral view queue uses the same tiles as the panel.
+
+## [3.8.0] - 2026-11-28
+
+### Added
+- The issued portal code dialog plays a GSAP sequence (badge pop, cascading copy, code flipping in tile by tile), shows the admission QR that the staff scanner resolves, and has a copy button.
+- The patient portal shows a message with a retry button when the overview cannot be loaded, and returns to the sign-in when the session expired.
+
+### Changed
+- The specialty waiting queue on the panel is an even grid of tiles; the suggestion button and tag no longer carry the sparkle icon.
+- The plan step of the staff registration centers its single button, and the institutional plan lists incident reports and audit instead of multi-site management.
+
+### Fixed
+- Spanish copy: the devices hint, the profile role and shift, the staff form options and the triage reason when no urgency criterion applies.
+- The patient portal works while a staff session is open in the same browser: the staff token no longer replaces the patient token.
+- The patient file always offers a new access code and tells the staff to regenerate it when the patient reports it no longer works.
+
+## [3.5.0] - 2026-11-26
+
+### Added
+- **Patient portal:** sign-in, my status, my turn and my voucher views with a tabbed layout, session guard, Spanish/English copy and a 45-second live queue poll.
+- **Voucher QR:** the referral voucher renders a real scannable QR carrying the sealed token, with PNG download for the patient and the staff.
+- **Voucher scanner:** the admission desk scans the voucher with the camera or an uploaded image and opens the patient file directly.
+- **Staff sign-in:** the staff logs in against the API and every request carries the real JWT.
+- Reports: NT-158 level distribution chart, each report source loaded independently.
+
+### Changed
+- Personal is laid out as a searchable list like Pacientes, with localized role and shift chips.
+- Monitor-paper grid background across the staff shell and the patient portal; issued-code dialog animated with the shared modal motion.
+- Incidents endpoint moved to `/incidents` to follow the renamed bounded context.
+
+### Fixed
+- Registration and dialog rendering (single root under the router transition), referral lookup through the episode endpoint, panel counts derived from live referrals, and responsive spacing on Pacientes and the episodes list.
+
+## [3.1.0] - 2026-11-21
 
 ### Added
 - Registration shows a "waking up the server" notice when the API takes long to answer.
@@ -15,18 +80,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The trial subscription is created with its renewal date and grace period.
 
-## [3.2.0] - 2026-11-23
+## [3.2.0] - 2026-11-21
 
 ### Added
 - Patient list marks each patient as classified or referred from the persisted classifications and referrals.
 - Reports: referral status in the care log, UTC-safe cycle time and translated severity in the alert log.
 
-## [3.3.0] - 2026-11-23
+## [3.3.0] - 2026-11-21
 
 ### Fixed
 - Acknowledge failures on escalated incidents are reported to the user.
 
-## [3.4.0] - 2026-11-25
+## [3.4.0] - 2026-11-22
 
 ### Changed
 - **Breaking — Bounded context rename (Alerting → Incidents):** aligned with the `feature/incident-refactor` branch of the TriAid Platform API.

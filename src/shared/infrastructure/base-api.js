@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getStaffToken } from '../application/staff-token.js'
 
 const triAidApiUrl = import.meta.env.VITE_TRIAGE_PLATFORM_API_URL
 
@@ -17,6 +18,13 @@ export class BaseApi {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             }
+        })
+        // Attach the staff JWT to every request when there is a session.
+        this.#http.interceptors.request.use(config => {
+            const token = getStaffToken()
+            // The patient portal sets its own token per request; the staff token must not replace it.
+            if (token && !config.headers.Authorization) config.headers.Authorization = `Bearer ${token}`
+            return config
         })
     }
 

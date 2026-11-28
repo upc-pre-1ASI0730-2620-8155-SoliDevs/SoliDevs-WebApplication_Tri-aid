@@ -53,13 +53,21 @@ export class TriageClassificationService {
         let classification = await this.findByEpisode(episode.id)
         if (classification?.isConfirmed) return { ok: true, data: classification, reasons: result.reasons }
 
+        let changed = false
         if (!classification) {
+            // First time: the engine's output becomes the pending suggestion.
             classification = new Classification({ id: null, episodeId: episode.id })
-            this.seq = Math.max(this.seq, 0)
+            classification.suggest(result.levelKey)
+            changed = true
+        } else if (classification.suggestedLevel !== result.levelKey) {
+            // The vitals changed and point to another level: suggest again.
+            classification.suggest(result.levelKey)
+            changed = true
         }
-        classification.suggest(result.levelKey)
+        // Otherwise the stored classification (approved or overridden) is kept as is;
+        // only the reasons are refreshed for the view.
         classification.episodeId = episode.id
-        classification = await this.persist(classification)
+        if (changed) classification = await this.persist(classification)
         return { ok: true, data: classification, reasons: result.reasons }
     }
 

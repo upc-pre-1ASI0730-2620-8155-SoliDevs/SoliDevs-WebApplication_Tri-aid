@@ -55,7 +55,7 @@ const currentPlan = computed(() =>
 
 const money = n => new Intl.NumberFormat(locale.value === 'en' ? 'en-US' : 'es-PE',
     { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(n)
-const fmtDate = d => d ? new Date(`${d}T12:00:00`).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE',
+const fmtDate = d => d ? new Date(`${String(d).slice(0, 10)}T12:00:00`).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE',
     { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
 const fmtDateTime = iso => iso ? new Date(iso).toLocaleString(locale.value === 'en' ? 'en-US' : 'es-PE',
     { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
@@ -157,7 +157,6 @@ const activate = () => run(() => subscriptionStore.service.activate({
     simulateReject: simulateReject.value
 }))
 const retry = () => run(() => subscriptionStore.service.retryPayment(subscription.value, { simulateReject: simulateReject.value }))
-const renew = () => run(() => subscriptionStore.service.renew(subscription.value, { simulateReject: false }))
 
 function maskedCard() {
     const digits = (cardNumber.value || '').replace(/\D/g, '')
@@ -207,12 +206,9 @@ function maskedCard() {
           {{ t(`subscription.state_${state}`) }}
         </span>
 
-        <div v-if="subscription" class="sub-actions">
-          <button v-if="state === 'pending' || state === 'overdue'" class="ta-btn" :disabled="busy" @click="retry">
+        <div v-if="subscription && (state === 'pending' || state === 'overdue')" class="sub-actions">
+          <button class="ta-btn" :disabled="busy" @click="retry">
             {{ t('subscription.retryPayment') }}
-          </button>
-          <button v-else class="ta-btn ta-btn--ghost" :disabled="busy" @click="renew">
-            {{ t('subscription.simulateRenewal') }}
           </button>
         </div>
         <p v-if="state === 'overdue'" class="sub-overdue-note">{{ t('subscription.overdueNote', { days: subscription.graceDays }) }}</p>

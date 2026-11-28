@@ -1,3 +1,4 @@
+import { setStaffToken } from '../../shared/application/staff-token.js'
 import { User } from '../domain/model/user.entity.js'
 import { IamApi } from './iam-api.js'
 
@@ -72,21 +73,35 @@ export class IamService {
      */
     async signIn(username, password) {
         await delay()
-        const response = await this.api.getUsers()
-        const match = (response.data || [])
-            .map(u => new User(u))
-            .find(u => u.username.toLowerCase() === String(username).trim().toLowerCase())
-        if (!match || match.password !== password) {
+        // Real sign-in against the API: it verifies the password server-side and
+        // returns a JWT. The old flow compared the stored hash client-side.
+        let token = null
+        try {
+            const r = await this.api.http.post('/auth/login', { username: String(username).trim(), password })
+            token = r.data?.token || null
+        } catch (e) {
             const error = new Error('invalid-credentials')
             error.code = 'invalid-credentials'
             throw error
         }
-        const session = await this.api.createSession({
-            userId: match.id,
-            username: match.username,
-            openedAt: new Date().toISOString()
-        })
-        this.sessionId = session.data.id
+        if (!token) {
+            const error = new Error('invalid-credentials')
+            error.code = 'invalid-credentials'
+            throw error
+        }
+        setStaffToken(token)
+        const response = await this.api.getUsers()
+        const match = (response.data || [])
+            .map(u => new User(u))
+            .find(u => u.username.toLowerCase() === String(username).trim().toLowerCase())
+        if (!match) {
+            const error = new Error('invalid-credentials')
+            error.code = 'invalid-credentials'
+            throw error
+        }
+        // Open the web session record so a reload can restore the signed-in user.
+        const opened = await this.api.createSession({ userId: match.id, username: match.username, openedAt: new Date().toISOString() })
+        this.sessionId = String(opened.data?.id ?? '')
         sessionStorage.setItem('triaid.sessionId', this.sessionId)
         return { ok: true, data: match }
     }

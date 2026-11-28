@@ -22,7 +22,10 @@ export class PatientAssembler {
             birth: resource.birthDate,
             sex: SEX_FROM_API[resource.sex] || resource.sex,
             phone: resource.phone || '',
-            address: resource.address || ''
+            address: resource.address || '',
+            email: resource.email || '',
+            portalEnabled: !!resource.portalEnabled,
+            portalPassword: resource.portalAccessCode || null
         }
     }
 
@@ -34,7 +37,8 @@ export class PatientAssembler {
             birthDate: form.birth,
             sex: SEX_TO_API[form.sex],
             phone: form.phone || null,
-            address: form.address || null
+            address: form.address || null,
+            email: form.email || null
         })
     }
 
@@ -50,7 +54,8 @@ export class PatientAssembler {
     static toUpdateContactResource(form) {
         return new UpdateContactResource({
             phone: form.phone || null,
-            address: form.address || null
+            address: form.address || null,
+            email: form.email || null
         })
     }
 }

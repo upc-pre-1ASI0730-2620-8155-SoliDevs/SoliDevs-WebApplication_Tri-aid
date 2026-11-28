@@ -1,6 +1,8 @@
 <script setup>
 /** Digital referral voucher: QR, destination details and SMS delivery. */
-import { computed } from 'vue'
+import { ref, watch, computed } from 'vue'
+import QRCode from 'qrcode'
+import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 import { t } from '../../../shared/application/i18n.js'
 
 const props = defineProps({
@@ -10,46 +12,50 @@ const props = defineProps({
     episodeId: { type: String, required: true },
     level: { type: Object, default: null }       // { code, name }
 })
-defineEmits(['close', 'send'])
+const emit = defineEmits(['close', 'send', 'email'])
+const { card, backdrop, close } = useModalMotion(() => emit('close'))
 
-// deterministic pseudo-QR generated from the voucher code (demo)
-const blocks = computed(() => {
-    let seed = 0
-    for (const ch of props.voucher.qrCode) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0
-    const out = []
-    for (let i = 0; i < 121; i++) {
-        seed = (seed * 1103515245 + 12345) >>> 0
-        out.push(((seed >> 8) & 1) === 1)
-    }
-    return out
-})
+// Real, scannable QR carrying the voucher payload (the same code the admission
+// desk scanner resolves). Rendered as SVG so it prints crisp.
+const qrSvg = ref('')
+watch(() => props.voucher?.qrCode, async code => {
+    qrSvg.value = code ? await QRCode.toString(code, { type: 'svg', margin: 0, color: { dark: '#0a2118', light: '#ffffff' } }) : ''
+}, { immediate: true })
+
+async function downloadQr() {
+    if (!props.voucher?.qrCode) return
+    const url = await QRCode.toDataURL(props.voucher.qrCode, { margin: 2, width: 640, color: { dark: '#0a2118', light: '#ffffff' } })
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `triaid-comprobante-${props.voucher.qrCode.split('|')[1] || ''}.png`
+    a.click()
+}
 </script>
 
 <template>
-    <div class="vd-overlay" @click.self="$emit('close')">
-        <div class="ta-card vd-modal">
+    <div ref="backdrop" class="vd-overlay" @click.self="close">
+        <div ref="card" class="ta-card vd-modal">
             <span class="vd-kicker">{{ t('referral.voucherKicker') }}</span>
             <h3 class="ta-h">{{ t('referral.voucherTitle') }}</h3>
 
-            <div class="vd-qr" aria-hidden="true">
-                <span v-for="(on, i) in blocks" :key="i" :class="{ on }"></span>
-            </div>
-            <code class="vd-code">{{ voucher.qrCode }}</code>
+            <div class="vd-qr" v-html="qrSvg"></div>
+            <code class="vd-code">EP-{{ String(voucher.episodeId || '').padStart(4, '0') }}</code>
 
             <dl class="vd-dl">
                 <div><dt>{{ t('referral.vPatient') }}</dt><dd>{{ patientName }}</dd></div>
                 <div><dt>{{ t('referral.vEpisode') }}</dt><dd>{{ episodeId }}</dd></div>
-                <div><dt>{{ t('referral.vSpecialty') }}</dt><dd>{{ t('referral.spec.' + referral.specialty) }}</dd></div>
+                <div><dt>{{ t('referral.vSpecialty') }}</dt><dd>{{ referral.specialty }}</dd></div>
                 <div><dt>{{ t('referral.vRoom') }}</dt><dd>{{ referral.room }}</dd></div>
                 <div v-if="level"><dt>{{ t('referral.vPriority') }}</dt><dd>{{ level.code }} · {{ t('triage.level.' + level.code + '.name') }}</dd></div>
                 <div><dt>{{ t('referral.vQueue') }}</dt><dd>#{{ referral.queuePosition }}</dd></div>
             </dl>
 
             <div class="vd-actions">
-                <button class="ta-btn ta-btn--ghost" @click="$emit('send', 'Sms')">
-                    <i class="pi pi-mobile"></i>{{ t('referral.sendSms') }}
+                <button class="ta-btn ta-btn--ghost" type="button" @click="downloadQr">
+                    <i class="pi pi-download"></i>{{ t('referral.downloadQr') }}
                 </button>
-                <button class="ta-btn" @click="$emit('close')"><i class="pi pi-check"></i>{{ t('referral.done') }}</button>
+                <button class="ta-btn ta-btn--ghost" type="button" @click="emit('email')"><i class="pi pi-envelope"></i>{{ t('referral.emailSend') }}</button>
+                <button class="ta-btn" @click="close()"><i class="pi pi-check"></i>{{ t('referral.done') }}</button>
             </div>
         </div>
     </div>
@@ -59,9 +65,8 @@ const blocks = computed(() => {
 .vd-overlay{position:fixed;inset:0;background:rgba(8,20,14,.45);display:grid;place-items:center;z-index:40;padding:20px}
 .vd-modal{width:min(480px,100%);display:grid;gap:10px}
 .vd-kicker{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ta-brand);font-weight:700}
-.vd-qr{display:grid;grid-template-columns:repeat(11,1fr);gap:2px;width:150px;padding:10px;background:#fff;border:1px solid var(--ta-line);border-radius:10px}
-.vd-qr span{aspect-ratio:1;border-radius:1px}
-.vd-qr span.on{background:var(--ta-ink)}
+.vd-qr{width:180px;height:180px;padding:10px;background:#fff;border:1px solid var(--ta-line);border-radius:10px}
+.vd-qr :deep(svg){width:100%;height:100%;display:block}
 .vd-code{font-family:var(--ta-mono);font-size:10.5px;color:var(--ta-text);background:#f2f6f4;border:1px solid var(--ta-line);border-radius:8px;padding:6px 10px;word-break:break-all;text-decoration:none}
 .vd-dl{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin:4px 0 0}
 @media(max-width:600px){.vd-dl{grid-template-columns:1fr}}

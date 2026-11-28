@@ -62,7 +62,7 @@ function pick(s) {
                 <code>{{ s.id }}</code> {{ label(s) }}
             </li>
         </ul>
-        <p v-if="selectedSymptom" class="sa-selected"><i class="pi pi-check-circle"></i>{{ selectedSymptom.id }} — {{ label(selectedSymptom) }}</p>
+        <p v-if="selectedSymptom && label(selectedSymptom)" class="sa-selected"><i class="pi pi-check-circle"></i>{{ selectedSymptom.id }} — {{ label(selectedSymptom) }}</p>
     </div>
 </template>
 

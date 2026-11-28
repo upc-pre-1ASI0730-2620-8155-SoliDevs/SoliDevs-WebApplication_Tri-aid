@@ -12,9 +12,14 @@ import { notify } from '../../../shared/application/toast-store.js';
 
 const { t } = useI18n();
 const activeIncidents = ref([]);
+// Escalation moves the whole episode to Trauma Shock, so it is offered once per episode.
+const episodeAlreadyEscalated = (incident) => activeIncidents.value
+  .some(a => String(a.episode) === String(incident.episode) && a.severity === 'escalated' && String(a.id) !== String(incident.id));
 const incidentsService = new IncidentsService();
 const router = useRouter();
 const doneId = ref(null);
+// Which closing animation the card plays: the green tick with 'Resuelta' or with the Trauma Shock destination.
+const doneKind = ref('resolve');
 const pendingId = ref(null);
 const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -58,7 +63,9 @@ const displayIncidents = computed(() => {
   if (activeFilter.value === 'critical') {
     filtered = filtered.filter(a => a.severity === 'critical');
   } else if (activeFilter.value === 'unresolved') {
-    filtered = filtered.filter(a => a.severity !== 'resolved');
+    // Resolved and escalated are both terminal: once the patient was referred or
+    // acknowledged, the card is closed and this filter takes it off the board.
+    filtered = filtered.filter(a => a.severity !== 'resolved' && a.severity !== 'escalated');
   }
 
   const localDay = a => new Date(a.createdAt).toLocaleDateString('en-CA');
@@ -91,18 +98,28 @@ const confirmEscalate = async () => {
   const incident = activeIncidents.value.find(a => String(a.id) === String(pendingEsc.value));
   pendingEsc.value = null;
   if (!incident) return;
+  doneKind.value = 'escalate';
+  doneId.value = incident.id;
+  await new Promise(r => setTimeout(r, 1500));
   try {
     const specs = await specialtyService.getSpecialties();
-    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock');
-    if (trauma) {
-      const r = await specialtyService.refer(incident.episode, {
-        specialtyRef: trauma,
-        symptom: `EMERGENCIA — ${incident.vitalSign} ${incident.value}`
-      });
-      if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
-      const ep = findEpisode(incident.episode);
-      if (ep) { ep.referred = true; saveEpisode(ep); }
+    const trauma = (specs.data || []).find(s => s.key === 'TraumaShock' || s.name === 'Trauma Shock');
+    if (!trauma) { notify({ type: 'error', title: t('incidents.escError') }); return; }
+    // The episode usually already carries a triage referral (e.g. Traumatología). Escalating
+    // must move that referral to Trauma Shock, not just rewrite its symptom.
+    const reason = `EMERGENCIA — ${incident.vitalSign} ${incident.value}`;
+    const existing = await specialtyService.findByEpisode(incident.episode);
+    let r;
+    if (existing && existing.specialty !== trauma.name) {
+      r = await specialtyService.changeSpecialty(existing.id, { specialty: trauma.name, reason });
+    } else if (existing) {
+      r = { ok: true, data: existing };
+    } else {
+      r = await specialtyService.refer(incident.episode, { specialtyRef: trauma, symptom: reason });
     }
+    if (!r.ok) { notify({ type: 'error', title: t(r.error) }); return; }
+    const ep = findEpisode(incident.episode);
+    if (ep) { ep.referred = true; saveEpisode(ep); }
     const up = await incidentsService.escalateIncident(incident.id, { userId: session.name || null, to: 'Trauma Shock' });
     if (up.ok) {
       const i = activeIncidents.value.findIndex(a => String(a.id) === String(incident.id));
@@ -112,6 +129,7 @@ const confirmEscalate = async () => {
     releaseEpisodeDevices(incident.episode);
     notify({ type: 'success', title: t('incidents.escDone'), detail: 'Trauma Shock · TS-1' });
   } catch (e) { console.error(e); notify({ type: 'error', title: t('incidents.escError') }); }
+  setTimeout(() => { if (String(doneId.value) === String(incident.id)) doneId.value = null; }, 400);
 };
 
 const cancelAcknowledge = () => { pendingId.value = null; };
@@ -120,19 +138,17 @@ const confirmAcknowledge = async (directId = null) => {
   const id = directId ?? pendingId.value;
   pendingId.value = null;
 
+  doneKind.value = 'resolve';
   doneId.value = id;
   await new Promise(r => setTimeout(r, 1500));
 
   try {
     const r = await incidentsService.acknowledgeIncident(id, session.name || null);
     if (r.ok) {
+      // The card stays on the board as resolved: the "hide resolved" filter and
+      // the actions row (hidden for terminal states) take it from here.
       const i = activeIncidents.value.findIndex(a => String(a.id) === String(id));
-      if (i !== -1) {
-        activeIncidents.value[i] = r.data;
-        if (!r.data.value.includes(t('incidents.backToNormal'))) {
-          activeIncidents.value[i].value = `${t('incidents.backToNormal')} · ${r.data.value}`;
-        }
-      }
+      if (i !== -1) activeIncidents.value[i] = r.data;
     } else {
       notify({ type: 'error', title: t('incidents.ackError') });
     }
@@ -263,14 +279,16 @@ const onDoneEnter = (el, done) => {
           </template>
         </div>
 
-        <div class="al-actions" v-if="incident.severity !== 'resolved'">
+        <!-- Resolved and escalated are terminal: nothing left to acknowledge or escalate. -->
+        <div class="al-actions" v-if="incident.severity !== 'resolved' && incident.severity !== 'escalated'">
           <button class="ta-btn ta-btn--ghost ta-btn--sm" @click="acknowledgeIncident(incident.id)">
             {{ t('incidents.acknowledge') }}
           </button>
-          <button v-if="incident.severity !== 'escalated'" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
+          <button v-if="!episodeAlreadyEscalated(incident)" class="ta-btn ta-btn--sm al-btn-esc" @click="escalateIncidentPrompt(incident.id)">
             {{ t('incidents.escalate') }}
           </button>
         </div>
+
 
         <Transition :css="false" @enter="onDoneEnter">
           <div v-if="doneId === incident.id" class="al-done" aria-hidden="true">
@@ -279,7 +297,7 @@ const onDoneEnter = (el, done) => {
               <circle class="al-done__disc" cx="36" cy="36" r="30" />
               <path class="al-done__tick" d="M23 37l9 9 18-21" pathLength="1" />
             </svg>
-            <span class="al-done__txt">{{ t('incidents.resolved') }}</span>
+            <span class="al-done__txt">{{ doneKind === 'escalate' ? t('incidents.escalatedDone') : t('incidents.resolved') }}</span>
           </div>
         </Transition>
       </article>
@@ -304,6 +322,7 @@ const onDoneEnter = (el, done) => {
 </template>
 
 <style scoped>
+
 .al-page{display:grid;gap:16px}
 .al-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 20px;flex-wrap:wrap}
 .al-head__main{display:grid;gap:12px}
@@ -322,19 +341,19 @@ const onDoneEnter = (el, done) => {
 .al-card{display:grid;gap:8px;padding:16px 18px;border-left:4px solid var(--ta-line);position:relative;overflow:hidden}
 .al-card.sev--critical{border-left-color:#b42318;background:var(--ta-danger-bg)}
 .al-card.sev--warning{border-left-color:#d97706}
-.al-card.sev--escalated{border-left-color:#6d28d9}
-.al-card.sev--resolved{border-left-color:var(--ta-brand)}
+.al-card.sev--escalated{border-left-color:#b25410;background:var(--ta-surface)}
+.al-card.sev--resolved{border-left-color:var(--ta-brand);background:var(--ta-surface);opacity:.85}
 .al-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .al-dot{font-size:8px;color:var(--ta-muted)}
 .sev--critical .al-dot{color:#b42318;animation:al-pulse 1.6s infinite}
 .sev--warning .al-dot{color:#d97706}
-.sev--escalated .al-dot{color:#6d28d9}
+.sev--escalated .al-dot{color:#b25410}
 .sev--resolved .al-dot{color:var(--ta-brand)}
 @keyframes al-pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 .al-name{font-size:14px;font-weight:600;color:var(--ta-text)}
 .al-prio{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eef0f2;color:var(--ta-muted)}
 .al-sound{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#b42318;background:#fee4e2;border-radius:999px;padding:3px 9px}
-.al-esc{font-size:10.5px;font-weight:600;color:#6d28d9;background:#ede9fe;border-radius:999px;padding:3px 9px}
+.al-esc{font-size:10.5px;font-weight:600;color:#b25410;background:#fdf0e3;border-radius:999px;padding:3px 9px}
 .al-res{font-size:10.5px;color:var(--ta-muted)}
 .al-meta{font-family:var(--ta-mono);font-size:10px;color:var(--ta-muted)}
 .al-value{font-size:13px;display:flex;align-items:center;gap:6px}

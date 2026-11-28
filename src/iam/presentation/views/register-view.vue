@@ -232,7 +232,7 @@ function animateReject() {
 
           <p class="rg__trial"><i class="pi pi-gift"></i>{{ t('register.trialNote2') }}</p>
 
-          <div class="rg__nav">
+          <div class="rg__nav rg__nav--solo">
             <button type="button" class="btn btn--ghost" :disabled="true" style="visibility:hidden">{{ t('register.back') }}</button>
             <button class="btn" :disabled="!step2Valid">{{ t('register.nextAccount') }}</button>
           </div>
@@ -383,6 +383,9 @@ function animateReject() {
 .rg__sumrow--total b{font-size:1rem}
 .rg__nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
 .rg__nav .btn{flex:1}
+/* First step has no back action: the single button sits centered under the trial note. */
+.rg__nav--solo{justify-content:center}
+.rg__nav--solo .btn--ghost{flex:0 0 auto;width:0;min-width:0;padding:0;border:0}
 .rg__note{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:.78rem;color:var(--ta-muted)}
 .rg__reject{display:flex;gap:8px;align-items:center;font-size:.82rem;color:var(--ta-muted);cursor:pointer;margin-top:12px}
 .rg__trial{display:flex;align-items:center;gap:8px;justify-content:center;margin:10px 0 0;font-size:.8rem;color:var(--ta-brand);font-weight:600}

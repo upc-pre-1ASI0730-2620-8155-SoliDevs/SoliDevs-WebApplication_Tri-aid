@@ -5,7 +5,7 @@
  * the triaid-platform RESTful API.
  */
 export class PatientResource {
-    constructor({ id, dni, firstName, lastName, birthDate, sex, phone, address, isTemporary, temporaryCode }) {
+    constructor({ id, dni, firstName, lastName, birthDate, sex, phone, address, isTemporary, temporaryCode, email, portalEnabled, portalAccessCode }) {
         this.id = id
         this.dni = dni
         this.firstName = firstName
@@ -16,11 +16,14 @@ export class PatientResource {
         this.address = address
         this.isTemporary = isTemporary
         this.temporaryCode = temporaryCode
+        this.email = email
+        this.portalEnabled = !!portalEnabled
+        this.portalAccessCode = portalAccessCode
     }
 }
 
 export class CreatePatientResource {
-    constructor({ dni, firstName, lastName, birthDate, sex, phone, address }) {
+    constructor({ dni, firstName, lastName, birthDate, sex, phone, address, email }) {
         this.dni = dni
         this.firstName = firstName
         this.lastName = lastName
@@ -28,6 +31,7 @@ export class CreatePatientResource {
         this.sex = sex
         this.phone = phone
         this.address = address
+        this.email = email
     }
 }
 
