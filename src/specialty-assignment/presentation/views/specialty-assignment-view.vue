@@ -233,7 +233,7 @@ onMounted(async () => {
 
     <VoucherDialog
         v-if="showVoucher"
-        :voucher="voucher"
+        :voucher="voucher ? { ...voucher, episodeId: referral?.episodeId } : voucher"
         :referral="referral"
         :patient-name="fullName"
         :episode-id="ep.id"

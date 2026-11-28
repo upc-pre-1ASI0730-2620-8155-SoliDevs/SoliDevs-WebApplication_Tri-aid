@@ -97,7 +97,7 @@ function saveManual(vt) {
 
 /* ---------- Confirmar / rechazar (US18) ---------- */
 async function onConfirm() {
-  const missing = DeviceType.filter(x => !props.episode.vitals[x.key]).map(x => vLabel(x.key))
+  const missing = DeviceType.filter(x => !String(props.episode.vitals[x.key]?.value ?? '').trim()).map(x => vLabel(x.key))
   if (missing.length) { notify({ type: 'error', title: t('pf.missing', { list: missing.join(', ') }) }); return }
   confirmReadings(props.episode)
   emit('confirmed')
