@@ -22,7 +22,8 @@ export class BaseApi {
         // Attach the staff JWT to every request when there is a session.
         this.#http.interceptors.request.use(config => {
             const token = getStaffToken()
-            if (token) config.headers.Authorization = `Bearer ${token}`
+            // The patient portal sets its own token per request; the staff token must not replace it.
+            if (token && !config.headers.Authorization) config.headers.Authorization = `Bearer ${token}`
             return config
         })
     }
