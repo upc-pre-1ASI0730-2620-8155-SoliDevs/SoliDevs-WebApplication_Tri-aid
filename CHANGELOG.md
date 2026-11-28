@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-11-28
+
+Stable release of the web application: the full emergency triage flow from admission to the patient portal.
+
+### Added
+- Patient portal (status, live queue turn, voucher with QR) and the admission voucher scanner.
+- Incidents center: one incident per patient, acknowledge and escalate to Trauma Shock.
+- Staff sign-in with JWT, staff accounts with roles and shifts, institution registration with plans and trial.
+- Referral voucher delivered by e-mail.
+- Institution isolation: every institution only sees its own patients, episodes, referrals and incidents.
+
+### Changed
+- Alerting became the Incidents bounded context; incidents endpoint moved to `/incidents`.
+- Redesigned panel, patients and staff lists, reports with the NT-158 chart, status skeletons while loading.
+
 ## [3.6.0] - 2026-11-27
 
 ### Fixed
