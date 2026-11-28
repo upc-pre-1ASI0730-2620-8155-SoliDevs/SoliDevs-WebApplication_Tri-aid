@@ -69,6 +69,7 @@ const tabsDef = computed(() => [
 
 /* ---------- Estado del flujo: clasificacion + derivacion ---------- */
 const classified = ref(null)
+const flowLoaded = ref(false)
 const classifiedConfirmed = ref(false)
 const referred = ref(false)
 
@@ -84,7 +85,7 @@ async function loadFlowState() {
     } else { classified.value = null; classifiedConfirmed.value = false }
     const rr = await new SpecialtyAssignmentApi().getReferralsByEpisode(ep.value.id)
     referred.value = (rr.data || []).length > 0
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error(e) } finally { flowLoaded.value = true }
 }
 
 onMounted(() => loadFlowState())
@@ -103,7 +104,8 @@ function onVitalsConfirmed() {
         <div class="fi-name">{{ fullName }}</div>
         <div class="fi-meta">{{ meta }}</div>
       </div>
-      <span class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
+      <span v-if="!flowLoaded" class="ta-skel" aria-hidden="true"></span>
+      <span v-else class="fi-pill" :class="{ done: classified }" :style="classified ? { borderColor: classified.color, color: classified.color, background: classified.color + '1A' } : {}">
         <template v-if="classified">{{ classified.code }} · {{ classified.name }}</template>
         <template v-else>{{ t('pf.unclassified') }}</template>
       </span>

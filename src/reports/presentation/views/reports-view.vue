@@ -19,6 +19,7 @@ const episodes = ref([])
 const classifications = ref([])
 const incidents = ref([])
 const referrals = ref([])
+const ready = ref(false)
 const queues = ref([])
 
 onMounted(async () => {
@@ -31,6 +32,7 @@ onMounted(async () => {
     load(() => specialtyApi.getReferrals(), rr => { referrals.value = rr.data || [] })
   ])
   episodes.value = [...store.episodes]
+  ready.value = true
   try {
     const rs = await specialtyApi.getSpecialties()
     queues.value = rs.data || []
@@ -140,7 +142,8 @@ const metrics = computed(() => {
               <span v-else class="rp-nolv">{{ t('reports.noLevel') }}</span>
             </td>
             <td>
-              <span class="rp-st" :class="{ ok: e.confirmed || e.referred }">
+              <span v-if="!ready" class="ta-skel" aria-hidden="true"></span>
+              <span v-else class="rp-st" :class="{ ok: e.confirmed || e.referred }">
                 {{ e.referred ? t('reports.stReferred') : (e.confirmed ? t('reports.stConfirmed') : t('reports.stPending')) }}
               </span>
             </td>

@@ -17,12 +17,16 @@ const queues = ref([])
 // a referral may exist while the episode still reads Waiting.
 const referredEpisodes = ref(new Set())
 
+const ready = ref(false)
+
 onMounted(async () => {
-  try {
+  // Episodes, classifications and referrals arrive together, so the rows never
+  // show an intermediate state ("Por clasificar" → "Por derivar" → "Derivado").
+  const loadClassifications = async () => {
     const rc = await triageApi.getClassifications()
     classifications.value = (rc.data || []).map(c => ({ ...c, levelInfo: levelByCode(c.level?.split('_')[0]) }))
-  } catch (e) { console.error(e) }
-  try {
+  }
+  const loadReferrals = async () => {
     // Waiting patients per specialty, counted from the live referrals. The API
     // returns the specialty by name, so match on name (not on the catalog key).
     const [rs, rr] = await Promise.all([specialtyApi.getSpecialties(), specialtyApi.getReferrals()])
@@ -38,7 +42,9 @@ onMounted(async () => {
       .map(s => ({ ...s, waiting: count.get(String(s.name).trim().toLowerCase()) || 0 }))
       .filter(q => q.waiting > 0)
       .sort((a, b) => b.waiting - a.waiting)
-  } catch (e) { console.error(e) }
+  }
+  await Promise.all([loadClassifications(), loadReferrals()].map(p => p.catch(e => console.error(e))))
+  ready.value = true
 })
 
 const episodes = computed(() => [...store.episodes].reverse())
@@ -95,20 +101,23 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
           <!-- Always occupy the level column so unclassified rows stay aligned. -->
           <span class="pn-lv" :class="{ 'pn-lv--empty': !e.level }" :style="e.level ? { background: e.color } : {}">{{ e.level || '·' }}</span>
           <span class="pn-id">{{ e.id }}</span>
-          <span class="pn-status" :class="{ ok: e.referred }">
-            {{ e.referred ? t('panel.referred') : (e.confirmed ? t('panel.toRefer') : t('panel.toClassify')) }}
-          </span>
-          <!-- The action follows the state: already referred opens the referral, else
-               classified goes to referral, else to classification. -->
-          <router-link v-if="e.referred" class="ta-btn ta-btn--sm ta-btn--ghost" :to="`/specialty-assignment/${e.id}`">
-            <i class="pi pi-qrcode"></i>{{ t('panel.btnViewReferral') }}
-          </router-link>
-          <router-link v-else-if="e.confirmed" class="ta-btn ta-btn--sm" :to="`/specialty-assignment/${e.id}`">
-            <i class="pi pi-directions"></i>{{ t('panel.btnRefer') }}
-          </router-link>
-          <router-link v-else class="ta-btn ta-btn--sm ta-btn--ghost" :to="`/triage-classification/${e.id}`">
-            <i class="pi pi-sort-amount-up"></i>{{ t('panel.btnClassify') }}
-          </router-link>
+          <span v-if="!ready" class="ta-skel" aria-hidden="true"></span>
+          <template v-else>
+            <span class="pn-status" :class="{ ok: e.referred }">
+              {{ e.referred ? t('panel.referred') : (e.confirmed ? t('panel.toRefer') : t('panel.toClassify')) }}
+            </span>
+            <!-- The action follows the state: already referred opens the referral, else
+                 classified goes to referral, else to classification. -->
+            <router-link v-if="e.referred" class="ta-btn ta-btn--sm ta-btn--ghost" :to="`/specialty-assignment/${e.id}`">
+              <i class="pi pi-qrcode"></i>{{ t('panel.btnViewReferral') }}
+            </router-link>
+            <router-link v-else-if="e.confirmed" class="ta-btn ta-btn--sm" :to="`/specialty-assignment/${e.id}`">
+              <i class="pi pi-directions"></i>{{ t('panel.btnRefer') }}
+            </router-link>
+            <router-link v-else class="ta-btn ta-btn--sm ta-btn--ghost" :to="`/triage-classification/${e.id}`">
+              <i class="pi pi-sort-amount-up"></i>{{ t('panel.btnClassify') }}
+            </router-link>
+          </template>
         </li>
       </ul></div>
     </section>
