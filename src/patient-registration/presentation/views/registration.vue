@@ -1,10 +1,11 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { registerEpisode, findPatient } from '../../application/patient-store.js'
 import { docTypes, docTypeOf } from '../../application/document-types.js'
 import { notify } from '../../../shared/application/toast-store.js'
 import { t } from '../../../shared/application/i18n.js'
+import { gsap } from 'gsap'
 import { useModalMotion } from '../../../shared/application/use-modal-motion.js'
 
 const router = useRouter()
@@ -62,6 +63,32 @@ const saving = ref(false)
 const wakingUp = ref(false)
 const issuedCode = ref(null)
 const { card: issuedCard, backdrop: issuedBackdrop, close: closeIssued } = useModalMotion(() => { issuedCode.value = null })
+
+// The dialog is rendered through v-if, so its entrance is choreographed here on
+// every appearance: backdrop, badge with a pulse ring, copy cascading up, and the
+// code flipping in tile by tile under a light sweep.
+watch(issuedCode, async (code) => {
+  if (!code) return
+  await nextTick()
+  const card = issuedCard.value, backdrop = issuedBackdrop.value
+  if (!card || !backdrop) return
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  gsap.killTweensOf([card, backdrop])
+  const badge = card.querySelector('.rg-issued-badge'), ring = card.querySelector('.rg-issued-ring')
+  const tiles = card.querySelectorAll('.rg-issued__ch'), els = card.querySelectorAll('.rg-issued-el')
+  gsap.set(card, { opacity: 0, y: 28, scale: .94 })
+  gsap.set(badge, { scale: 0, rotation: -30 })
+  gsap.set(els, { opacity: 0, y: 14 })
+  gsap.set(tiles, { opacity: 0, rotationX: -90, y: 10, transformPerspective: 400 })
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+  tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: .28 })
+    .to(card, { opacity: 1, y: 0, scale: 1, duration: .5, ease: 'back.out(1.4)' }, .05)
+    .to(badge, { scale: 1, rotation: 0, duration: .55, ease: 'back.out(2.2)' }, .22)
+    .fromTo(ring, { scale: .6, opacity: .55 }, { scale: 2.1, opacity: 0, duration: .9, ease: 'power2.out' }, .45)
+    .to(els, { opacity: 1, y: 0, duration: .38, stagger: .07 }, .3)
+    .to(tiles, { opacity: 1, rotationX: 0, y: 0, duration: .45, stagger: .045, ease: 'back.out(1.6)' }, .5)
+    .fromTo(card.querySelector('.rg-issued__shine'), { xPercent: -120 }, { xPercent: 260, duration: .8, ease: 'power2.inOut' }, .95)
+})
 function goToFile() { router.push(`/patient-registration/${issuedCode.value?.episodeId || ''}`) }
 async function submit() {
   if (!validate() || saving.value) return
@@ -192,16 +219,21 @@ function reset() {
 
     <!-- Código de portal recién emitido: se muestra una sola vez -->
     <div v-if="issuedCode" ref="issuedBackdrop" class="rg-modal" role="dialog" aria-modal="true" aria-labelledby="rg-issued-title">
-        <div ref="issuedCard" class="rg-modal__card ta-card">
-          <span class="rg-modal__ic"><i class="pi pi-qrcode"></i></span>
-          <h3 id="rg-issued-title" class="ta-h">{{ t('rg.issued.title') }}</h3>
-          <p class="ta-sub">{{ t('rg.issued.sub') }}</p>
-          <dl class="fi-dl rg-issued">
-            <div><dt>{{ t('rg.issued.user') }}</dt><dd>{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</dd></div>
-            <div><dt>{{ t('rg.issued.code') }}</dt><dd class="rg-issued__code">{{ issuedCode.code }}</dd></div>
-          </dl>
-          <p class="rg-modal__note">{{ t('rg.issued.note') }}</p>
-          <button class="ta-btn rg-modal__btn" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
+      <div ref="issuedCard" class="rg-modal__card ta-card rg-issued-card">
+        <span class="rg-issued-badge"><i class="pi pi-qrcode"></i><span class="rg-issued-ring"></span></span>
+        <h3 id="rg-issued-title" class="ta-h rg-issued-el">{{ t('rg.issued.title') }}</h3>
+        <p class="ta-sub rg-issued-el">{{ t('rg.issued.sub') }}</p>
+        <dl class="fi-dl rg-issued">
+          <div class="rg-issued-el"><dt>{{ t('rg.issued.user') }}</dt><dd>{{ issuedCode.dni }}{{ issuedCode.email ? ' · ' + issuedCode.email : '' }}</dd></div>
+          <div class="rg-issued-el"><dt>{{ t('rg.issued.code') }}</dt>
+            <dd class="rg-issued__code">
+              <span v-for="(ch, i) in issuedCode.code" :key="i" class="rg-issued__ch" :style="{ '--i': i }">{{ ch }}</span>
+              <span class="rg-issued__shine" aria-hidden="true"></span>
+            </dd>
+          </div>
+        </dl>
+        <p class="rg-modal__note rg-issued-el">{{ t('rg.issued.note') }}</p>
+        <button class="ta-btn rg-modal__btn rg-issued-el" type="button" @click="closeIssued(); goToFile()">{{ t('rg.issued.go') }}</button>
         </div>
     </div>
   </div>
@@ -217,7 +249,12 @@ function reset() {
 .rg-issued > div{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:baseline}
 .rg-issued dt{font-size:.8rem;color:var(--ta-muted)}
 .rg-issued dd{margin:0;font-size:.9rem;font-weight:500;word-break:break-all}
-.rg-issued__code{font-family:var(--ta-mono);font-weight:700;font-size:22px;letter-spacing:.14em;color:var(--ta-brand)}
+.rg-issued-card{position:relative;overflow:hidden;text-align:left;width:min(560px,92vw)}
+.rg-issued-badge{position:relative;display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:var(--ta-brand);color:#fff;font-size:22px;margin-bottom:12px;transform-origin:50% 60%}
+.rg-issued-ring{position:absolute;inset:0;border-radius:inherit;border:2px solid var(--ta-brand);opacity:0;pointer-events:none}
+.rg-issued__code{position:relative;display:flex;flex-wrap:wrap;gap:6px;overflow:hidden;padding:4px 0;font-family:var(--ta-mono)}
+.rg-issued__ch{display:inline-grid;place-items:center;min-width:28px;height:38px;padding:0 8px;border-radius:8px;background:var(--ta-brand-soft,#e8f3ec);color:var(--ta-brand);font-weight:700;font-size:21px;line-height:1;transform-style:preserve-3d;box-shadow:inset 0 -2px 0 rgba(0,0,0,.04)}
+.rg-issued__shine{position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);pointer-events:none}
 .rg-modal__note{margin:4px 0 10px;font-size:.78rem;color:var(--ta-muted)}
 .rg-modal__btn{width:100%}
 .rg-field{display:grid;gap:8px;margin-bottom:18px}
