@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Status chips on the panel, patients, reports and the patient file show a skeleton until classifications and referrals have loaded instead of flashing intermediate states; the panel loads its sources in parallel.
 
+## [3.9.0] - 2026-11-28
+
+### Fixed
+- Each institution only sees its own patients, episodes, classifications, referrals and incidents, and its queue positions.
+- The subscription page shows the trial renewal date instead of "Invalid Date".
+- The staff voucher shows the episode code; readings cannot be confirmed with empty values.
+- The referral view queue uses the same tiles as the panel.
+
 ## [3.8.0] - 2026-11-28
 
 ### Added
