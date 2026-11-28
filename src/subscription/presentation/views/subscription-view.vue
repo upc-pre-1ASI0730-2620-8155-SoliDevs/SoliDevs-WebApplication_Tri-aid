@@ -55,7 +55,7 @@ const currentPlan = computed(() =>
 
 const money = n => new Intl.NumberFormat(locale.value === 'en' ? 'en-US' : 'es-PE',
     { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }).format(n)
-const fmtDate = d => d ? new Date(`${d}T12:00:00`).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE',
+const fmtDate = d => d ? new Date(`${String(d).slice(0, 10)}T12:00:00`).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'es-PE',
     { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
 const fmtDateTime = iso => iso ? new Date(iso).toLocaleString(locale.value === 'en' ? 'en-US' : 'es-PE',
     { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
