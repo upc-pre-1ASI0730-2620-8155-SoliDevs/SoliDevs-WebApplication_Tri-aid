@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.5.0] - 2026-11-24
+## [3.6.0] - 2026-11-27
+
+### Fixed
+- Escalating an incident moves the patient's referral to Trauma Shock (also when a triage referral already existed), raises one incident per patient listing every altered vital sign and the triage priority, is offered once per patient and plays the closing tick animation.
+- The closed filter hides escalated cards as well as resolved ones, and an episode keeps a single open incident.
+- Referrals created before tenancy (no institution) stay visible in the panel, patients and reports; referral resources send the episode id as the API expects.
+- The out-of-range notice shows the blood pressure as one value instead of a raw label per reading.
+
+## [3.7.0] - 2026-11-28
+
+### Fixed
+- Approving the triage suggestion stays approved when leaving and re-entering the view; the suggestion is only recalculated when the vital signs change the level.
+- The patient file shows the confirmed level; before, it read the classification answer as a list and always saw none.
+
+### Changed
+- Status chips on the panel, patients, reports and the patient file show a skeleton until classifications and referrals have loaded instead of flashing intermediate states; the panel loads its sources in parallel.
+
+## [3.8.0] - 2026-11-28
+
+### Added
+- The issued portal code dialog plays a GSAP sequence (badge pop, cascading copy, code flipping in tile by tile), shows the admission QR that the staff scanner resolves, and has a copy button.
+- The patient portal shows a message with a retry button when the overview cannot be loaded, and returns to the sign-in when the session expired.
+
+### Changed
+- The specialty waiting queue on the panel is an even grid of tiles; the suggestion button and tag no longer carry the sparkle icon.
+- The plan step of the staff registration centers its single button, and the institutional plan lists incident reports and audit instead of multi-site management.
+
+### Fixed
+- Spanish copy: the devices hint, the profile role and shift, the staff form options and the triage reason when no urgency criterion applies.
+- The patient portal works while a staff session is open in the same browser: the staff token no longer replaces the patient token.
+- The patient file always offers a new access code and tells the staff to regenerate it when the patient reports it no longer works.
+
+## [3.5.0] - 2026-11-26
 
 ### Added
 - **Patient portal:** sign-in, my status, my turn and my voucher views with a tabbed layout, session guard, Spanish/English copy and a 45-second live queue poll.
