@@ -161,8 +161,8 @@ const specName = key => queues.value.find(q => q.key === key)?.name || key
   .pn-list li{grid-template-columns:40px minmax(160px,1fr) 30px 60px 136px 120px;min-width:620px}
   .pn-list b{white-space:nowrap}
 }
-.rc-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:10px;margin-top:12px}
+.rc-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
 .rc-chip{border:1px solid var(--ta-line);border-radius:12px;padding:10px 14px;font-size:12.5px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
-.rc-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-chip span{line-height:1.2}
 .rc-chip b{color:var(--ta-brand);background:#e8f3ec;border-radius:999px;padding:2px 10px;font-size:12px;line-height:1.3}
 </style>

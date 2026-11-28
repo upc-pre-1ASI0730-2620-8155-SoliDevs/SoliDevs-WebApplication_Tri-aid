@@ -764,5 +764,21 @@
   "portal.error.title": "No pudimos cargar tu información",
   "portal.error.notFound": "No pudimos cargar tu información.",
   "portal.error.retry": "Reintentar",
-  "portal.error.signIn": "Iniciar sesión"
+  "portal.error.signIn": "Iniciar sesión",
+  "referral.emailSend": "Enviar por correo",
+  "referral.emailTitle": "Enviar comprobante por correo",
+  "referral.emailPrompt": "{name} no tiene un correo registrado. Ingresa uno para enviarle el comprobante:",
+  "referral.emailPlaceholder": "correo{'@'}ejemplo.com",
+  "referral.emailInvalid": "Ingresa un correo válido.",
+  "referral.emailAccept": "Aceptar",
+  "referral.emailConfirm": "El comprobante se enviará a {email}.",
+  "referral.emailLinkTitle": "¿Ligar este correo a la cuenta del paciente?",
+  "referral.emailLinkText": "Guardamos {email} como el correo de {name}. Los siguientes comprobantes se enviarán ahí sin volver a preguntar.",
+  "referral.emailLinkYes": "Sí, ligar y enviar",
+  "referral.emailLinkNo": "Solo enviar por ahora",
+  "referral.emailSent": "Comprobante enviado a {email}",
+  "referral.emailAttached": "Correo ligado a {name}",
+  "referral.emailError": "No se pudo enviar el comprobante. Intenta nuevamente.",
+  "referral.emailNotConfigured": "El envío de correos no está configurado en este despliegue.",
+  "referral.cancel": "Cancelar"
 }
