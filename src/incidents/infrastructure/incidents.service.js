@@ -54,6 +54,9 @@ export class IncidentsService {
             triggers.push({ sign: 'Clasificación de triaje', value: `Prioridad ${levelCode} confirmada`, range: 'Atención inmediata', critical: true })
         }
         if (!triggers.length) return { ok: true, data: [] }
+        // One open incident per episode, however many times the flow runs.
+        const open = (await this.getIncidents()).data.filter(i => String(i.episode) === String(episode.id) && i.severity !== 'resolved' && i.severity !== 'escalated')
+        if (open.length) return { ok: true, data: [] }
 
         const join = (key) => triggers.map(t => t[key]).join(' · ')
         const created = new Incident({
@@ -71,6 +74,12 @@ export class IncidentsService {
         })
         const r = await this.api.createIncident({ ...created })
         return { ok: true, data: [new Incident(r.data)] }
+    }
+
+    /** Every incident, open and closed, as entities. */
+    async getIncidents() {
+        const response = await this.api.getIncidents()
+        return { data: (response.data || []).map(i => new Incident(i)) }
     }
 
     /** Marks an incident as resolved, stamping the acknowledgement time. */
